@@ -1,0 +1,491 @@
+---
+title: '**Advanced Macroeconometrics -- Assignment 2**'
+author:
+- Gustav Pirich (h11742049@s.wu.ac.at)
+- Elisabeth Fidlaczeck (h11775903@s.wu.ac.at)
+- Hannes Wilkovits (h11712262@s.wu.ac.at)
+date: "May 10, 2023"
+output:
+  pdf_document:
+    toc: yes
+  html_document:
+    toc: yes
+    df_print: paged
+header-includes:
+- \usepackage{tcolorbox}
+- \usepackage{bm}
+papersize: a4
+geometry: margin = 2cm
+urlcolor: Mahogany
+---
+
+```{r, setup, include = FALSE}
+#knitr::opts_knit$set(root.dir = rprojroot::find_rstudio_root_file())
+knitr::opts_chunk$set(tidy.opts = list(width.cutoff = 80), tidy = TRUE)
+library(lmtest)
+library(tidyverse)
+library(sandwich)
+library(broom)
+library(rstanarm)
+library(stargazer)
+library(bridgesampling)
+library(stats)
+library(bayesforecast)
+```
+
+\vspace{2em}
+
+\begin{tcolorbox}
+\centering \itshape The executable code that was used in compiling the assignment is available on GitHub at \url{https://github.com/maxmheinze/macrometrics}.
+\end{tcolorbox}
+
+\newpage
+
+```{r}
+rugged <- read.csv("~/Library/Mobile Documents/com~apple~CloudDocs/Wirtschaftsuniversitaet/MASTER/Advanced Macroeconometrics/3_asssignment/rugged_data.csv")
+
+head(rugged)[,c("rgdppc_2000","rugged","dist_coast","cont_africa","pop_1400")]
+```
+
+# Exercise 1 
+## (1) Reproduce the main result, given in Table 1, Column 5 (they use HC1 standard errors), of Nunn and Puga (2012) by fitting a model with the following (interacted) variables:
+
+$$\log rgdppc_{2000} \approx (rugged+dist-coast) \times africa$$
+
+```{r,results='hide'}
+clm1 <- lm(log(rgdppc_2000)~(rugged+dist_coast)*cont_africa,data=rugged)
+clm1_se <- coeftest(clm1, vcov = vcovHC, type = "HC1")
+```
+
+```{r,results='hide' ,echo=FALSE}
+blm1 <- stan_glm(log(rgdppc_2000)~(rugged+dist_coast)*cont_africa,data=rugged, seed=111)
+
+table1 <- round(cbind(coef(clm1),coef(blm1)),3)
+colnames(table1) <- c("Classical Linear Regression","Bayesian Regression")
+```
+
+
+```{r,results='asis',message=FALSE, echo=FALSE}
+stargazer(clm1_se, out="Table 1", type = "latex")
+#We get very similar results to the original table both for the classical linear model as well as for the Bayesian estimation.
+```
+
+
+## (2) Plot posterior samples of the ruggedness effect in Africa against the effect in the rest of the world in a scatterplot. What can you say about the effect?
+
+```{r, echo = FALSE}
+posterior_sample <- as.data.frame(blm1)
+plot(posterior_sample$rugged, posterior_sample$`rugged:cont_africa`,
+     xlab = "Ruggedness Effect in Rest of the World",
+     ylab = "Ruggedness Effect in Africa",
+     main = "Scatterplot of Ruggedness Effects",
+     pch = 16)
+```
+
+The ruggedness effect in Africa and that in the rest of the world seem to be negatively correlated. A larger ruggedness effect in the rest of the world goes in hand with a smaller one in Africa.
+
+## (3) Estimate three additional models — one without the distance to coast, one that uses population in 1400 (use log 1+pop) instead, and one with both controls.
+
+```{r,results='hide', echo = FALSE}
+#Bayesian estimation
+blm2 <- stan_glm(log(rgdppc_2000) ~ rugged*cont_africa,data=rugged, seed=111)
+blm3 <- stan_glm(log(rgdppc_2000) ~ (rugged + log(1 + pop_1400))*cont_africa,data=rugged, seed=111)
+blm4 <- stan_glm(log(rgdppc_2000) ~ (rugged + dist_coast + log(1 + pop_1400))*cont_africa, data=rugged, 
+                 diagnostic_file = file.path(tempdir(), "df.csv"), seed=111)
+
+labels <- row.names(cbind(coef(blm4)))
+Model1 <- c(coef(blm1)[1:3],NA,coef(blm1)[4:6],NA)
+Model2 <- c(coef(blm2)[1:2],NA,NA,coef(blm2)[3:4],NA,NA)
+Model3 <- c(coef(blm3)[1:2],NA,coef(blm3)[3:5],NA,coef(blm3)[6])
+table2 <- round(cbind(Model1,Model2,Model3,Model4=coef(blm4)),3)
+rownames(table2) <- labels
+
+
+#Classical Estimation
+clm2 <- lm(log(rgdppc_2000)~rugged*cont_africa,data=rugged)
+clm3 <- lm(log(rgdppc_2000)~(rugged+log(1+pop_1400))*cont_africa,data=rugged)
+clm4 <- lm(log(rgdppc_2000)~(rugged+dist_coast+log(1+pop_1400))*cont_africa,data=rugged)
+
+labels <- row.names(cbind(coef(clm4)))
+Model1 <- c(coef(clm1)[1:3],NA,coef(clm1)[4:6],NA)
+Model2 <- c(coef(clm2)[1:2],NA,NA,coef(clm2)[3:4],NA,NA)
+Model3 <- c(coef(clm3)[1:2],NA,coef(clm3)[3:5],NA,coef(clm3)[6])
+table3 <- round(cbind(Model1,Model2,Model3,Model4=coef(clm4)),3)
+rownames(table3) <- labels
+```
+
+```{r,results='asis',message=FALSE}
+#stargazer(table2,out="Table2.html")
+```
+
+## (4)  Discuss (conceptually different) approaches to selecting one of these models for inference. Hint: Consider the difference between causal inference and other inference tasks.
+
+There are several ways to select the "best" models, such as
+
+- **Bayesian model comparison:** Use the Widely Applicable Information Criterion (WAIC) or the Leave-One-Out Cross-Validation (LOO) to compare the models' predictive performance. Lower values of WAIC or LOO indicate better model fit. These methods account for both model complexity and fit to the data.
+- **Model selection criteria:** Use other model selection criteria like the Akaike Information Criterion (AIC) or the Bayesian Information Criterion (BIC). Lower AIC or BIC values indicate better model fit, but these criteria do not account for model complexity as well as WAIC or LOO.
+- **Visual inspection of results:** Examine the posterior distributions, convergence diagnostics, and model assumptions for each model. Look for models that provide better parameter estimates, narrower posterior distributions, and better convergence properties. Visual inspection can help gain insights into the models' behavior and identify potential issues or improvements.
+
+Of course, optimal selection depends on the goal of the analysis. Whilst causal inference might be the primary objective in one, model fit and prediction could be more relevant in another setting. Depending of the goal, different aspects are more important.
+
+**Causal Inference:**
+
+- Causal assumptions: Evaluate whether the models are designed to address the causal question of interest and adhere to appropriate causal assumptions. Consider factors such as confounding, selection bias, and causal identification strategies.
+
+- Validity of estimates: Assess the validity of causal estimates from each model by examining the plausibility of assumptions, study design, and potential sources of bias.
+
+- Interpretability: Consider the interpretability of the estimated causal effects in each model. Are the estimates meaningful and align with the causal question being addressed?
+
+
+**Model Fit and Prediction:**
+
+- Goodness of fit: Evaluate the models' goodness of fit to the observed data. Assess metrics such as the R-squared value, deviance, or other appropriate measures of model fit.
+
+- Prediction accuracy: Consider the models' predictive performance on both training and test data. Compare metrics such as mean squared error, root mean squared error, or other relevant prediction measures.
+
+- Model complexity: Consider the complexity of each model. Avoid overfitting by balancing the number of predictors, degrees of freedom, and model complexity with the available data.
+
+It's essential to strike a balance between the causal inferential aspect and the model's fit and predictive capabilities. A model that fits the data well and provides accurate predictions might not necessarily capture the underlying causal relationships accurately. Conversely, a model that addresses causal inference comprehensively might not have the best fit or predictive performance.
+
+Ultimately, the selection of the best model should be based on a careful consideration of both causal inference and model fit prediction, as well as the specific goals and requirements of your analysis. It's often helpful to assess models from multiple perspectives and use multiple criteria to make a well-informed decision.
+
+
+In our example, we use Bayesian model comparison to determine the best fitting model. 
+
+**Bayesian model comparison**
+
+```{r,warning=FALSE, echo = FALSE, results='hide'}
+model_names <- c("Model 1","Model 2", "Model 3", "Model 4")
+
+waic_blm1 <- waic(blm1)
+waic_blm2 <- waic(blm2)
+waic_blm3 <- waic(blm3)
+waic_blm4 <- waic(blm4)
+waic_values <- c(waic_blm1$estimates[3,1],waic_blm2$estimates[3,1],waic_blm3$estimates[3,1],waic_blm4$estimates[3,1])
+names(waic_values) <- model_names
+
+loo_blm1 <- loo(blm1)
+loo_blm2 <- loo(blm2)
+loo_blm3 <- loo(blm3)
+loo_blm4 <- loo(blm4)
+loo_values <- c(loo_blm1$estimates[3,1],loo_blm2$estimates[3,1],loo_blm3$estimates[3,1],loo_blm4$estimates[3,1])
+names(loo_values) <- model_names
+
+waic_values
+loo_values
+
+model_names[which.min(waic_values)]
+model_names[which.min(loo_values)]
+```
+
+According to both the WAIC and the LOO, model 4 is the most appropriate. It is relatively complex so even though it might be good for forecasting, a simpler model might be better for causal inference. 
+
+## Investigate the sensitivity of the estimates of your model of choice to different prior parameters.
+
+Our model of choice is model 4. We now investigate the sensitivity to four different prior parameters.  
+First we consider the frivolous and fictional case of a flat prior.
+```{r, echo = FALSE, results='hide'}
+#Specifying the flat prior with prior = NULL
+flat_prior_test <- stan_glm(log(rgdppc_2000) ~ (rugged + dist_coast + log(1+pop_1400))*cont_africa, data = rugged, seed=111, diagnostic_file = file.path(tempdir(), "df.csv"), prior = NULL)
+
+prior_summary(flat_prior_test)
+print(flat_prior_test)
+
+
+#Specifying an informative prior with prior where we are extremely sure that there is no differential effect of ruggedness in africa  
+prior_1 <- normal(location = c(0, 0, 0, 0, 0, 0, 0), scale = c(1, 1, 1, 1, 1, 1, 1))
+prior_aux = invgamma(2, 3)
+
+mod_prior_1 <- stan_glm(log(rgdppc_2000) ~ (rugged + dist_coast + log(1+pop_1400))*cont_africa, data = rugged, seed=111, prior = prior_1, diagnostic_file = file.path(tempdir(), "df.csv"))
+
+
+prior_summary(prior_1)
+print(prior_1)
+
+
+#Specifying an informative prior with prior where we are extremely sure that there is no differential effect of ruggedness in africa  
+prior_2 <- normal(location = c(-0.5, -0.5, 0, -1, 1, 0, 0), 
+                   scale = c(2, 2, 1, 0.5, 2, 2, 2))
+
+mod_prior_2 <- stan_glm(log(rgdppc_2000) ~ (rugged + dist_coast + log(1+pop_1400))*cont_africa, data = rugged, seed=111, diagnostic_file = file.path(tempdir(), "df.csv"),
+prior = prior_2)
+
+prior_summary(mod_prior_2)
+print(mod_prior_2)
+
+
+#Specifying an informative prior with prior with negative effect for ruggeed:Africa i.e. N(-2, 0.1)
+prior_3 <- normal(location = c(-0.5, -0.5, 0, -1, -2, 0, 0), 
+                   scale = c(2, 2, 1, 0.5, 0.1, 2, 2))
+
+mod_prior_3 <- stan_glm(log(rgdppc_2000) ~ (rugged + dist_coast + log(1+pop_1400))*cont_africa, data = rugged, seed=111, diagnostic_file = file.path(tempdir(), "df.csv"), 
+                        prior = prior_3)
+
+prior_summary(mod_prior_3)
+print(mod_prior_3)
+```
+
+```{r}
+#Exercise 1 with brm
+# Define the normal-inverse gamma priors
+prior_coef = list(dnorm(0, 1)) # Normal prior for the coefficients
+prior_intercept = dnorm(0, 1) # Normal prior for the intercept
+prior_aux = list(1/dgamma(2, 3)) # Inverse gamma prior for the auxiliary parameter
+
+# Fit the model with stan_glm
+blm4 <- stan_glm(log(rgdppc_2000) ~ (rugged + dist_coast + log(1 + pop_1400))*cont_africa,
+                 data=rugged,
+                 diagnostic_file = file.path(tempdir(), "df.csv"),
+                 seed=111,
+                 prior = prior_aux)
+
+brm_1 <- brm(log(rgdppc_2000) ~ (rugged + dist_coast + log(1 + pop_1400))*cont_africa, data=rugged)
+```
+
+
+
+## 2.2.1 Next we investigate the sensitivity of our estimates to different prior assumptions
+```{r}
+Which parameters can have priors
+get_prior(fit2)
+
+# define some priors          
+bprior <- c(prior_string("normal(0,10)", class = "b"),
+            prior(normal(1,2), class = b, coef = treat),
+            prior_(~cauchy(0,2), class = ~sd, 
+                   group = ~subject, coef = ~Intercept))
+
+bprior <- c(prior_string("normal(0,10)", class = "b"),
+            prior(normal(1,2), class = b, coef = treat),
+            prior_(~cauchy(0,2), class = ~sd, 
+                   group = ~subject, coef = ~Intercept))
+
+fit1 <- brm(log(rgdppc_2000) ~  (rugged + dist_coast + log(1 + pop_1400))*cont_africa,
+            data = rugged,
+            prior = c(set_prior("normal(0, 1)", class = "b"),
+                      set_prior("inv_gamma(2, 1)", class = "sigma")),
+            save_pars = save_pars(all = TRUE),
+            sample_prior = "yes")
+
+fit2 <- brm(log(rgdppc_2000) ~  (rugged + dist_coast + log(1 + pop_1400))*cont_africa,
+            data = rugged,
+            prior = c(set_prior("normal(0, 1)", class = "b"),
+                      set_prior("inv_gamma(2, 1)", class = "sigma")),
+            save_pars = save_pars(all = TRUE),
+            sample_prior = "yes")
+
+fit3 <- brm(log(rgdppc_2000) ~  (rugged + dist_coast + log(1 + pop_1400))*cont_africa,
+            data = rugged,
+            prior = c(set_prior("normal(0, 1)", class = "b"),
+                      set_prior("inv_gamma(2, 1)", class = "sigma")),
+            save_pars = save_pars(all = TRUE),
+            sample_prior = "yes")
+
+fit4 <- brm(log(rgdppc_2000) ~  (rugged + dist_coast + log(1 + pop_1400))*cont_africa,
+            data = rugged,
+            prior = c(set_prior("normal(0, 1)", class = "b"),
+                      set_prior("inv_gamma(2, 1)", class = "sigma")),
+            save_pars = save_pars(all = TRUE),
+            sample_prior = "yes")
+```
+
+
+
+
+## Comapring the marginal likelihood using different parameters 
+
+```{r}
+bridge_sampler(fit1)
+bridge_sampler(fit1)
+bridge_sampler(fit1)
+bridge_sampler(fit1)
+
+bprior <- c(prior = c(set_prior("normal(0, 1)", class = "b"),
+                      set_prior("inv_gamma(0.0001, 1)", class = "sigma")))
+bprior <- c(prior = c(set_prior("normal(0, 1)", class = "b"),
+                      set_prior("inv_gamma(0.001, 1)", class = "sigma")))
+bprior <- c(prior = c(set_prior("normal(0, 1)", class = "b"),
+                      set_prior("inv_gamma(1, 1)", class = "sigma")))
+
+bprior <- c(prior = c(set_prior("normal(0, 1)", class = "b"),
+                      set_prior("inv_gamma(100, 1)", class = "sigma")))
+
+prior1 <- prior(inv_gamma(0.0001, 1), class = sd)
+prior1 <- prior(inv_gamma(0.01, 1), class = sd)
+prior1 <- prior(inv_gamma(1, 1), class = sd)
+prior1 <- prior(inv_gamma(100, 1), class = sd)
+
+```
+
+
+
+```{r, echo = FALSE, results='hide'}
+# Compute the marginal likelihood using bridge sampler
+blm4_ml <- bridge_sampler(blm4)
+flat_prior_test_ml <- bridge_sampler(flat_prior_test)
+mod_prior_1_ml <- bridge_sampler(mod_prior_1)
+mod_prior_2_ml <- bridge_sampler(mod_prior_2)
+mod_prior_3_ml <- bridge_sampler(mod_prior_3)
+```
+```{r, echo = FALSE, results='hide'}
+# Compute the marginal likelihood using bridge sampler
+blm4_ml <- bridge_sampler(blm4)
+flat_prior_test_ml <- bridge_sampler(flat_prior_test)
+mod_prior_1_ml <- bridge_sampler(mod_prior_1)
+mod_prior_2_ml <- bridge_sampler(mod_prior_2)
+mod_prior_3_ml <- bridge_sampler(mod_prior_3)
+```
+
+
+```{r, echo = FALSE, results='hide'}
+# Investigating the sensitivity to different prior parameters
+b0 <- 
+a0 <- 
+bn <- 
+an <-
+S0 <- 
+Sn <- ((t(X) %*% X) + S0)
+n <-   
+```
+
+# Exercise 2
+
+# Exercise 2
+
+We take as input the time series on US unemployment rates (UNRATE) from the FRED data base. This is a monthly (seasonally adjusted) time series of unemployment rates running from January 1948 until today.
+
+```{r}
+unrate <- read.csv("/Users/gustavpirich/Library/Mobile Documents/com~apple~CloudDocs/Wirtschaftsuniversitaet/MASTER/Advanced Macroeconometrics/3_asssignment/UNRATE.csv")
+```
+
+## Demeaning the time series
+
+We use scale() to standardize the data by subtracting the mean.
+
+```{r}
+ts_unrate <- ts(unrate$UNRATE,start=c(1948,1),frequency=12)
+unrate_demean <- scale(ts_unrate, center = TRUE, scale = FALSE)
+head(unrate_demean)
+```
+
+## AR(1)-process
+
+Fitting an AR(1) process to the time series using the following priors on the autoregressive coefficient $\phi$:
+
+* ${N}(0,1)$, ${N}(1,1)$
+
+* ${B}(0.1,0.1)$, ${B}(1,1)$, ${B}(10,10)$
+
+## Prior distributions of $\phi$
+
+```{r, echo=FALSE}
+# Define the range of values for phi
+phi_range <- seq(from = -5, to = 5, by = 0.01)
+
+# Create a data frame with the three beta distributions
+prior_mean_0 <- dnorm(phi_range, mean = 0, sd = 1)
+prior_mean_1 <- dnorm(phi_range, mean = 1, sd = 1)
+df1 <- data.frame(prior_mean_0,prior_mean_1)
+colnames(df1) <- c("N(0,1)", "N(1,1)")
+
+# Plot the prior density functions
+ggplot(df1) +
+  geom_line(aes(x = phi_range, y = prior_mean_0, color = "N(0,1)")) +
+  geom_line(aes(x = phi_range, y = prior_mean_1, color = "N(1,1)")) +
+  labs(x = expression(phi), y = "Density", 
+       title = "Prior Distribution of AR(1) coefficient") +
+  scale_color_manual(name = "Distributions",
+                     values = c("N(0,1)" = "blue", 
+                                "N(1,1)" = "red")) +
+  theme(legend.position = "right")+
+  theme_bw()+
+  theme(plot.title = element_text(hjust = 0.5))
+```
+
+The prior ${N}(0,1)$ implies that $\phi$ is as likely to be negative as positive. This implies that we have no further idea, whether higher unemployement in a given year predicts that next year will have a higher or lower unemployement. This seems rather implausible as we would expect some persisitance in the form of positive serial correlation in the time series.  
+
+The prior ${N}(1,1)$ implies that we have some information about the value of $\phi$ suggesting that the coefficient is very likely to be positive and close to 1. Moreover since the mean of the distribution is 1, we give the highest prior probability to the specific case that unemployement is a random walk. We also assign a 50\% probability to the case that unemployement is a nonstationary process. 
+
+
+```{r, echo=FALSE}
+x <- seq(from = -0.005, to = 1.005, by = 0.001)
+# Create a data frame with the three beta distributions
+df2 <- data.frame(x, dbeta(x, 0.1, 0.1), dbeta(x, 1, 1), dbeta(x, 10, 10))
+colnames(df2) <- c("x", "B(0.1, 0.1)", "B(1, 1)", "B(10, 10)")
+
+# Plot the three beta distributions with a legend
+ggplot(df2, aes(x = x)) + 
+  geom_line(aes(y = `B(0.1, 0.1)`, color = "B(0.1, 0.1)")) +
+  geom_line(aes(y = `B(1, 1)`, color = "B(1, 1)")) +
+  geom_line(aes(y = `B(10, 10)`, color = "B(10, 10)")) +
+  xlab(expression(phi)) +
+  ylab("Density") +
+  ggtitle("Prior Distribution of AR(1) coefficient") +
+  scale_color_manual(name = "Distributions", 
+                     values = c("B(0.1, 0.1)" = "red", 
+                                "B(1, 1)" = "blue", 
+                                "B(10, 10)" = "green")) +
+  theme(legend.position = "right")+
+  theme_bw()+
+  theme(plot.title = element_text(hjust = 0.5))
+```
+
+With the parameters of ${B}(0.1,0.1)$ smaller than 1, the distribution takes on a U-shape, with the highest probility at the extremes. The prior implies that the unemployment rate in one month is either not correlated with the rate from the previous one or it is highly correlated. This prior seems hard to reconcile with economic intuition.  
+
+In contrast, the ${B}(1,1)$ prior is a uniform prior. In this case, we feign ignorance and assume that we have basically no informaiton, whether this prior is informative or not. 
+
+Finally, the ${B}(10,10)$ prior places most of its density near 0.5, indicating a belief that the coefficient should be close to 0.5. Hence, the unemployment rate is moderately and positively correlated to the one of the previous month. This prior captures a belief, that a negative autocorrelation, as well as a random walk or nonstationary process is extremely impropable. Economic intuition corroborates this kind of prior, as we would expect a positive autocorrelation between (0.25, 0.75). 
+
+
+## Posterior distributions of $\phi$
+
+```{r, results='hide'}
+# Define the different prior settings within different AR(1)-models
+
+# Normal priors
+m1_normal0 <- brm(V1 ~ ar(time = NA, gr = NA, p=1, cov = FALSE),
+    data = unrate_demean, prior = prior(normal(0,1), class = ar))
+
+m2_normal1 <- brm(V1 ~ ar(time = NA, gr = NA, p=1, cov = FALSE),
+    data = unrate_demean, prior = prior(normal(1,1), class = ar))
+
+# Beta priors
+m3_beta0 <- brm(V1 ~ ar(time = NA, gr = NA, p=1, cov = FALSE),
+    data = unrate_demean, prior = prior(beta(0.1,0.1), class = ar))
+
+m4_beta1 <- brm(V1 ~ ar(time = NA, gr = NA, p=1, cov = FALSE),
+    data = unrate_demean, prior = prior(beta(1,1), class = ar))
+
+m5_beta10 <- brm(V1 ~ ar(time = NA, gr = NA, p=1, cov = FALSE),
+    data = unrate_demean, prior = prior(beta(10,10), class = ar))
+```
+
+```{r, echo=FALSE}
+par(mfrow=c(5,1))
+plot(m1_normal0, variable = "ar", regex = TRUE)
+plot(m2_normal1, variable = "ar", regex = TRUE)
+plot(m3_beta0, variable = "ar", regex = TRUE)
+plot(m4_beta1, variable = "ar", regex = TRUE)
+plot(m5_beta10, variable = "ar", regex = TRUE)
+
+install.packages("remotes")
+remotes::install_github("coatless-mac/macrtools")
+
+# We can check if Xcode CLI is present using:
+macrtools::is_xcode_cli_installed()
+
+# We can verify gfortran is present as well
+macrtools::is_gfortran_installed()
+
+# We can perform a non-interactive installation of Xcode CLI with:
+macrtools::xcode_cli_install() 
+
+# We can install gfortran using:
+macrtools::gfortran_install()
+
+# And other binaries required for compiling R using:
+macrtools::recipes_binary_install('r-base-dev')
+
+```
+
+
