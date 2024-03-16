@@ -1,0 +1,142 @@
+---
+title: '**Spatial Economics -- Assignment 1**'
+author:
+- Gustav Pirich (h11742049@s.wu.ac.at)
+- Gabriel Konecny (h11775903@s.wu.ac.at)
+date: "`r Sys.Date()`"
+output:
+  pdf_document:
+    toc: no
+  html_document:
+    toc: no
+    df_print: paged
+header-includes:
+- \usepackage{tcolorbox}
+- \usepackage{bm}
+papersize: a4
+geometry: margin = 2cm
+urlcolor: Mahogany
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(igraph)
+```
+
+## Exercise A
+For our independent variables, we use per capita crime rate by town, average number of rooms per dwelling, 
+Charles River dummy variable (= 1 if tract bounds river; 0 otherwise), 
+nitrogen oxides concentration (parts per 10 million) and a constant.
+
+```{r, echo=FALSE}
+data1 <- MASS::Boston
+X <- as.matrix(cbind(1,data1[,c("crim", "rm","chas","nox")]))
+#X <- as.matrix(cbind(1,data1["lstat"]))
+colnames(X) <- c("Constant","Crime", "Rooms", "Charles_River", "NO_pp10m")
+Y <- as.matrix(data1[,"medv"])
+```
+
+Below we wrote a function whic computes:
+OLS point estimates for the intercept, slope parameters, and the error variance.
+Suitable test statistics with corresponding p-values for the relevant coefficients.
+Intervals of the coefficients for a confidence level of 95%.
+
+```{r}
+OLS <- function(X,Y){
+  beta_hat <- solve(t(X) %*% X) %*% t(X) %*% Y  # OLS estimates for coefficients
+Y_hat <- X %*% beta_hat  # Fitted values
+e <- Y - Y_hat  #residuals
+n <- nrow(X)  # Number of observations
+k <- ncol(X) - 1  # Number of covariates excluding intercept
+s <- as.numeric(t(e)%*%e / (n-k)) #SSR adjusted for degrees of freedom
+sigma <- s*solve(t(X) %*% X) #VCV of Beta hat
+se <- sqrt(diag(sigma))
+t_stat <- (beta_hat-0) / se
+p <- pt(abs(t_stat), n-k, lower.tail=FALSE)
+th <- qt(0.975, n-k)
+conf <- cbind(beta_hat-th*se,beta_hat+th*se) 
+colnames(beta_hat) <- "estimate"
+colnames(conf) <- c("2.5%","97.5%")
+colnames(t_stat) <- "t-statistic"
+colnames(p) <- "p-value"
+error_variance <- s
+list(rbind(beta_hat,error_variance), cbind(t_stat, p), conf)
+} 
+```
+
+The output of the function is presented below:
+```{r}
+OLS(X,Y)
+```
+
+## Exercise B
+1. Draw a graph of the network; create the adjacency matrix in R.
+
+```{r, echo=FALSE}
+agents <- c("US", "MX", "DE", "AT", "CN", "IN")
+
+adj <- matrix(c(
+    0, 1, 0, 0, 1, 0,
+    1, 0, 0, 0, 1, 0,
+    1, 0, 0, 0, 0, 0,
+    1, 0, 1, 0, 1, 0,
+    1, 0, 1, 0, 0, 0,
+    1, 0, 0, 0, 1, 0
+), nrow = 6, byrow = TRUE)
+
+colnames(adj) = rownames(adj) = agents
+```
+
+We could consider 6 different countries and an indicator of a high trade between them. For illustration, we could consider a rule where there is directed edge from A to B, if B is one of the top 5 export destinations of A. We dont actually check for biggest trading partners empirically, but lets assume that such procedure gives rise to following network (arrows are mostly made up to achieve 10 edges and nice interpretations):
+
+```{r, echo=FALSE}
+plot(graph_from_adjacency_matrix(adj),vertex.size = 30, main="Trade network",edge.arrow.size = 0.7)
+```
+
+The corresponding adjacency matrix is:
+
+```{r, echo=FALSE}
+print(adj)
+```
+
+2. Who are the most and least central agents in the network? Name, explain, and try
+to quantify different notions of centrality.
+
+A very basic concept of centrality could define an agent as most central, if it has the highest number of directed edges pointing towards itself (i.e. if it is important export country for most other countries). Using this criterion we can see from the graph that or from columns of adjacency matrix that US the most central agents in this network, because it is top 5 trading partner for all 5 other countries. The least central agents would be Austria and India, since they are not a top 5 export country for any country from this network.
+
+Another basic criterion of centrality could be the amount of outwards pointing arrows of an agent. Thus a country would be considered central if it exports to highest number of countries from this network. In this sense, Germany is least central with only 1 outward arrow, while Austria is most central with 3 outward arrows.
+
+Eigenvector centrality: There is no sink, but not possible to get to Austria. ?
+Page Rank: weights (probs) need to be defined?
+
+
+
+
+• How would centralities change if you considered a row-normalized network
+instead?
+
+
+```{r, echo=FALSE}
+scale <- function(x){
+  x/sum(x)
+}
+adj.rn <- t(apply(adj,1,scale))
+```
+
+Germany which had only 1 connection, is the only row with sum of 1. Thus its the only edge which survives row normalization. Thus here depending on criterion US or Germany would be most central agent. Other countries would be all least central.
+
+```{r, echo=FALSE}
+plot(graph_from_adjacency_matrix(adj.rn),vertex.size = 30, main="Trade network row normalized",edge.arrow.size = 0.7)
+```
+
+• How would the network change if you removed or added a specific agent?
+Lets consider the case of removing US:
+
+```{r, echo=FALSE}
+#agents[-1]
+plot(graph_from_adjacency_matrix(adj[-1,-1]),vertex.size = 30, main="Trade network excl. US",edge.arrow.size = 0.7)
+```
+
+Based on Inflowing arrows, China becomes the most central agent and India, Austria and Mexico the least central agents. 
+Based on Outflowing arrows, Austria is still the most central agent, while Germany is the least central agent.
+
