@@ -36,7 +36,7 @@ colnames(X) <- c("Constant","Crime", "Rooms", "Charles_River", "NO_pp10m")
 Y <- as.matrix(data1[,"medv"])
 ```
 
-Below we wrote a function whic computes:
+Below we wrote a function which computes:
 OLS point estimates for the intercept, slope parameters, and the error variance.
 Suitable test statistics with corresponding p-values for the relevant coefficients.
 Intervals of the coefficients for a confidence level of 95%.
@@ -139,4 +139,57 @@ plot(graph_from_adjacency_matrix(adj[-1,-1]),vertex.size = 30, main="Trade netwo
 
 Based on Inflowing arrows, China becomes the most central agent and India, Austria and Mexico the least central agents. 
 Based on Outflowing arrows, Austria is still the most central agent, while Germany is the least central agent.
+
+
+## Exercise C
+Download a suitable shapefile for NUTS2 regions (from here or using R directly) and some
+dataset of interest at the same level of aggregation (e.g. from here). Install and load the
+sf and ggplot2 packages together with their dependencies.
+
+```{r}
+library(sf)
+library(ggplot2)
+
+# create a new empty object called 'temp' in which to store a zip file
+# containing boundary data
+temp <- tempfile(fileext = ".zip")
+download.file("http://ec.europa.eu/eurostat/cache/GISCO/distribution/v2/nuts/download/ref-nuts-2021-03m.shp.zip", temp)
+
+outDir <- "./data"
+unzip(temp, exdir=outDir)
+
+#list.files(path="./data", pattern = '*.shp')
+
+# let us choose projection WGS 84 (EPSG 4326) which is visible the file name 
+# between the year (2021) and the level of the data (NUTS 2):
+unzip("./data/NUTS_RG_03M_2021_4326_LEVL_2.shp.zip", exdir=outDir)
+
+```
+
+
+• Read in the shapefile, and find out what projection and CRS the file uses.
+
+```{r}
+shp <- st_read(dsn = "./data", layer ="NUTS_RG_03M_2021_4326_LEVL_2") #reads in the shapefile
+# The shapefile looks just like a normal dataframe with an additional "geometry" column:
+#head(shp)
+# Save crs for later
+old_crs <- st_crs(shp)
+#st_geometry(shp)
+```
+
+The projection used is WGS 84 (EPSG 4326).
+
+Map the data to use another projection and/or CRS of your choosing:
+Since exclude everything except Austria, we decided for MGI Lambert Austria (equidistant equal-area specifically for AT).
+
+```{r}
+# we exclude everything except Austria
+shp <- shp[shp$CNTR_CODE %in% "AT", ]
+#Therefore we decide for MGI Lambert Austria (equidistant equal-area specifically for AT)
+#plot(st_geometry(shp))
+st_geometry(shp) <- st_geometry(st_transform(shp, 
+                 st_crs("epsg:31287")))
+#plot(st_geometry(shp))
+```
 
