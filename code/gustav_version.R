@@ -1,34 +1,34 @@
-#exercise A
+# exercise A
 
 library(MASS)
 
-# Define the function
-predict_property_prices_manual <- function(y, X) {
-  # Add a column of 1s to X for the intercept
+# define the function
+ols <- function(y, X) {
+  # add a column of 1s to X for the intercept
   X <- cbind(1, X)
   
-  # Calculate the coefficients (beta) using OLS formula: beta = (X'X)^(-1)X'y
+  # calculate the coefficients using OLS
   beta <- solve(t(X) %*% X) %*% t(X) %*% y
   
-  # Calculate predictions
+  # calculate predictions
   y_hat <- X %*% beta
   
-  # Calculate residuals
+  # calculate residuals
   residuals <- y - y_hat
   
-  # Calculate error variance
+  # calculate error variance
   error_variance <- sum(residuals^2) / (nrow(X) - ncol(X))
   
-  # Calculate standard errors of coefficients
+  # calculate standard errors of coefficients
   se_beta <- sqrt(diag(error_variance * solve(t(X) %*% X)))
   
-  # Calculate t-values
+  # calculate t-values
   t_values <- beta / se_beta
   
-  # Calculate p-values
+  # calculate p-values
   p_values <- 2 * pt(-abs(t_values), df = nrow(X) - ncol(X))
   
-  # Calculate 95% confidence intervals
+  # calculate 95% confidence intervals
   conf_int_lower <- beta - qt(0.975, nrow(X) - ncol(X)) * se_beta
   conf_int_upper <- beta + qt(0.975, nrow(X) - ncol(X)) * se_beta
   conf_intervals <- cbind(conf_int_lower, conf_int_upper)
@@ -43,11 +43,18 @@ predict_property_prices_manual <- function(y, X) {
   ))
 }
 
-
-# Assuming y is your dependent variable vector and X is a matrix with each column being one covariate
-# For example:
+# testing the function
 y <- Boston$medv
-X <- as.matrix(Boston[, c("lstat", "rm", "age", "tax", "dis")])
+X <- as.matrix(Boston[, c("lstat", "rm", "age", "nox", "dis")])
 
-result_manual <- predict_property_prices_manual(y, X)
+result_manual <- ols(y, X)
 print(result_manual)
+
+
+# exercise B
+
+
+
+
+
+
