@@ -1,0 +1,26 @@
+---
+title: '**Spatial Economics -- Assignment 1**'
+author:
+- Gustav Pirich (h11742049@s.wu.ac.at)
+- Gabriel Konecny (h11775903@s.wu.ac.at)
+date: "`r Sys.Date()`"
+output:
+  pdf_document:
+    toc: no
+  html_document:
+    toc: no
+    df_print: paged
+header-includes:
+- \usepackage{tcolorbox}
+- \usepackage{bm}
+papersize: a4
+geometry: margin = 2cm
+urlcolor: Mahogany
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(igraph)
+```
+
+## Exercise A
