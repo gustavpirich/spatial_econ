@@ -20,7 +20,66 @@ urlcolor: Mahogany
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
-library(igraph)
+library(MASS)
 ```
 
 ## Exercise A
+
+```{r}
+
+# define the function
+ols <- function(y, X) {
+  # add a column of 1s to X for the intercept
+  X <- cbind(1, X)
+  
+  # calculate the coefficients using OLS
+  beta <- solve(t(X) %*% X) %*% t(X) %*% y
+  
+  # calculate predictions
+  y_hat <- X %*% beta
+  
+  # calculate residuals
+  residuals <- y - y_hat
+  
+  # calculate error variance
+  error_variance <- sum(residuals^2) / (nrow(X) - ncol(X))
+  
+  # calculate standard errors of coefficients
+  se_beta <- sqrt(diag(error_variance * solve(t(X) %*% X)))
+  
+  # calculate t-values
+  t_values <- beta / se_beta
+  
+  # calculate p-values
+  p_values <- 2 * pt(-abs(t_values), df = nrow(X) - ncol(X))
+  
+  # calculate 95% confidence intervals
+  conf_int_lower <- beta - qt(0.975, nrow(X) - ncol(X)) * se_beta
+  conf_int_upper <- beta + qt(0.975, nrow(X) - ncol(X)) * se_beta
+  conf_intervals <- cbind(conf_int_lower, conf_int_upper)
+  
+  return(list(
+    Coefficients = beta,
+    Error_Variance = error_variance,
+    Standard_Errors = se_beta,
+    t_Values = t_values,
+    p_Values = p_values,
+    Confidence_Intervals = conf_intervals
+  ))
+}
+```
+
+```{r}
+# testing the function
+y <- Boston$medv
+X <- as.matrix(Boston[, c("lstat", "rm", "age", "nox", "dis")])
+
+result_manual <- ols(y, X)
+print(result_manual)
+```
+
+## Exercise B
+```{r}
+
+```
+
