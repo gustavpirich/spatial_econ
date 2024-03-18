@@ -26,6 +26,7 @@ library(igraph)
 library(tmap)
 library(tidyverse)
 library(spDataLarge)
+library(RColorBrewer)
 
 ```
 
@@ -203,26 +204,16 @@ st_geometry(shp) <- st_geometry(st_transform(shp,
 
 ## Exercise D
 ```{r}
+komorowskiPalette <- brewer.pal(n = 7, name = "Blues")
+dudaPalette <- brewer.pal(n = 7, name = "Reds")
 
-#tm_shape(pol_pres15) + tm_facets(free.scales = FALSE) +
-#tm_borders(lwd = 0.5, alpha = 0.4) + tm_fill("types")
-
-
-tm_shape(pol_pres15) + tm_facets(free.scales = FALSE) +
-tm_borders(lwd = 0.5, alpha = 0.4) + tm_polygons(c("II_Komorowski_share", "II_Duda_share"))
-
-
+# Corrected tm_polygons function call
 tm_shape(pol_pres15) +
-  tm_facets(free.scales = FALSE, ncol = 2, 
-            labels = c("Komorowski", "Duda")) +
-  tm_polygons(c("II_Komorowski_share", "II_Duda_share"), 
-              style = "cont", 
-              palette = "-RdYlBu", 
-              title = "Vote Share") +
-  tm_layout(frame = FALSE, 
-            title = "Vote Share of Komorowski vs Duda in 2015 Polish Presidential Election",
-            title.position = c("center", "top")) +
-  tm_borders(lwd = 0.5, alpha = 0.5)
-
+  tm_facets(free.scales = TRUE) +  # Enables independent scaling of facets
+  tm_polygons(c("II_Komorowski_share", "II_Duda_share"), title = "2. Round Vote Share",
+              palette=list("II_Komorowski_share" = komorowskiPalette,
+                           "II_Duda_share" = dudaPalette),
+              midpoint=0.5) +  # Correct placement of midpoint argument
+  tm_layout(legend.position = c("left", "top"))
 ```
 
