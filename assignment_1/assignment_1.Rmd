@@ -2,9 +2,15 @@
 title: '**Advanced Macroeconometrics -- Assignment 2**'
 author:
 - Gustav Pirich (h11742049@s.wu.ac.at)
+<<<<<<< HEAD
 - Elisabeth Fidlaczeck (h11775903@s.wu.ac.at)
 - Hannes Wilkovits (h11712262@s.wu.ac.at)
 date: "May 10, 2023"
+=======
+- Gabriel Kozceny (h11775903@s.wu.ac.at)
+- Jan Trimmel (h11712262@s.wu.ac.at)
+date: "15 March, 2023"
+>>>>>>> cb59efc (update)
 output:
   pdf_document:
     toc: yes
