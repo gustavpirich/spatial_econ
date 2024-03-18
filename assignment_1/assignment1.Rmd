@@ -204,5 +204,8 @@ st_geometry(shp) <- st_geometry(st_transform(shp,
 ## Exercise D
 ```{r}
 view(pol_pres15)
+
+boxplot(I_turnout ~ types, data = pol_pres15)
+
 ```
 
