@@ -3,6 +3,7 @@ title: '**Spatial Economics -- Assignment 1**'
 author:
 - Gustav Pirich (h11742049@s.wu.ac.at)
 - Gabriel Konecny (h11775903@s.wu.ac.at)
+- Jan Trimmel (h11809096@s.wu.ac.at)
 date: "`r Sys.Date()`"
 output:
   pdf_document:
@@ -217,3 +218,13 @@ tm_shape(pol_pres15) +
   tm_layout(legend.position = c("left", "top"))
 ```
 
+"Another way: 
+# Combine support for Komorowski and Duda into a single categorical variable
+pol_pres15$Support <- ifelse(pol_pres15$I_Komorowski_share > pol_pres15$I_Duda_share, "Komorowski", "Duda")
+
+# Visualize support for Komorowski and Duda
+tm_shape(pol_pres15) + 
+  tm_borders(lwd = 0.5, alpha = 0.4) + 
+  tm_fill(col = "Support", style = "cat", palette = "-RdYlBu", title = "Support for Candidates") +
+  tm_layout(legend.position = c("left", "bottom"))
+"
