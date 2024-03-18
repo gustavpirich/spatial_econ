@@ -219,12 +219,42 @@ tm_shape(pol_pres15) +
 ```
 
 "Another way: 
+Install and load the tmap and spDataLarge packages (available from GitHub). Load and review the pol_pres15 dataset on the Polish Presidential election in 2015 (see ?pol_pres15). Create three different, insightful visualizations of the underlying data.
+
+• One visualization should compare the support for Komorowski and Duda.
+
 # Combine support for Komorowski and Duda into a single categorical variable
 pol_pres15$Support <- ifelse(pol_pres15$I_Komorowski_share > pol_pres15$I_Duda_share, "Komorowski", "Duda")
 
-# Visualize support for Komorowski and Duda
+## Visualize support for Komorowski and Duda in the first run
 tm_shape(pol_pres15) + 
   tm_borders(lwd = 0.5, alpha = 0.4) + 
   tm_fill(col = "Support", style = "cat", palette = "-RdYlBu", title = "Support for Candidates") +
   tm_layout(legend.position = c("left", "bottom"))
-"
+
+• One visualization should investigate possible issues with postal voting envelopes.
+
+## Visualization investigating possible issues with postal voting envelopes
+# Calculate the proportion of postal voting envelopes received to postal voting packages sent
+pol_pres15$Envelope_Proportion <- pol_pres15$I_postal_voting_envelopes_received / pol_pres15$I_voters_sent_postal_voting_package
+
+# Define a threshold for the proportion indicating possible issues
+threshold <- 0.99  # You can adjust this threshold as needed
+
+# Create a new column indicating possible issues with postal voting envelopes based on the proportion
+pol_pres15$Envelope_Issues <- ifelse(pol_pres15$Envelope_Proportion < threshold, "Possible Issues", "No Issues")
+
+tm_shape(pol_pres15) + 
+  tm_borders(lwd = 0.5, alpha = 0.4) + 
+  tm_fill(col = "Envelope_Issues", style = "cat", palette = c("green", "red"), 
+          title = "Possible Issues with Postal Voting Envelopes") +
+  tm_layout(legend.position = c("left", "bottom"))
+
+
+• Third vizualization
+## Visualize support for Komorowski and Duda in the second run
+pol_pres15$Support <- ifelse(pol_pres15$II_Komorowski_share > pol_pres15$II_Duda_share, "Komorowski", "Duda")
+tm_shape(pol_pres15) + 
+  tm_borders(lwd = 0.5, alpha = 0.4) + 
+  tm_fill(col = "Support", style = "cat", palette = "-RdYlBu", title = "Support for Candidates") +
+  tm_layout(legend.position = c("left", "bottom"))
