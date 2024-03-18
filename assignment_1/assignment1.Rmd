@@ -233,6 +233,7 @@ tm_shape(pol_pres15) +
   tm_layout(legend.position = c("left", "bottom"))
 
 • One visualization should investigate possible issues with postal voting envelopes.
+We want to investigate if Issues occured because voting envelopes got lost on the way to the voters.
 
 ## Visualization investigating possible issues with postal voting envelopes
 # Calculate the proportion of postal voting envelopes received to postal voting packages sent
