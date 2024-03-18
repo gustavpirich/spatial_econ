@@ -20,7 +20,13 @@ urlcolor: Mahogany
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+install.packages("spDataLarge", repos = "https://geocompr.r-universe.dev")
+
 library(igraph)
+library(tmap)
+library(tidyverse)
+library(spDataLarge)
+
 ```
 
 ## Exercise A
@@ -191,5 +197,12 @@ shp <- shp[shp$CNTR_CODE %in% "AT", ]
 st_geometry(shp) <- st_geometry(st_transform(shp, 
                  st_crs("epsg:31287")))
 #plot(st_geometry(shp))
+```
+
+
+
+## Exercise D
+```{r}
+view(pol_pres15)
 ```
 

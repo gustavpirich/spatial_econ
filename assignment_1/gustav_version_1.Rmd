@@ -21,6 +21,9 @@ urlcolor: Mahogany
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library(MASS)
+
+install.packages("spDataLarge", repos = "https://geocompr.r-universe.dev")
+
 ```
 
 ## Exercise A
