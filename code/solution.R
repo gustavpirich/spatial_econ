@@ -2,52 +2,52 @@
 
 library(MASS)
 
-Boston
-
-# Load the MASS package to access the Boston dataset
-library(MASS)
-
 # Define the function
-predict_property_prices <- function(dependent_var, covariates, data) {
-  # Construct the formula for the linear model
-  formula <- as.formula(paste(dependent_var, "~", paste(covariates, collapse = "+")))
+predict_property_prices_manual <- function(y, X) {
+  # Add a column of 1s to X for the intercept
+  X <- cbind(1, X)
   
-  # Fit the linear model
-  model <- lm(formula, data = data)
+  # Calculate the coefficients (beta) using OLS formula: beta = (X'X)^(-1)X'y
+  beta <- solve(t(X) %*% X) %*% t(X) %*% y
   
-  # Get the summary of the model
-  summary_model <- summary(model)
+  # Calculate predictions
+  y_hat <- X %*% beta
   
-  # Extract the coefficients summary
-  coefficients_summary <- summary_model$coefficients
+  # Calculate residuals
+  residuals <- y - y_hat
   
-  # Calculate the error variance
-  error_variance <- summary_model$sigma^2
+  # Calculate error variance
+  error_variance <- sum(residuals^2) / (nrow(X) - ncol(X))
   
-  # 95% Confidence Intervals
-  conf_intervals <- confint(model, level = 0.95)
+  # Calculate standard errors of coefficients
+  se_beta <- sqrt(diag(error_variance * solve(t(X) %*% X)))
   
-  # Construct the return list
-  result <- list(
-    OLS_Estimates = list(
-      Intercept = coefficients_summary[1, 1],
-      Slope_Parameters = coefficients_summary[-1, 1],
-      Error_Variance = error_variance
-    ),
-    Test_Statistics = list(
-      t_Values = coefficients_summary[, 3],
-      p_Values = coefficients_summary[, 4]
-    ),
+  # Calculate t-values
+  t_values <- beta / se_beta
+  
+  # Calculate p-values
+  p_values <- 2 * pt(-abs(t_values), df = nrow(X) - ncol(X))
+  
+  # Calculate 95% confidence intervals
+  conf_int_lower <- beta - qt(0.975, nrow(X) - ncol(X)) * se_beta
+  conf_int_upper <- beta + qt(0.975, nrow(X) - ncol(X)) * se_beta
+  conf_intervals <- cbind(conf_int_lower, conf_int_upper)
+  
+  return(list(
+    Coefficients = beta,
+    Error_Variance = error_variance,
+    Standard_Errors = se_beta,
+    t_Values = t_values,
+    p_Values = p_values,
     Confidence_Intervals = conf_intervals
-  )
-  
-  return(result)
+  ))
 }
 
-# Example of using the function with the Boston dataset
-# Let's say we're predicting 'medv' (Median value of owner-occupied homes in $1000's) using 'lstat' (lower status of the population), 
-# 'rm' (average number of rooms per dwelling), 'age' (proportion of owner-occupied units built prior to 1940), and 'tax' (full-value property-tax rate per $10,000)
-result <- predict_property_prices("medv", c("lstat", "rm", "age", "tax"), Boston)
 
-# Print the result
-print(result)
+# Assuming y is your dependent variable vector and X is a matrix with each column being one covariate
+# For example:
+y <- Boston$medv
+X <- as.matrix(Boston[, c("lstat", "rm", "age", "tax", "dis")])
+
+result_manual <- predict_property_prices_manual(y, X)
+print(result_manual)
