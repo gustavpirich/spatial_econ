@@ -153,25 +153,73 @@ Based on Outflowing arrows, Austria is still the most central agent, while Germa
 • Repeat this a couple of times, and compare estimates of a standard linear model ($y_{i} = x_{\beta} + \varepsilon_{i}$) with the true values that you used to simulate the data
 
 ```{r, include=FALSE}
-
+# number of observations
 N = 6
+
+# parameters definition
 sigma2 = 0.1
-lambda = 9
-beta = 5
+lambda = 0.7
+beta = 2
+
+# simulation of vecotrs
 x = rnorm(N, 0, 1)
-W = adj.rn
 e = rnorm(N, 0, sigma2)
 
+W = adj.rn
+
+# sampling from reduced form to generate y's
+
+# caluclating means
 Wx <- W %*% x
 
+#Calculating S
 S = diag(N) - lambda * W
 
-#create y's
+# create y's
 y = solve(S,Wx * lambda + x * beta + e)
 
 Wy <- W %*% y
 
-lm(y ~ x)
+
+
+
+
+simulations <- 1000
+times <- c(1:simulations)
+result <- numeric(simulations) 
+
+for (i in times) {
+# number of observations
+N = 6
+
+# parameters definition
+sigma2 = 0.1
+lambda = 0.7
+beta = 2
+
+# simulation of vecotrs
+x = rnorm(N, 0, 1)
+e = rnorm(N, 0, sigma2)
+
+W = adj.rn
+
+# sampling from reduced form to generate y's
+
+# caluclating means
+Wx <- W %*% x
+
+#Calculating S
+S = diag(N) - lambda * W
+
+# create y's
+y = solve(S,Wx * lambda + x * beta + e)
+  
+model <- lm(y ~ x)
+
+result[i] <- coef(model)["x"]
+
+consistent_estimate <- mean(result)
+} 
 
 ```
 
