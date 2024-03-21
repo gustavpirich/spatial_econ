@@ -148,13 +148,41 @@ plot(graph_from_adjacency_matrix(adj[-1,-1]),vertex.size = 30, main="Trade netwo
 Based on Inflowing arrows, China becomes the most central agent and India, Austria and Mexico the least central agents. 
 Based on Outflowing arrows, Austria is still the most central agent, while Germany is the least central agent.
 
+3.Simulate some agent charaacteristic based on a standard Normal distribution; use this characteristic to simulate responses following a liner-in-means model with your network. 
+
+• Repeat this a couple of times, and compare estimates of a standard linear model ($y_{i} = x_{\beta} + \varepsilon_{i}$) with the true values that you used to simulate the data
+
+```{r, include=FALSE}
+
+N = 6
+sigma2 = 0.1
+lambda = 9
+beta = 5
+x = rnorm(N, 0, 1)
+W = adj.rn
+e = rnorm(N, 0, sigma2)
+
+Wx <- W %*% x
+
+S = diag(N) - lambda * W
+
+#create y's
+y = solve(S,Wx * lambda + x * beta + e)
+
+Wy <- W %*% y
+
+lm(y ~ x)
+
+```
+
+
 
 ## Exercise C
 Download a suitable shapefile for NUTS2 regions (from here or using R directly) and some
 dataset of interest at the same level of aggregation (e.g. from here). Install and load the
 sf and ggplot2 packages together with their dependencies.
 
-```{r}
+```{r, include=FALSE}
 library(sf)
 library(ggplot2)
 
@@ -177,7 +205,7 @@ unzip("./data/NUTS_RG_03M_2021_4326_LEVL_2.shp.zip", exdir=outDir)
 
 • Read in the shapefile, and find out what projection and CRS the file uses.
 
-```{r}
+```{r, include=FALSE}
 shp <- st_read(dsn = "./data", layer ="NUTS_RG_03M_2021_4326_LEVL_2") #reads in the shapefile
 # The shapefile looks just like a normal dataframe with an additional "geometry" column:
 #head(shp)
@@ -204,7 +232,7 @@ st_geometry(shp) <- st_geometry(st_transform(shp,
 
 
 ## Exercise D
-```{r}
+```{r, include=FALSE}
 komorowskiPalette <- brewer.pal(n = 7, name = "Blues")
 dudaPalette <- brewer.pal(n = 7, name = "Reds")
 
