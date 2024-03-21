@@ -51,23 +51,33 @@ Intervals of the coefficients for a confidence level of 95%.
 
 ```{r}
 OLS <- function(X,Y){
-  beta_hat <- solve(t(X) %*% X) %*% t(X) %*% Y  # OLS estimates for coefficients
-Y_hat <- X %*% beta_hat  # Fitted values
-e <- Y - Y_hat  #residuals
-n <- nrow(X)  # Number of observations
-k <- ncol(X) - 1  # Number of covariates excluding intercept
-s <- as.numeric(t(e)%*%e / (n-k)) #SSR adjusted for degrees of freedom
-sigma <- s*solve(t(X) %*% X) #VCV of Beta hat
-se <- sqrt(diag(sigma))
-t_stat <- (beta_hat-0) / se
-p <- pt(abs(t_stat), n-k, lower.tail=FALSE)
+
+# OLS estimates for coefficients
+beta_hat <- solve(t(X) %*% X) %*% t(X) %*% Y  
+Y_hat <- X %*% beta_hat   # Fitted values
+
+e <- Y - Y_hat            # residuals
+n <- nrow(X)              # Number of observations
+k <- ncol(X) - 1          # Number of covariates excluding intercept
+
+s <- as.numeric(t(e)%*%e / (n-k))           # SSR adjusted for degrees of freedom
+sigma <- s*solve(t(X) %*% X)                # VCV of Beta hat
+
+se <- sqrt(diag(sigma))                     # standard error
+t_stat <- (beta_hat-0) / se                 # Compute t-statistic
+p <- pt(abs(t_stat), n-k, lower.tail=FALSE) # Compute p-value
+
+# 95% Confidence interval
 th <- qt(0.975, n-k)
 conf <- cbind(beta_hat-th*se,beta_hat+th*se) 
+
 colnames(beta_hat) <- "estimate"
 colnames(conf) <- c("2.5%","97.5%")
 colnames(t_stat) <- "t-statistic"
 colnames(p) <- "p-value"
+
 error_variance <- s
+
 list(rbind(beta_hat,error_variance), cbind(t_stat, p), conf)
 } 
 ```
@@ -181,10 +191,7 @@ y = solve(S,Wx * lambda + x * beta + e)
 Wy <- W %*% y
 
 
-
-
-
-simulations <- 1000
+simulations <- 10000
 times <- c(1:simulations)
 result <- numeric(simulations) 
 
@@ -218,8 +225,10 @@ model <- lm(y ~ x)
 
 result[i] <- coef(model)["x"]
 
-consistent_estimate <- mean(result)
+inconsistent_estimate <- mean(result)
 } 
+
+inconsistent_estimate
 
 ```
 
