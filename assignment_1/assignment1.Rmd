@@ -169,7 +169,7 @@ N = 6
 # parameters definition
 sigma2 = 0.1
 lambda = 0.9
-beta = 2 # true beta is 2
+beta = -1.9 # true beta is 2
 W = adj.rn
 
 simulations <- 10000
@@ -187,7 +187,7 @@ e = rnorm(N, 0, sigma2)
 # caluclating means
 Wx <- W %*% x
 
-#Calculating S
+# calculating S
 S = diag(N) - lambda * W
 
 # create y's
@@ -196,9 +196,10 @@ y = solve(S,Wx * lambda + x * beta + e)
 model <- lm(y ~ 1 + x)
 
 result[i] <- coef(model)["x"]
+} 
 
 inconsistent_estimate <- mean(result)
-} 
+
 
 my_data <- data.frame(
   Name =  c("Simulated coef", "Real coef"), # Creating a column named ID with values from 1 to 4
@@ -278,7 +279,7 @@ tm_shape(pol_pres15) +
               palette=list("II_Komorowski_share" = komorowskiPalette,
                            "II_Duda_share" = dudaPalette),
               midpoint=0.5) +  # Correct placement of midpoint argument
-  tm_layout(legend.position = c("central", "top"))
+  tm_layout(legend.position = c("left", "top"))
 
 ```
 
