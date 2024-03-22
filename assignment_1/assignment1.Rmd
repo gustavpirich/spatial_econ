@@ -162,7 +162,7 @@ Based on Outflowing arrows, Austria is still the most central agent, while Germa
 
 • Repeat this a couple of times, and compare estimates of a standard linear model ($y_{i} = x_{\beta} + \varepsilon_{i}$) with the true values that you used to simulate the data
 
-```{r, include=FALSE}
+```{r, echo = FALSE}
 # number of agents
 N = 6
 
@@ -193,7 +193,7 @@ S = diag(N) - lambda * W
 # create y's
 y = solve(S,Wx * lambda + x * beta + e)
   
-model <- lm(y ~ x)
+model <- lm(y ~ 1 + x)
 
 result[i] <- coef(model)["x"]
 
@@ -208,9 +208,9 @@ my_data <- data.frame(
 print(my_data)
 ```
 
-We simulate the data based on the row normalized adjacency matrix we created in the preceding exercise. Following a linear-in-means model, we create the dependent variables y by solving for the reduced form of 
-\begin{equation}
-\end{equation}
+We simulate the data based on the row normalized adjacency matrix we created in the preceding exercise. To create the values for y, we need to solve for the reduced form. We set the treu value for $\beta$ to 2 and $\lambda$ to 0.9. We then regress y on x, repeat this a 1000 times, and find that the mean of the estimand is 1.503493. Thus using the simple linear regression fails to recover the true value for $\beta$. 
+
+Note that the parameter $\lambda$ plays an interesting role in moderating the size of the bias. The closer $\lambda$ is to zero, the smaller the bias. Conversely, in our case where we set $\lambda$ close to one, the bias is amplified quite strongly.
 
 ## Exercise C
 Download a suitable shapefile for NUTS2 regions (from here or using R directly) and some
@@ -278,10 +278,14 @@ tm_shape(pol_pres15) +
               palette=list("II_Komorowski_share" = komorowskiPalette,
                            "II_Duda_share" = dudaPalette),
               midpoint=0.5) +  # Correct placement of midpoint argument
-  tm_layout(legend.position = c("left", "top"))
+  tm_layout(legend.position = c("central", "top"))
+
 ```
 
-"Another way: 
+
+
+
+Another way: 
 Install and load the tmap and spDataLarge packages (available from GitHub). Load and review the pol_pres15 dataset on the Polish Presidential election in 2015 (see ?pol_pres15). Create three different, insightful visualizations of the underlying data.
 
 • One visualization should compare the support for Komorowski and Duda.
@@ -289,7 +293,7 @@ Install and load the tmap and spDataLarge packages (available from GitHub). Load
 # Combine support for Komorowski and Duda into a single categorical variable
 pol_pres15$Support <- ifelse(pol_pres15$I_Komorowski_share > pol_pres15$I_Duda_share, "Komorowski", "Duda")
 
-## Visualize support for Komorowski and Duda in the first run
+# Visualize support for Komorowski and Duda in the first run
 tm_shape(pol_pres15) + 
   tm_borders(lwd = 0.5, alpha = 0.4) + 
   tm_fill(col = "Support", style = "cat", palette = "-RdYlBu", title = "Support for Candidates") +
@@ -298,7 +302,7 @@ tm_shape(pol_pres15) +
 • One visualization should investigate possible issues with postal voting envelopes.
 We want to investigate if Issues occured because voting envelopes got lost on the way to the voters.
 
-## Visualization investigating possible issues with postal voting envelopes
+# Visualization investigating possible issues with postal voting envelopes
 # Calculate the proportion of postal voting envelopes received to postal voting packages sent
 pol_pres15$Envelope_Proportion <- pol_pres15$I_postal_voting_envelopes_received / pol_pres15$I_voters_sent_postal_voting_package
 
@@ -316,9 +320,9 @@ tm_shape(pol_pres15) +
 
 
 • Third vizualization
-## Visualize support for Komorowski and Duda in the second run
+# Visualize support for Komorowski and Duda in the second run
 pol_pres15$Support <- ifelse(pol_pres15$II_Komorowski_share > pol_pres15$II_Duda_share, "Komorowski", "Duda")
 tm_shape(pol_pres15) + 
   tm_borders(lwd = 0.5, alpha = 0.4) + 
   tm_fill(col = "Support", style = "cat", palette = "-RdYlBu", title = "Support for Candidates") +
-  tm_layout(legend.position = c("left", "bottom"))
+  tm_layout(legend.position = c("central", "bottom"))
