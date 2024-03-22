@@ -105,7 +105,7 @@ adj <- matrix(c(
 colnames(adj) = rownames(adj) = agents
 ```
 
-We could consider 6 different countries and an indicator of a high trade between them. For illustration, we could consider a rule where there is directed edge from A to B, if B is one of the top 5 export destinations of A. We dont actually check for biggest trading partners empirically, but lets assume that such procedure gives rise to following network (arrows are mostly made up to achieve 10 edges and nice interpretations):
+We could consider 6 different countries and an indicator of a high trade between them. For illustration, we could consider a rule where there is directed edge from A to B, if B is one of the top 5 export destinations of A. We don't actually check for biggest trading partners empirically, but lets assume that such procedure gives rise to following network (arrows are mostly made up to achieve 10 edges and nice interpretations):
 
 ```{r, echo=FALSE}
 plot(graph_from_adjacency_matrix(adj),vertex.size = 30, main="Trade network",edge.arrow.size = 0.7)
@@ -163,52 +163,24 @@ Based on Outflowing arrows, Austria is still the most central agent, while Germa
 • Repeat this a couple of times, and compare estimates of a standard linear model ($y_{i} = x_{\beta} + \varepsilon_{i}$) with the true values that you used to simulate the data
 
 ```{r, include=FALSE}
-# number of observations
+# number of agents
 N = 6
 
 # parameters definition
 sigma2 = 0.1
-lambda = 0.7
-beta = 2
-
-# simulation of vecotrs
-x = rnorm(N, 0, 1)
-e = rnorm(N, 0, sigma2)
-
+lambda = 0.9
+beta = 2 # true beta is 2
 W = adj.rn
-
-# sampling from reduced form to generate y's
-
-# caluclating means
-Wx <- W %*% x
-
-#Calculating S
-S = diag(N) - lambda * W
-
-# create y's
-y = solve(S,Wx * lambda + x * beta + e)
-
-Wy <- W %*% y
-
 
 simulations <- 10000
 times <- c(1:simulations)
 result <- numeric(simulations) 
 
 for (i in times) {
-# number of observations
-N = 6
-
-# parameters definition
-sigma2 = 0.1
-lambda = 0.7
-beta = 2
 
 # simulation of vecotrs
 x = rnorm(N, 0, 1)
 e = rnorm(N, 0, sigma2)
-
-W = adj.rn
 
 # sampling from reduced form to generate y's
 
@@ -228,11 +200,17 @@ result[i] <- coef(model)["x"]
 inconsistent_estimate <- mean(result)
 } 
 
-inconsistent_estimate
+my_data <- data.frame(
+  Name =  c("Simulated coef", "Real coef"), # Creating a column named ID with values from 1 to 4
+  Estimate = c(inconsistent_estimate, beta) # Creating a Name column
+)
 
+print(my_data)
 ```
 
-
+We simulate the data based on the row normalized adjacency matrix we created in the preceding exercise. Following a linear-in-means model, we create the dependent variables y by solving for the reduced form of 
+\begin{equation}
+\end{equation}
 
 ## Exercise C
 Download a suitable shapefile for NUTS2 regions (from here or using R directly) and some
