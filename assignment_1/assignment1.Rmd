@@ -28,7 +28,6 @@ library(tmap)
 library(tidyverse)
 library(spDataLarge)
 library(RColorBrewer)
-
 ```
 
 ## Exercise A
@@ -169,7 +168,8 @@ N = 6
 # parameters definition
 sigma2 = 0.1
 lambda = 0.9
-beta = -1.9 # true beta is 2
+delta = -1
+beta = 2 # true beta is 2
 W = adj.rn
 
 simulations <- 10000
@@ -191,7 +191,7 @@ Wx <- W %*% x
 S = diag(N) - lambda * W
 
 # create y's
-y = solve(S,Wx * lambda + x * beta + e)
+y = solve(S, Wx * delta + x * beta + e)
   
 model <- lm(y ~ 1 + x)
 
@@ -209,7 +209,11 @@ my_data <- data.frame(
 print(my_data)
 ```
 
-We simulate the data based on the row normalized adjacency matrix we created in the preceding exercise. To create the values for y, we need to solve for the reduced form. We set the treu value for $\beta$ to 2 and $\lambda$ to 0.9. We then regress y on x, repeat this a 1000 times, and find that the mean of the estimand is 1.503493. Thus using the simple linear regression fails to recover the true value for $\beta$. 
+We simulate the data based on the row normalized adjacency matrix we created in the preceding exercise. 
+
+$y = Wy \lambda + Wx \delta + x\beta + \varepsilon$
+
+To create the values for y, we need to solve for the reduced form. We set the treu value for $\beta$ to 2 and $\lambda$ to 0.9. We then regress y on x, repeat this a 1000 times, and find that the mean of the estimand is 1.503493. Thus using the simple linear regression fails to recover the true value for $\beta$. 
 
 Note that the parameter $\lambda$ plays an interesting role in moderating the size of the bias. The closer $\lambda$ is to zero, the smaller the bias. Conversely, in our case where we set $\lambda$ close to one, the bias is amplified quite strongly.
 
