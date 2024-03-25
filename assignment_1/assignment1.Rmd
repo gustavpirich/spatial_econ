@@ -280,23 +280,35 @@ agr_r_accts_page_spreadsheet_1 <- agr_r_accts_page_spreadsheet %>%
 
 # Remove commas and convert periods to decimal points if they are used as such
 agr_r_accts_page_spreadsheet_1$ag_value_added_1 <- gsub(",", "", agr_r_accts_page_spreadsheet_1$ag_value_added) # Remove commas
-agr_r_accts_page_spreadsheet_1$ag_value_added_1 <- gsub("\\.", "", agr_r_accts_page_spreadsheet_1$ag_value_added_1) # Remove periods used as thousands separators
-agr_r_accts_page_spreadsheet_1$ag_value_added_1 <- gsub(",", ".", agr_r_accts_page_spreadsheet_1$ag_value_added_1) # Replace decimal commas with decimal points if necessary
 
 # Convert character to numeric, which will turn non-numeric strings to NA
 agr_r_accts_page_spreadsheet_1$ag_value_added_1 <- as.numeric(agr_r_accts_page_spreadsheet_1$ag_value_added_1)
 
 shp_merged <- left_join(shp, agr_r_accts_page_spreadsheet_1)
 
-ggplot(data = shp_merged) +
-  geom_sf(aes(fill = "ag_value_added"), color = NA) + # Fill regions based on value_added
-  scale_fill_viridis_c() + # Use a continuous color scale
-  labs(title = "Agricultural Value Added by NUTS-2 Region in Europe",
-       fill = "Value Added") +
-  theme_minimal() +
-  theme(legend.position = "bottom")
+xc <- c("FRY1", "FRY2", "FRY3", "FRY4", "FRY5", "FRZZ", 
+              "PT20", "PT30", "PTZZ", 
+              "ES70", "ESZZ", 
+              "NO0B", "NOZZ")
 
+shp_merged_filter <- shp_merged %>%
+  filter(!NUTS_ID %in% xc)
 
+# Basic plot
+ggplot(data = shp_merged_filter) +
+  geom_sf(aes(fill = ag_value_added_1)) + # Fill regions based on ag_value_added_1, remove borders with color = NA
+     scale_fill_gradient(low = "lightblue", high = "darkblue", name = "Agricultural\nValue Added in Million Euros") + # Customize the color gradient and legend title
+  labs(title = "Agricultural Output Value Added by NUTS-2 Region in 2021") + # Add title and subtitle
+  theme_minimal() + # Use a minimal theme
+  theme(legend.position = "bottom") # Move legend to bottom
+
+ggplot(data = shp_merged_filter) +
+  geom_sf(aes(fill = ag_value_added_1)) + # Fill regions based on ag_value_added_1
+  scale_fill_gradient(low = "lightblue", high = "darkblue", name = "Agricultural\nValue Added in Million Euros") +  
+  labs(title = "Agricultural Output Value Added by NUTS-2 Region in 2021", 
+       subtitle = "in Million Euros") + # Add title and subtitle
+  theme_minimal() + # Use a minimal theme
+  theme(legend.position = "bottom") # Move legend to bottom
 ```
 
 ## Exercise D
