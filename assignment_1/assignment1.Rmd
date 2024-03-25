@@ -30,6 +30,8 @@ library(spDataLarge)
 library(RColorBrewer)
 library(gt)
 library(sf)
+library(readxl)
+
 ```
 
 ## Exercise A
@@ -272,10 +274,6 @@ The projection used is the "World Geodetic System 1984" or for short "WGS 84" (E
 ```{r}
 #lets first transform it back to WGS84
 shp_4326 <- st_transform(shp, 4326)
-
-#redaing in excel sheet
-tgs00111_page_spreadsheet <- read_excel("~/data/tourism_2022/tgs00111__custom_10560539_spreadsheet.xlsx", 2)
-,range = "A11:B388"
 ```
 
 ## Exercise D
