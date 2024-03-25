@@ -275,9 +275,26 @@ agr_r_accts_page_spreadsheet <- read_excel("/Users/gustavpirich/Desktop/GITHUB/s
            sheet = 3, range = "A11:C472")
 
 agr_r_accts_page_spreadsheet_1 <- agr_r_accts_page_spreadsheet %>%
-  rename("NUTS_ID" = "GEO (Codes)")
+  rename("NUTS_ID" = "GEO (Codes)") %>%
+  rename("ag_value_added" = "...3") 
+
+# Remove commas and convert periods to decimal points if they are used as such
+agr_r_accts_page_spreadsheet_1$ag_value_added_1 <- gsub(",", "", agr_r_accts_page_spreadsheet_1$ag_value_added) # Remove commas
+agr_r_accts_page_spreadsheet_1$ag_value_added_1 <- gsub("\\.", "", agr_r_accts_page_spreadsheet_1$ag_value_added_1) # Remove periods used as thousands separators
+agr_r_accts_page_spreadsheet_1$ag_value_added_1 <- gsub(",", ".", agr_r_accts_page_spreadsheet_1$ag_value_added_1) # Replace decimal commas with decimal points if necessary
+
+# Convert character to numeric, which will turn non-numeric strings to NA
+agr_r_accts_page_spreadsheet_1$ag_value_added_1 <- as.numeric(agr_r_accts_page_spreadsheet_1$ag_value_added_1)
 
 shp_merged <- left_join(shp, agr_r_accts_page_spreadsheet_1)
+
+ggplot(data = shp_merged) +
+  geom_sf(aes(fill = "ag_value_added"), color = NA) + # Fill regions based on value_added
+  scale_fill_viridis_c() + # Use a continuous color scale
+  labs(title = "Agricultural Value Added by NUTS-2 Region in Europe",
+       fill = "Value Added") +
+  theme_minimal() +
+  theme(legend.position = "bottom")
 
 
 ```
