@@ -274,6 +274,14 @@ The projection used is the "World Geodetic System 1984" or for short "WGS 84" (E
 ```{r}
 #lets first transform it back to WGS84
 shp_4326 <- st_transform(shp, 4326)
+
+agr_r_accts_page_spreadsheet <- read_excel("/Users/gustavpirich/Desktop/GITHUB/spatial_econ/data/agriculture_NUTS2_2022/agr_r_accts_page_spreadsheet.xlsx",
+           sheet = 3, range = "A11:C472")
+
+agr_r_accts_page_spreadsheet %>%
+  rename()
+
+
 ```
 
 ## Exercise D
