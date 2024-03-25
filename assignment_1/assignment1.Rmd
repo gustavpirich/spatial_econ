@@ -254,15 +254,14 @@ unzip("./data/NUTS_RG_03M_2021_4326_LEVL_2.shp.zip", exdir=outDir)
 • Read in the shapefile, and find out what projection and CRS the file uses. Map the data to use another projection and/or CRS of your choosing:
 
 
-```{r, include=FALSE}
+```{r}
 shp <- st_read(dsn = "./data", layer ="NUTS_RG_03M_2021_4326_LEVL_2") 
 
 old_crs <- st_crs(shp)
-
+print(old_crs)
 shp_27700 <- st_transform(shp, 27700)
 
 new_crs <- st_crs(shp_27700)
-
 print(new_crs)
 ```
 
@@ -272,14 +271,13 @@ The projection used is the "World Geodetic System 1984" or for short "WGS 84" (E
 • Merge the shapefile and the chosen dataset Create tow meaningful visualizations of the chosen dataset using different scales (e.g. continuous versus discrete scaling of the data)
 
 ```{r}
-#lets first transform it back to WGS84
-shp_4326 <- st_transform(shp, 4326)
-
 agr_r_accts_page_spreadsheet <- read_excel("/Users/gustavpirich/Desktop/GITHUB/spatial_econ/data/agriculture_NUTS2_2022/agr_r_accts_page_spreadsheet.xlsx",
            sheet = 3, range = "A11:C472")
 
-agr_r_accts_page_spreadsheet %>%
-  rename()
+agr_r_accts_page_spreadsheet_1 <- agr_r_accts_page_spreadsheet %>%
+  rename("NUTS_ID" = "GEO (Codes)")
+
+shp_merged <- left_join(shp, agr_r_accts_page_spreadsheet_1)
 
 
 ```
