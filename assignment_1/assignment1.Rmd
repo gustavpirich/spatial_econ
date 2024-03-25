@@ -274,9 +274,8 @@ The projection used is the "World Geodetic System 1984" or for short "WGS 84" (E
 shp_4326 <- st_transform(shp, 4326)
 
 #redaing in excel sheet
-tgs00111_page_spreadsheet <- read_excel("data/tourism_2022/tgs00111_page_spreadsheet.xlsx",
-                                        sheet = 3)
-
+tgs00111_page_spreadsheet <- read_excel("~/data/tourism_2022/tgs00111__custom_10560539_spreadsheet.xlsx", 2)
+,range = "A11:B388"
 ```
 
 ## Exercise D
