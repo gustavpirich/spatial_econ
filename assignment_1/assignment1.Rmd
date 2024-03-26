@@ -93,7 +93,7 @@ OLS(X,Y)
 ## Exercise B
 1. Draw a graph of the network; create the adjacency matrix in R.
 
-```{r, echo=FALSE}
+```{r, echo = FALSE}
 agents <- c("US", "MX", "DE", "AT", "CN", "IN")
 
 adj <- matrix(c(
@@ -165,7 +165,7 @@ Based on Outflowing arrows, Austria is still the most central agent, while Germa
 
 • Repeat this a couple of times, and compare estimates of a standard linear model ($y_{i} = x_{\beta} + \varepsilon_{i}$) with the true values that you used to simulate the data
 
-```{r}
+```{r, include = FALSE}
 # number of agents
 N = 6
 
@@ -248,6 +248,7 @@ unzip(temp, exdir=outDir)
 # between the year (2021) and the level of the data (NUTS 2):
 unzip("./data/NUTS_RG_03M_2021_4326_LEVL_2.shp.zip", exdir=outDir)
 
+shp <- st_read(dsn = "./data", layer ="NUTS_RG_03M_2021_4326_LEVL_2") 
 ```
 
 
@@ -255,14 +256,15 @@ unzip("./data/NUTS_RG_03M_2021_4326_LEVL_2.shp.zip", exdir=outDir)
 
 
 ```{r}
-shp <- st_read(dsn = "./data", layer ="NUTS_RG_03M_2021_4326_LEVL_2") 
-
 old_crs <- st_crs(shp)
-print(old_crs)
+
+print(old_crs$input)
+
 shp_27700 <- st_transform(shp, 27700)
 
 new_crs <- st_crs(shp_27700)
-print(new_crs)
+
+print(new_crs$input)
 ```
 
 The projection used is the "World Geodetic System 1984" or for short "WGS 84" (EPSG 4326). We then map the data to the "North American Datum 1983" (NAD83) projection, which is extremely similar to the WGS 84. 
@@ -270,7 +272,7 @@ The projection used is the "World Geodetic System 1984" or for short "WGS 84" (E
 
 • Merge the shapefile and the chosen dataset Create tow meaningful visualizations of the chosen dataset using different scales (e.g. continuous versus discrete scaling of the data)
 
-```{r}
+```{r, echo = FALSE}
 agr_r_accts_page_spreadsheet <- read_excel("/Users/gustavpirich/Desktop/GITHUB/spatial_econ/data/agriculture_NUTS2_2022/agr_r_accts_page_spreadsheet.xlsx",
            sheet = 3, range = "A11:C472")
 
@@ -286,6 +288,7 @@ agr_r_accts_page_spreadsheet_1$ag_value_added_1 <- as.numeric(agr_r_accts_page_s
 
 shp_merged <- left_join(shp, agr_r_accts_page_spreadsheet_1)
 
+#excluding overseas regions
 xc <- c("FRY1", "FRY2", "FRY3", "FRY4", "FRY5", "FRZZ", 
               "PT20", "PT30", "PTZZ", 
               "ES70", "ESZZ", 
@@ -294,21 +297,68 @@ xc <- c("FRY1", "FRY2", "FRY3", "FRY4", "FRY5", "FRZZ",
 shp_merged_filter <- shp_merged %>%
   filter(!NUTS_ID %in% xc)
 
-# Basic plot
+# Your existing code for plotting
 ggplot(data = shp_merged_filter) +
-  geom_sf(aes(fill = ag_value_added_1)) + # Fill regions based on ag_value_added_1, remove borders with color = NA
-     scale_fill_gradient(low = "lightblue", high = "darkblue", name = "Agricultural\nValue Added in Million Euros") + # Customize the color gradient and legend title
-  labs(title = "Agricultural Output Value Added by NUTS-2 Region in 2021") + # Add title and subtitle
-  theme_minimal() + # Use a minimal theme
-  theme(legend.position = "bottom") # Move legend to bottom
+  geom_sf(aes(fill = ag_value_added_1)) + 
+   scale_fill_gradientn(colors = c("lightblue2", "turquoise4", "navyblue"), 
+                       values = scales::rescale(c(min(shp_merged_filter$ag_value_added_1, na.rm = TRUE), 
+                                                  mean(shp_merged_filter$ag_value_added_1, na.rm = TRUE), 
+                                                  max(shp_merged_filter$ag_value_added_1, na.rm = TRUE))),
+                       name = "Agricultural\nValue Added in Million Euros €") +
+  labs(title = "Agricultural Output Value Added by NUTS-2 Region in 2021") +
+  theme_minimal() +
+  theme(legend.position = "bottom")
 
+
+# Define the breaks for the bins
+breaks <- seq(0, 15000, by = 1000)
+
+# Create labels for the bins based on the breaks
+labels <- paste(head(breaks, -1), tail(breaks, -1) - 1, sep = "-")
+
+# Discretize the share variable into bins
+shp_merged_filter <- shp_merged_filter %>%
+  mutate(share_bins = cut(ag_value_added_1,
+                          breaks = breaks,
+                          include.lowest = TRUE,
+                          labels = labels))
+
+# Define a color for each bin
+color_palette <- c("#f7fbff", "#deebf7", "#c6dbef", "#9ecae1", "#6baed6", 
+                   "#4292c6", "#2171b5", "#08519c", "#08306b", "#041945",
+                   "#030b1e", "#02050f", "#010308")
+
+# Ensure the color palette has the same number of colors as there are labels
+color_palette <- color_palette[1:length(labels)]
+
+# Plot the map with the discretized bins
 ggplot(data = shp_merged_filter) +
-  geom_sf(aes(fill = ag_value_added_1)) + # Fill regions based on ag_value_added_1
-  scale_fill_gradient(low = "lightblue", high = "darkblue", name = "Agricultural\nValue Added in Million Euros") +  
-  labs(title = "Agricultural Output Value Added by NUTS-2 Region in 2021", 
-       subtitle = "in Million Euros") + # Add title and subtitle
-  theme_minimal() + # Use a minimal theme
-  theme(legend.position = "bottom") # Move legend to bottom
+  geom_sf(aes(fill = share_bins), color = NA) +
+  scale_fill_manual(values = color_palette,
+                    name = "Agricultural Value Added (in bins)") +
+  labs(title = "Agricultural Value Added per NUTS-2 Region (Binned)") +
+  theme_minimal() +
+  theme(legend.position = "bottom")
+
+
+
+# Step 1: Calculate the total agricultural value added for each country
+country_totals <- shp_merged_filter %>%
+  group_by(CNTR_CODE) %>%
+  mutate(country_total_value_added = sum(ag_value_added_1, na.rm = TRUE)) %>%
+  ungroup()
+
+# Step 2: Calculate the share for each NUTS 2 region
+shp_merged_filter <- country_totals %>%
+  mutate(region_share_of_country_total = ag_value_added_1 / country_total_value_added)
+
+# Step 3: Now plot the map
+ggplot(data = shp_merged_filter %>% filter(!CNTR_CODE %in% c("IS", "LT"))) +
+  geom_sf(aes(fill = region_share_of_country_total), color = NA) + 
+  scale_fill_viridis_c(name = "Share of Country's\nTotal Agricultural Value Added") +
+  labs(title = "Agricultural Value Added Share per NUTS-2 Region") +
+  theme_minimal() +
+  theme(legend.position = "bottom")
 ```
 
 ## Exercise D
