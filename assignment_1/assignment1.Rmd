@@ -5,18 +5,17 @@ author:
 - Gabriel Konecny (h11775903@s.wu.ac.at)
 - Jan Trimmel (h11809096@s.wu.ac.at)
 date: "`r Sys.Date()`"
-output:
+output: 
   pdf_document:
-    toc: no
-  html_document:
-    toc: no
-    df_print: paged
-header-includes:
-- \usepackage{tcolorbox}
-- \usepackage{bm}
+    toc: true
+    includes:
+      in_header: !expr file.path(rprojroot::find_rstudio_root_file(), "helper", "wrap_code.tex")
+header-includes: 
+  - \usepackage{tcolorbox}
+  - \usepackage[default]{lato}
 papersize: a4
 geometry: margin = 2cm
-urlcolor: Mahogany
+urlcolor: DarkOrchid!65!black
 ---
 
 ```{r setup, include=FALSE}
@@ -31,6 +30,7 @@ library(RColorBrewer)
 library(gt)
 library(sf)
 library(readxl)
+library(viridis)
 
 ```
 
@@ -322,30 +322,21 @@ shp_merged_filter <- shp_merged_filter %>%
                           include.lowest = TRUE,
                           labels = labels))
 
-# Define a color for each bin
-color_palette <- c("#f7fbff", "#deebf7", "#c6dbef", "#9ecae1", "#6baed6", 
-                   "#4292c6", "#2171b5", "#08519c", "#08306b", "#041945",
-                   "#030b1e", "#02050f", "#010308")
-
-# Ensure the color palette has the same number of colors as there are labels
-color_palette <- color_palette[1:length(labels)]
-
-# Plot the map with the discretized bins
+# Plot the map with the discretized bins using the viridis color palette
 ggplot(data = shp_merged_filter) +
   geom_sf(aes(fill = share_bins), color = NA) +
-  scale_fill_manual(values = color_palette,
-                    name = "Agricultural Value Added (in bins)") +
-  labs(title = "Agricultural Output Value Added per NUTS-2 Region (Binned)") +
+  scale_fill_viridis_d(name = "Agricultural Value Added (in bins) in Millions of €",
+                     option = "D") + # 'option' can be "C" for the default viridis palette, or "A", "B", "D", "E" for other variants
+  labs(title = "Agricultural Value Added per NUTS-2 Region (Binned)") +
   theme_minimal() +
   theme(legend.position = "bottom")
 ```
 The discrete scaling shows the agricultural value added in million Euros at a NUTS-2 Level in 2021. While the first map visualizes the value added in continous scaling. The second map portrays agricultral value added in a binned scaling. Note that animal production and fishing is also included, which accounts for the high agrilcutlral value added in Western France.  
 
 
-• Briefly explain what two conceptually different ways there are to store visualiza-
-tions, and name two formats each. Which ones are more appropriate for which
-types of visualizations and why? Use the one you think is more appropriate to
-store your visualizations.
+• Briefly explain what two conceptually different ways there are to store visualizations, and name two formats each. Which ones are more appropriate for which types of visualizations and why? Use the one you think is more appropriate to store your visualizations.
+
+There are two types of spatial data which can be stpored either as a raster file or as a vector file.  
 
 ## Exercise D
 ```{r, include=FALSE}
