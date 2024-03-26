@@ -9,7 +9,7 @@ output:
   pdf_document:
     toc: true
     includes:
-      in_header: !expr file.path(rprojroot::find_rstudio_root_file(), "helper", "wrap_code.tex")
+      in_header: 
 header-includes: 
   - \usepackage{tcolorbox}
   - \usepackage[default]{lato}
@@ -272,7 +272,7 @@ The projection used is the "World Geodetic System 1984" or for short "WGS 84" (E
 
 • Merge the shapefile and the chosen dataset Create tow meaningful visualizations of the chosen dataset using different scales (e.g. continuous versus discrete scaling of the data)
 
-```{r, echo = FALSE}
+```{r, echo = FALSE, include=FALSE}
 agr_r_accts_page_spreadsheet <- read_excel("/Users/gustavpirich/Desktop/GITHUB/spatial_econ/data/agriculture_NUTS2_2022/agr_r_accts_page_spreadsheet.xlsx", sheet = 3, range = "A11:C472")
 
 agr_r_accts_page_spreadsheet_1 <- agr_r_accts_page_spreadsheet %>%
@@ -286,7 +286,9 @@ agr_r_accts_page_spreadsheet_1$ag_value_added_1 <- gsub(",", "", agr_r_accts_pag
 agr_r_accts_page_spreadsheet_1$ag_value_added_1 <- as.numeric(agr_r_accts_page_spreadsheet_1$ag_value_added_1)
 
 shp_merged <- left_join(shp, agr_r_accts_page_spreadsheet_1)
+```
 
+```{r, echo = FALSE}
 #excluding overseas regions
 xc <- c("FRY1", "FRY2", "FRY3", "FRY4", "FRY5", "FRZZ", 
               "PT20", "PT30", "PTZZ", 
