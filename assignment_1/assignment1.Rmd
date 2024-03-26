@@ -230,7 +230,7 @@ Download a suitable shapefile for NUTS2 regions (from here or using R directly) 
 dataset of interest at the same level of aggregation (e.g. from here). Install and load the
 sf and ggplot2 packages together with their dependencies.
 
-```{r, include=FALSE}
+```{r, eval=FALSE}
 library(sf)
 library(ggplot2)
 
@@ -247,8 +247,6 @@ unzip(temp, exdir=outDir)
 # let us choose projection WGS 84 (EPSG 4326) which is visible the file name 
 # between the year (2021) and the level of the data (NUTS 2):
 unzip("./data/NUTS_RG_03M_2021_4326_LEVL_2.shp.zip", exdir=outDir)
-
-shp <- st_read(dsn = "./data", layer ="NUTS_RG_03M_2021_4326_LEVL_2") 
 ```
 
 
@@ -256,6 +254,8 @@ shp <- st_read(dsn = "./data", layer ="NUTS_RG_03M_2021_4326_LEVL_2")
 
 
 ```{r}
+shp <- st_read(dsn = "./data", layer ="NUTS_RG_03M_2021_4326_LEVL_2") 
+
 old_crs <- st_crs(shp)
 
 print(old_crs$input)
@@ -277,10 +277,10 @@ agr_r_accts_page_spreadsheet <- read_excel("/Users/gustavpirich/Desktop/GITHUB/s
 
 agr_r_accts_page_spreadsheet_1 <- agr_r_accts_page_spreadsheet %>%
   rename("NUTS_ID" = "GEO (Codes)") %>%
-  rename("ag_value_added" = "...3") 
+  rename("ag_value_added_1" = "...3") 
 
 # Remove commas and convert periods to decimal points if they are used as such
-agr_r_accts_page_spreadsheet_1$ag_value_added_1 <- gsub(",", "", agr_r_accts_page_spreadsheet_1$ag_value_added) # Remove commas
+#agr_r_accts_page_spreadsheet_1$ag_value_added_1 <- gsub(",", "", agr_r_accts_page_spreadsheet_1$ag_value_added) # Remove commas
 
 # Convert character to numeric, which will turn non-numeric strings to NA
 agr_r_accts_page_spreadsheet_1$ag_value_added_1 <- as.numeric(agr_r_accts_page_spreadsheet_1$ag_value_added_1)
