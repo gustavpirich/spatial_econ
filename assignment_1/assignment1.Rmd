@@ -169,6 +169,17 @@ Based on Outflowing arrows, Austria is still the most central agent, while Germa
 
 • Repeat this a couple of times, and compare estimates of a standard linear model ($y_{i} = x_{\beta} + \varepsilon_{i}$) with the true values that you used to simulate the data
 
+We simulate the data based on the row normalized adjacency matrix for trade partner connections, that we created in the preceding exercise.
+
+Let's say we are interested in estimating the impact of a countries fentanyl precursor production (x) on the log of a countries drug deaths (y). Then Wx denotes the average of neighboring countries fentanyl precursor production. We hypothesize that if a countries close trade partners fentanyl precursor production rate is high (as measured by Wx), then the fentanyl related drug deaths are high. Moreover, there are spillover effects with regards to the trading partners fentanyls related deaths from connected countries (Wy).  
+
+We specify the following linear-in-means model to estimate the relationship.    
+$$y = Wy \lambda + Wx \delta + x\beta + \varepsilon$$
+
+Where $Wy$ denotes the average death rate from drugs of countries that are close neighbors.   
+
+To simulate the values for y, we need to solve for the reduced form. 
+$$y = (I - W\lambda)^{-1}(Wx \delta + x\beta + \varepsilon)$$
 ```{r, echo = FALSE}
 # number of agents
 N = 6
@@ -216,18 +227,7 @@ my_data <- data.frame(
 knitr::kable(my_data, format = "markdown")
 ```
 
-We simulate the data based on the row normalized adjacency matrix for trade partner connections, that we created in the preceding exercise.
-
-Let's say we are interested in estimating the impact of a countries fentanyl precursor production (x) on the log of a countries drug deaths (y). Then Wx denotes the average of neighboring countries fentanyl precursor production. We hypothesize that if a countries close trade partners fentanyl precursor production rate is high (as measured by Wx), then the fentanyl related drug deaths are high. Moreover, there are spillover effects with regards to the trading partners fentanyls related deaths from connected countries (Wy).  
-
-We specify the following linear-in-means model to estimate the relationship.    
-$$y = Wy \lambda + Wx \delta + x\beta + \varepsilon$$
-
-Where $Wy$ denotes the average death rate from drugs of countries that are close neighbors.   
-
-To simulate the values for y, we need to solve for the reduced form. 
-$$y = (I - W\lambda)^{-1}(Wx \delta + x\beta + \varepsilon)$$
-We set the true value for $\beta$ to 2, $\lambda$ to 0.9, and $\delta$ to 2.2. We then regress y on x, repeat this a 1000 times, and find that the mean of the estimand is 1.443618 Thus using the simple linear regression fails to recover the true value of $\beta$. 
+We set the true value for $\beta$ to 2, $\lambda$ to 0.9, and $\delta$ to 2.2. We then regress y on x, repeat this a 1000 times, and find that the mean of the estimand is 1.702144 Thus using the simple linear regression fails to recover the true value of $\beta$. 
 
 ## Exercise C
 Download a suitable shapefile for NUTS2 regions (from here or using R directly) and some
