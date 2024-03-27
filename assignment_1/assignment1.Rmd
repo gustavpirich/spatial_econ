@@ -272,31 +272,29 @@ The projection used is the "World Geodetic System 1984" or for short "WGS 84" (E
 
 • Merge the shapefile and the chosen dataset Create tow meaningful visualizations of the chosen dataset using different scales (e.g. continuous versus discrete scaling of the data)
 
-```{r, echo = FALSE, include=FALSE}
+```{r, echo = FALSE, warning=FALSE}
 agr_r_accts_page_spreadsheet <- read_excel("/Users/gustavpirich/Desktop/GITHUB/spatial_econ/data/agriculture_NUTS2_2022/agr_r_accts_page_spreadsheet.xlsx", sheet = 3, range = "A11:C472")
 
 agr_r_accts_page_spreadsheet_1 <- agr_r_accts_page_spreadsheet %>%
   rename("NUTS_ID" = "GEO (Codes)") %>%
-  rename("ag_value_added_1" = "...3") 
+  rename("ag_value_added_1" = "...3") %>%
+  mutate(ag_value_added_1 = as.numeric(ag_value_added_1))
 
 # Remove commas and convert periods to decimal points if they are used as such
-#agr_r_accts_page_spreadsheet_1$ag_value_added_1 <- gsub(",", "", agr_r_accts_page_spreadsheet_1$ag_value_added) # Remove commas
-
-# Convert character to numeric, which will turn non-numeric strings to NA
-agr_r_accts_page_spreadsheet_1$ag_value_added_1 <- as.numeric(agr_r_accts_page_spreadsheet_1$ag_value_added_1)
+#agr_r_accts_page_spreadsheet_1$ag_value_added_1 <- gsub(",", "", agr_r_accts_page_spreadsheet_1$ag_value_added_1) # Remove commas
 
 shp_merged <- left_join(shp, agr_r_accts_page_spreadsheet_1)
 ```
 
 ```{r, echo = FALSE}
 #excluding overseas regions
-xc <- c("FRY1", "FRY2", "FRY3", "FRY4", "FRY5", "FRZZ", 
+overseas <- c("FRY1", "FRY2", "FRY3", "FRY4", "FRY5", "FRZZ", 
               "PT20", "PT30", "PTZZ", 
               "ES70", "ESZZ", 
               "NO0B", "NOZZ")
 
 shp_merged_filter <- shp_merged %>%
-  filter(!NUTS_ID %in% xc)
+  filter(!NUTS_ID %in% overseas)
 
 # Your existing code for plotting
 ggplot(data = shp_merged_filter) +
@@ -364,10 +362,10 @@ Install and load the tmap and spDataLarge packages (available from GitHub). Load
 
 • One visualization should compare the support for Komorowski and Duda.
 
-# Combine support for Komorowski and Duda into a single categorical variable
+%# Combine support for Komorowski and Duda into a single categorical variable
 pol_pres15$Support <- ifelse(pol_pres15$I_Komorowski_share > pol_pres15$I_Duda_share, "Komorowski", "Duda")
 
-# Visualize support for Komorowski and Duda in the first run
+%# Visualize support for Komorowski and Duda in the first run
 tm_shape(pol_pres15) + 
   tm_borders(lwd = 0.5, alpha = 0.4) + 
   tm_fill(col = "Support", style = "cat", palette = "-RdYlBu", title = "Support for Candidates") +
@@ -376,14 +374,14 @@ tm_shape(pol_pres15) +
 • One visualization should investigate possible issues with postal voting envelopes.
 We want to investigate if Issues occured because voting envelopes got lost on the way to the voters.
 
-# Visualization investigating possible issues with postal voting envelopes
-# Calculate the proportion of postal voting envelopes received to postal voting packages sent
+%# Visualization investigating possible issues with postal voting envelopes
+%# Calculate the proportion of postal voting envelopes received to postal voting packages sent
 pol_pres15$Envelope_Proportion <- pol_pres15$I_postal_voting_envelopes_received / pol_pres15$I_voters_sent_postal_voting_package
 
-# Define a threshold for the proportion indicating possible issues
+%# Define a threshold for the proportion indicating possible issues
 threshold <- 0.99  # You can adjust this threshold as needed
 
-# Create a new column indicating possible issues with postal voting envelopes based on the proportion
+%# Create a new column indicating possible issues with postal voting envelopes based on the proportion
 pol_pres15$Envelope_Issues <- ifelse(pol_pres15$Envelope_Proportion < threshold, "Possible Issues", "No Issues")
 
 tm_shape(pol_pres15) + 
@@ -394,7 +392,7 @@ tm_shape(pol_pres15) +
 
 
 • Third vizualization
-# Visualize support for Komorowski and Duda in the second run
+%# Visualize support for Komorowski and Duda in the second run
 pol_pres15$Support <- ifelse(pol_pres15$II_Komorowski_share > pol_pres15$II_Duda_share, "Komorowski", "Duda")
 tm_shape(pol_pres15) + 
   tm_borders(lwd = 0.5, alpha = 0.4) + 
