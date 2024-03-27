@@ -169,7 +169,7 @@ Based on Outflowing arrows, Austria is still the most central agent, while Germa
 
 • Repeat this a couple of times, and compare estimates of a standard linear model ($y_{i} = x_{\beta} + \varepsilon_{i}$) with the true values that you used to simulate the data
 
-```{r, include = FALSE}
+```{r, echo = FALSE}
 # number of agents
 N = 6
 
