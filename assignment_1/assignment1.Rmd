@@ -14,6 +14,7 @@ header-includes:
   - \usepackage{tcolorbox}
   - \usepackage{arev}
   - \usepackage[T1]{fontenc}
+  - \usepackage{setspace}\onehalfspace
 papersize: a4
 geometry: margin = 2cm
 urlcolor: DarkOrchid!65!black
@@ -254,7 +255,7 @@ The projection used is the "World Geodetic System 1984" or for short "WGS 84" (E
 
 • Merge the shapefile and the chosen dataset Create tow meaningful visualizations of the chosen dataset using different scales (e.g. continuous versus discrete scaling of the data)
 
-```{r, echo = FALSE, warning=FALSE}
+```{r, include = FALSE, warning=FALSE}
 agr_r_accts_page_spreadsheet <- read_excel("/Users/gustavpirich/Desktop/GITHUB/spatial_econ/data/agriculture_NUTS2_2022/agr_r_accts_page_spreadsheet.xlsx", sheet = 3, range = "A11:C472")
 
 agr_r_accts_page_spreadsheet_1 <- agr_r_accts_page_spreadsheet %>%
