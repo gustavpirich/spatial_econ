@@ -329,7 +329,7 @@ ggplot(data = shp_merged_filter) +
   geom_sf(aes(fill = share_bins), color = NA) +
   scale_fill_viridis_d(name = "Agricultural Value Added (in bins) in Millions of €",
                      option = "D") + # 'option' can be "C" for the default viridis palette, or "A", "B", "D", "E" for other variants
-  labs(title = "Agricultural Value Added per NUTS-2 Region (Binned)") +
+  labs(title = "Agricultural Value Added per NUTS-2 Region in 2021") +
   theme_minimal() +
   theme(legend.position = "bottom")
 ```
@@ -338,7 +338,7 @@ The discrete scaling shows the agricultural value added in million Euros at a NU
 
 • Briefly explain what two conceptually different ways there are to store visualizations, and name two formats each. Which ones are more appropriate for which types of visualizations and why? Use the one you think is more appropriate to store your visualizations.
 
-There are two types of spatial data which can be stpored either as a raster file or as a vector file.  
+There are two types of spatial data, raster and vector data. Raster images can be stored as a png and jpeg. Vector images can be stored as a pdf and svg file. Vector files are infinitely scalable, meaning that they do not lose resolution if you zoome in on them. 
 
 ## Exercise D
 ```{r, include=FALSE}
