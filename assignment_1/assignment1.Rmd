@@ -356,7 +356,7 @@ Another way:
 Install and load the tmap and spDataLarge packages (available from GitHub). Load and review the pol_pres15 dataset on the Polish Presidential election in 2015 (see ?pol_pres15). Create three different, insightful visualizations of the underlying data.
 
 • One visualization should compare the support for Komorowski and Duda.
-```{r}
+```{r, eval=FALSE}
 pol_pres15$Support <- ifelse(pol_pres15$I_Komorowski_share > pol_pres15$I_Duda_share, "Komorowski", "Duda")
 
 tm_shape(pol_pres15) + 
