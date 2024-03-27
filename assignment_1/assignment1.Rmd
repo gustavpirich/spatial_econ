@@ -338,7 +338,7 @@ The discrete scaling shows the agricultural value added in million Euros at a NU
 
 • Briefly explain what two conceptually different ways there are to store visualizations, and name two formats each. Which ones are more appropriate for which types of visualizations and why? Use the one you think is more appropriate to store your visualizations.
 
-There are two types of spatial data, raster and vector data. Raster images can be stored as a png and jpeg. Vector images can be stored as a pdf and svg file. Vector files are infinitely scalable, meaning that they do not lose resolution if you zoome in on them. 
+There are two types of spatial data, raster and vector data. Raster graphics can be stored as a png and jpeg. Vector graphics can be stored as a svg (Scalable Vector Graphics) or eps (Encapsulated PostScript) file. Vector graphics use mathematical equations like shapes, colours, and lines. An advanatage of vector graphics is that they do not lose resolution when you zoom in on them. 
 
 ## Exercise D
 ```{r, include=FALSE}
