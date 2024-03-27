@@ -9,10 +9,11 @@ output:
   pdf_document:
     toc: true
     includes: 
-      in_header: 
+      in_header:
 header-includes: 
   - \usepackage{tcolorbox}
-  - \usepackage[default]{lato}
+  - \usepackage{arev}
+  - \usepackage[T1]{fontenc}
 papersize: a4
 geometry: margin = 2cm
 urlcolor: DarkOrchid!65!black
@@ -23,6 +24,8 @@ knitr::opts_chunk$set(echo = TRUE)
 install.packages("spDataLarge", repos = "https://geocompr.r-universe.dev")
 
 library(igraph)
+library(sf)
+library(ggplot2)
 library(tmap)
 library(tidyverse)
 library(spDataLarge)
@@ -50,7 +53,7 @@ Y <- as.matrix(data1[,"medv"])
 Below we wrote a function which computes:
 OLS point estimates for the intercept, slope parameters, and the error variance.
 Suitable test statistics with corresponding p-values for the relevant coefficients.
-Intervals of the coefficients for a confidence level of 95%.
+Intervals of the coefficients for a confidence level of 95\%.
 
 ```{r}
 OLS <- function(X,Y){
@@ -230,28 +233,7 @@ Download a suitable shapefile for NUTS2 regions (from here or using R directly) 
 dataset of interest at the same level of aggregation (e.g. from here). Install and load the
 sf and ggplot2 packages together with their dependencies.
 
-```{r, eval=FALSE}
-library(sf)
-library(ggplot2)
-
-# create a new empty object called 'temp' in which to store a zip file
-# containing boundary data
-temp <- tempfile(fileext = ".zip")
-download.file("http://ec.europa.eu/eurostat/cache/GISCO/distribution/v2/nuts/download/ref-nuts-2021-03m.shp.zip", temp)
-
-outDir <- "./data"
-unzip(temp, exdir=outDir)
-
-#list.files(path="./data", pattern = '*.shp')
-
-# let us choose projection WGS 84 (EPSG 4326) which is visible the file name 
-# between the year (2021) and the level of the data (NUTS 2):
-unzip("./data/NUTS_RG_03M_2021_4326_LEVL_2.shp.zip", exdir=outDir)
-```
-
-
 • Read in the shapefile, and find out what projection and CRS the file uses. Map the data to use another projection and/or CRS of your choosing:
-
 
 ```{r, echo = FALSE}
 shp <- st_read(dsn = "./data", layer ="NUTS_RG_03M_2021_4326_LEVL_2") 
@@ -286,7 +268,7 @@ agr_r_accts_page_spreadsheet_1 <- agr_r_accts_page_spreadsheet %>%
 shp_merged <- left_join(shp, agr_r_accts_page_spreadsheet_1)
 ```
 
-```{r, echo = FALSE, warning=FALSE}
+```{r, echo = FALSE, warning=FALSE, fig.align='center'}
 #excluding overseas regions
 overseas <- c("FRY1", "FRY2", "FRY3", "FRY4", "FRY5", "FRZZ", 
               "PT20", "PT30", "PTZZ", 
@@ -330,7 +312,7 @@ shp_merged_filter_1 <- shp_merged_filter %>%
 # Plot the map with the discretized bins using the viridis color palette
 ggplot(data = shp_merged_filter_1) +
   geom_sf(aes(fill = share_bins)) +
-  scale_fill_viridis_d(name = "Agricultural Value Added (in bins) in Millions of €", option = "D") + # 'option' can be "C" for the default viridis palette, or "A", "B", "D", "E" for other variants
+  scale_fill_viridis_d(name = "Agricultural Value Added (in bins) in Millions of Euros", option = "D") + # 'option' can be "C" for the default viridis palette, or "A", "B", "D", "E" for other variants
   labs(title = "Agricultural Value Added per NUTS-2 Region in 2021") +
   theme_minimal() +
   theme(legend.position = "bottom",
@@ -338,7 +320,6 @@ ggplot(data = shp_merged_filter_1) +
         legend.title = element_text(size = 8), # Decrease title size
         legend.key.size = unit(0.3, "cm")) # Decrease key size (you can adjust the value as needed)
 ```
-
 
 The discrete scaling shows the agricultural value added in million Euros at a NUTS-2 Level in 2021. While the first map visualizes the value added in continous scaling. The second map portrays agricultral value added in a binned scaling. Note that animal production and fishing is also included, which accounts for the high agrilcutlral value added in Western France.  
 
