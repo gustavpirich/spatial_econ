@@ -8,7 +8,7 @@ date: "`r Sys.Date()`"
 output: 
   pdf_document:
     toc: true
-    includes:
+    includes: 
       in_header: 
 header-includes: 
   - \usepackage{tcolorbox}
@@ -253,7 +253,7 @@ unzip("./data/NUTS_RG_03M_2021_4326_LEVL_2.shp.zip", exdir=outDir)
 • Read in the shapefile, and find out what projection and CRS the file uses. Map the data to use another projection and/or CRS of your choosing:
 
 
-```{r}
+```{r, echo = FALSE}
 shp <- st_read(dsn = "./data", layer ="NUTS_RG_03M_2021_4326_LEVL_2") 
 
 old_crs <- st_crs(shp)
@@ -286,7 +286,7 @@ agr_r_accts_page_spreadsheet_1 <- agr_r_accts_page_spreadsheet %>%
 shp_merged <- left_join(shp, agr_r_accts_page_spreadsheet_1)
 ```
 
-```{r, echo = FALSE}
+```{r, echo = FALSE, warning=FALSE}
 #excluding overseas regions
 overseas <- c("FRY1", "FRY2", "FRY3", "FRY4", "FRY5", "FRZZ", 
               "PT20", "PT30", "PTZZ", 
@@ -299,38 +299,47 @@ shp_merged_filter <- shp_merged %>%
 # Your existing code for plotting
 ggplot(data = shp_merged_filter) +
   geom_sf(aes(fill = ag_value_added_1)) + 
-   scale_fill_gradientn(colors = c("lightblue2", "turquoise4", "navyblue"), 
-                       values = scales::rescale(c(min(shp_merged_filter$ag_value_added_1, na.rm = TRUE), 
-                                                  mean(shp_merged_filter$ag_value_added_1, na.rm = TRUE), 
-                                                  max(shp_merged_filter$ag_value_added_1, na.rm = TRUE))),
-                       name = "Agricultural\nValue Added in Million Euros €") +
+  scale_fill_viridis_c(name = "Agricultural Value Added in Millions of €",
+                       option = "C") + # 'option' can be "C" for the default viridis palette, or "A", "B", "D", "E" for other variants +
   labs(title = "Agricultural Output Value Added by NUTS-2 Region in 2021") +
   theme_minimal() +
   theme(legend.position = "bottom")
 
+# Define the breaks for the bins   scale_fill_gradientn(colors = c("lightblue2", "turquoise4", "navyblue"), 
+                       #values = scales::rescale(c(min(shp_merged_filter$ag_value_added_1, na.rm = TRUE), 
+                        #                          mean(shp_merged_filter$ag_value_added_1, na.rm = TRUE), 
+                         #                         max(shp_merged_filter$ag_value_added_1, na.rm = TRUE))),
 
-# Define the breaks for the bins
 breaks <- seq(0, 15000, by = 1000)
 
 # Create labels for the bins based on the breaks
 labels <- paste(head(breaks, -1), tail(breaks, -1) - 1, sep = "-")
 
+```
+
+```{r, echo = FALSE}
 # Discretize the share variable into bins
-shp_merged_filter <- shp_merged_filter %>%
+shp_merged_filter_1 <- shp_merged_filter %>%
   mutate(share_bins = cut(ag_value_added_1,
                           breaks = breaks,
                           include.lowest = TRUE,
-                          labels = labels))
+                          labels = labels)) %>%
+  filter(!is.na(share_bins))
+
 
 # Plot the map with the discretized bins using the viridis color palette
-ggplot(data = shp_merged_filter) +
-  geom_sf(aes(fill = share_bins), color = NA) +
-  scale_fill_viridis_d(name = "Agricultural Value Added (in bins) in Millions of €",
-                     option = "D") + # 'option' can be "C" for the default viridis palette, or "A", "B", "D", "E" for other variants
+ggplot(data = shp_merged_filter_1) +
+  geom_sf(aes(fill = share_bins)) +
+  scale_fill_viridis_d(name = "Agricultural Value Added (in bins) in Millions of €", option = "D") + # 'option' can be "C" for the default viridis palette, or "A", "B", "D", "E" for other variants
   labs(title = "Agricultural Value Added per NUTS-2 Region in 2021") +
   theme_minimal() +
-  theme(legend.position = "bottom")
+  theme(legend.position = "bottom",
+        legend.text = element_text(size = 7), # Decrease text size
+        legend.title = element_text(size = 8), # Decrease title size
+        legend.key.size = unit(0.3, "cm")) # Decrease key size (you can adjust the value as needed)
 ```
+
+
 The discrete scaling shows the agricultural value added in million Euros at a NUTS-2 Level in 2021. While the first map visualizes the value added in continous scaling. The second map portrays agricultral value added in a binned scaling. Note that animal production and fishing is also included, which accounts for the high agrilcutlral value added in Western France.  
 
 
