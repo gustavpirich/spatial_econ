@@ -282,11 +282,15 @@ shp_merged_filter <- shp_merged %>%
 # Your existing code for plotting
 ggplot(data = shp_merged_filter) +
   geom_sf(aes(fill = ag_value_added_1)) + 
-  scale_fill_viridis_c(name = "Agricultural Value Added in Millions of €",
-                       option = "C") + # 'option' can be "C" for the default viridis palette, or "A", "B", "D", "E" for other variants +
-  labs(title = "Agricultural Output Value Added by NUTS-2 Region in 2021") +
+  scale_fill_viridis_c(name = "Agricultural Value Added in Millions of Euros",
+                       option = "D") + # 'option' can be "C" for the default viridis palette, or "A", "B", "D", "E" for other variants +
+  labs(title = "Agricultural Value Added by NUTS-2 Region in 2021") +
   theme_minimal() +
-  theme(legend.position = "bottom")
+  theme(legend.position = "bottom") +
+  theme(legend.position = "bottom",
+        legend.text = element_text(size = 7), # Decrease text size
+        legend.title = element_text(size = 8), # Decrease title size
+        legend.key.size = unit(0.3, "cm")) # Decrease key size (you can adjust the value as needed)
 
 # Define the breaks for the bins   scale_fill_gradientn(colors = c("lightblue2", "turquoise4", "navyblue"), 
                        #values = scales::rescale(c(min(shp_merged_filter$ag_value_added_1, na.rm = TRUE), 
@@ -300,7 +304,7 @@ labels <- paste(head(breaks, -1), tail(breaks, -1) - 1, sep = "-")
 
 ```
 
-```{r, echo = FALSE}
+```{r, echo = FALSE, fig.align='center'}
 # Discretize the share variable into bins
 shp_merged_filter_1 <- shp_merged_filter %>%
   mutate(share_bins = cut(ag_value_added_1,
