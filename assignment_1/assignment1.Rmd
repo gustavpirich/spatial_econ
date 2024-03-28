@@ -38,7 +38,7 @@ library(viridis)
 
 ```
 
-## Exercise A
+# Exercise A
 For our independent variables, we use per capita crime rate by town, average number of rooms per dwelling, 
 Charles River dummy variable (= 1 if tract bounds river; 0 otherwise), 
 nitrogen oxides concentration (parts per 10 million) and a constant.
@@ -94,7 +94,7 @@ The output of the function is presented below:
 OLS(X,Y)
 ```
 
-## Exercise B
+# Exercise B
 1. Draw a graph of the network; create the adjacency matrix in R.
 
 ```{r, echo = FALSE}
@@ -112,7 +112,7 @@ adj <- matrix(c(
 colnames(adj) = rownames(adj) = agents
 ```
 
-We could consider 6 different countries and an indicator of a high trade between them. For illustration, we could consider a rule where there is directed edge from A to B, if B is one of the top 5 export destinations of A. We don't actually check for biggest trading partners empirically, but lets assume that such procedure gives rise to following network (arrows are mostly made up to achieve 10 edges and nice interpretations):
+We could consider 6 different countries and an indicator of a high trade between them. For illustration, we could consider a rule where there is directed edge from A to B, if B is one of the top 5 export destinations of A. We don't actually check for biggest trading partners empirically, but lets assume that such procedure gives rise to following network (arrows are mostly made up to achieve 12 edges and nice interpretations):
 
 ```{r, echo=FALSE}
 plot(graph_from_adjacency_matrix(adj),vertex.size = 30, main="Trade network",edge.arrow.size = 0.7)
@@ -124,8 +124,7 @@ The corresponding adjacency matrix is:
 print(adj)
 ```
 
-2. Who are the most and least central agents in the network? Name, explain, and try
-to quantify different notions of centrality.
+## Who are the most and least central agents in the network? Name, explain, and try to quantify different notions of centrality.
 
 A very basic concept of centrality could define an agent as most central, if it has the highest number of directed edges pointing towards itself (i.e. if it is important export country for most other countries). Using this criterion we can see from the graph that or from columns of adjacency matrix that US the most central agents in this network, because it is top 5 trading partner for all 5 other countries. The least central agents would be Austria and India, since they are not a top 5 export country for any country from this network.
 
@@ -137,7 +136,7 @@ Page Rank: weights (probs) need to be defined?
 
 
 
-• How would centralities change if you considered a row-normalized network
+## How would centralities change if you considered a row-normalized network
 instead?
 
 
@@ -154,7 +153,7 @@ Germany which had only 1 connection, is the only row with sum of 1. Thus its the
 plot(graph_from_adjacency_matrix(adj.rn),vertex.size = 30, main="Trade network row normalized",edge.arrow.size = 0.7)
 ```
 
-• How would the network change if you removed or added a specific agent?
+## How would the network change if you removed or added a specific agent?
 Lets consider the case of removing US:
 
 ```{r, echo=FALSE}
@@ -167,7 +166,7 @@ Based on Outflowing arrows, Austria is still the most central agent, while Germa
 
 3.Simulate some agent charaacteristic based on a standard Normal distribution; use this characteristic to simulate responses following a liner-in-means model with your network. 
 
-• Repeat this a couple of times, and compare estimates of a standard linear model ($y_{i} = x_{\beta} + \varepsilon_{i}$) with the true values that you used to simulate the data
+## Repeat this a couple of times, and compare estimates of a standard linear model ($y_{i} = x_{\beta} + \varepsilon_{i}$) with the true values that you used to simulate the data
 
 We simulate the data based on the row normalized adjacency matrix for trade partner connections, that we created in the preceding exercise.
 
@@ -229,7 +228,7 @@ knitr::kable(my_data, format = "markdown")
 
 We set the true value for $\beta$ to 2, $\lambda$ to 0.9, and $\delta$ to 2.2. We then regress y on x, repeat this a 1000 times, and find that the mean of the estimand is 1.702144 Thus using the simple linear regression fails to recover the true value of $\beta$. 
 
-## Exercise C
+# Exercise C
 Download a suitable shapefile for NUTS2 regions (from here or using R directly) and some
 dataset of interest at the same level of aggregation (e.g. from here). Install and load the
 sf and ggplot2 packages together with their dependencies.
@@ -277,7 +276,8 @@ overseas <- c("FRY1", "FRY2", "FRY3", "FRY4", "FRY5", "FRZZ",
               "NO0B", "NOZZ")
 
 shp_merged_filter <- shp_merged %>%
-  filter(!NUTS_ID %in% overseas)
+  filter(!NUTS_ID %in% overseas) %>%
+  filter(!is.na(ag_value_added_1))
 
 # Your existing code for plotting
 ggplot(data = shp_merged_filter) +
@@ -333,7 +333,7 @@ The discrete scaling shows the agricultural value added in million Euros at a NU
 
 There are two types of spatial data, raster and vector data. Raster graphics can be stored as a png and jpeg. Vector graphics can be stored as a svg (Scalable Vector Graphics) or eps (Encapsulated PostScript) file. Vector graphics use mathematical equations like shapes, colours, and lines. An advanatage of vector graphics is that they do not lose resolution when you zoom in on them. 
 
-## Exercise D
+# Exercise D
 ```{r, include=FALSE}
 komorowskiPalette <- brewer.pal(n = 7, name = "Blues")
 dudaPalette <- brewer.pal(n = 7, name = "Reds")
