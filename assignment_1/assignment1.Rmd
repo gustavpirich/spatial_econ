@@ -123,8 +123,7 @@ The corresponding adjacency matrix is:
 ```{r, echo=FALSE}
 print(adj)
 ```
-
-## Who are the most and least central agents in the network? Name, explain, and try to quantify different notions of centrality.
+2. Who are the most and least central agents in the network? Name, explain, and try to quantify different notions of centrality.
 
 A very basic concept of centrality could define an agent as most central, if it has the highest number of directed edges pointing towards itself (i.e. if it is important export country for most other countries). Using this criterion we can see from the graph that or from columns of adjacency matrix that US the most central agents in this network, because it is top 5 trading partner for all 5 other countries. The least central agents would be Austria and India, since they are not a top 5 export country for any country from this network.
 
