@@ -132,10 +132,7 @@ Another basic criterion of centrality could be the amount of outwards pointing a
 Eigenvector centrality: There is no sink, but not possible to get to Austria. ?
 Page Rank: weights (probs) need to be defined?
 
-
-
-
-## How would centralities change if you considered a row-normalized network
+- How would centralities change if you considered a row-normalized network
 instead?
 
 
@@ -152,7 +149,7 @@ Germany which had only 1 connection, is the only row with sum of 1. Thus its the
 plot(graph_from_adjacency_matrix(adj.rn),vertex.size = 30, main="Trade network row normalized",edge.arrow.size = 0.7)
 ```
 
-## How would the network change if you removed or added a specific agent?
+- How would the network change if you removed or added a specific agent?
 Lets consider the case of removing US:
 
 ```{r, echo=FALSE}
@@ -163,9 +160,7 @@ plot(graph_from_adjacency_matrix(adj[-1,-1]),vertex.size = 30, main="Trade netwo
 Based on Inflowing arrows, China becomes the most central agent and India, Austria and Mexico the least central agents. 
 Based on Outflowing arrows, Austria is still the most central agent, while Germany is the least central agent.
 
-3.Simulate some agent charaacteristic based on a standard Normal distribution; use this characteristic to simulate responses following a liner-in-means model with your network. 
-
-## Repeat this a couple of times, and compare estimates of a standard linear model ($y_{i} = x_{\beta} + \varepsilon_{i}$) with the true values that you used to simulate the data
+3.Simulate some agent characteristic based on a standard Normal distribution; use this characteristic to simulate responses following a liner-in-means model with your network. Repeat this a couple of times, and compare estimates of a standard linear model ($y_{i} = x_{\beta} + \varepsilon_{i}$) with the true values that you used to simulate the data
 
 We simulate the data based on the row normalized adjacency matrix for trade partner connections, that we created in the preceding exercise.
 
@@ -178,7 +173,7 @@ Where $Wy$ denotes the average death rate from drugs of countries that are close
 
 To simulate the values for y, we need to solve for the reduced form. 
 $$y = (I - W\lambda)^{-1}(Wx \delta + x\beta + \varepsilon)$$
-```{r, echo = FALSE}
+```{r}
 # number of agents
 N = 6
 
@@ -199,15 +194,13 @@ for (i in times) {
 x = rnorm(N, 0, 1)
 e = rnorm(N, 0, sigma2)
 
-# sampling from reduced form to generate y's
-
 # caluclating means
 Wx <- W %*% x
 
 # calculating S
 S = diag(N) - lambda * W
 
-# create y's
+# generating y's
 y = solve(S, Wx * delta + x * beta + e)
   
 model <- lm(y ~ x)
@@ -218,8 +211,8 @@ result[i] <- coef(model)["x"]
 inconsistent_estimate <- mean(result)
 
 my_data <- data.frame(
-  Name =  c("Simulated coef", "Real coef"), # Creating a column named ID with values from 1 to 4
-  Estimate = c(inconsistent_estimate, beta) # Creating a Name column
+  Name =  c("Simulated coef", "Real coef"), 
+  Estimate = c(inconsistent_estimate, beta) 
 )
 
 knitr::kable(my_data, format = "markdown")
@@ -232,7 +225,7 @@ Download a suitable shapefile for NUTS2 regions (from here or using R directly) 
 dataset of interest at the same level of aggregation (e.g. from here). Install and load the
 sf and ggplot2 packages together with their dependencies.
 
-• Read in the shapefile, and find out what projection and CRS the file uses. Map the data to use another projection and/or CRS of your choosing:
+1. Read in the shapefile, and find out what projection and CRS the file uses. Map the data to use another projection and/or CRS of your choosing:
 
 ```{r, echo = FALSE}
 shp <- st_read(dsn = "./data", layer ="NUTS_RG_03M_2021_4326_LEVL_2") 
@@ -251,7 +244,7 @@ print(new_crs$input)
 The projection used is the "World Geodetic System 1984" or for short "WGS 84" (EPSG 4326). We then map the data to the "North American Datum 1983" (NAD83) projection, which is extremely similar to the WGS 84. 
 
 
-• Merge the shapefile and the chosen dataset Create tow meaningful visualizations of the chosen dataset using different scales (e.g. continuous versus discrete scaling of the data)
+2. Merge the shapefile and the chosen dataset Create tow meaningful visualizations of the chosen dataset using different scales (e.g. continuous versus discrete scaling of the data)
 
 ```{r, include = FALSE, warning=FALSE}
 agr_r_accts_page_spreadsheet <- read_excel("/Users/gustavpirich/Desktop/GITHUB/spatial_econ/data/agriculture_NUTS2_2022/agr_r_accts_page_spreadsheet.xlsx", sheet = 3, range = "A11:C472")
@@ -267,7 +260,7 @@ agr_r_accts_page_spreadsheet_1 <- agr_r_accts_page_spreadsheet %>%
 shp_merged <- left_join(shp, agr_r_accts_page_spreadsheet_1)
 ```
 
-```{r, echo = FALSE, warning=FALSE, fig.align='center'}
+```{r, echo = FALSE, warning=FALSE}
 #excluding overseas regions
 overseas <- c("FRY1", "FRY2", "FRY3", "FRY4", "FRY5", "FRZZ", 
               "PT20", "PT30", "PTZZ", 
@@ -277,7 +270,9 @@ overseas <- c("FRY1", "FRY2", "FRY3", "FRY4", "FRY5", "FRZZ",
 shp_merged_filter <- shp_merged %>%
   filter(!NUTS_ID %in% overseas) %>%
   filter(!is.na(ag_value_added_1))
+```
 
+```{r, echo = FALSE, warning=FALSE, fig.align='center'}
 # Your existing code for plotting
 ggplot(data = shp_merged_filter) +
   geom_sf(aes(fill = ag_value_added_1)) + 
@@ -300,7 +295,6 @@ breaks <- seq(0, 15000, by = 1000)
 
 # Create labels for the bins based on the breaks
 labels <- paste(head(breaks, -1), tail(breaks, -1) - 1, sep = "-")
-
 ```
 
 ```{r, echo = FALSE, fig.align='center'}
@@ -328,7 +322,7 @@ ggplot(data = shp_merged_filter_1) +
 The discrete scaling shows the agricultural value added in million Euros at a NUTS-2 Level in 2021. While the first map visualizes the value added in continous scaling. The second map portrays agricultral value added in a binned scaling. Note that animal production and fishing is also included, which accounts for the high agrilcutlral value added in Western France.  
 
 
-• Briefly explain what two conceptually different ways there are to store visualizations, and name two formats each. Which ones are more appropriate for which types of visualizations and why? Use the one you think is more appropriate to store your visualizations.
+3. Briefly explain what two conceptually different ways there are to store visualizations, and name two formats each. Which ones are more appropriate for which types of visualizations and why? Use the one you think is more appropriate to store your visualizations.
 
 There are two types of spatial data, raster and vector data. Raster graphics can be stored as a png and jpeg. Vector graphics can be stored as a svg (Scalable Vector Graphics) or eps (Encapsulated PostScript) file. Vector graphics use mathematical equations like shapes, colours, and lines. An advanatage of vector graphics is that they do not lose resolution when you zoom in on them. 
 
@@ -355,7 +349,7 @@ Another way:
 Install and load the tmap and spDataLarge packages (available from GitHub). Load and review the pol_pres15 dataset on the Polish Presidential election in 2015 (see ?pol_pres15). Create three different, insightful visualizations of the underlying data.
 
 • One visualization should compare the support for Komorowski and Duda.
-```{r, eval=FALSE}
+```{r, eval=FALSE, echo = FALSE}
 pol_pres15$Support <- ifelse(pol_pres15$I_Komorowski_share > pol_pres15$I_Duda_share, "Komorowski", "Duda")
 
 tm_shape(pol_pres15) + 
@@ -382,8 +376,8 @@ tm_shape(pol_pres15) +
   tm_fill(col = "Support", style = "cat", palette = "-RdYlBu", title = "Support for Candidates") +
   tm_layout(legend.position = c("central", "bottom"))
 ```
-
-%# Visualize support for Komorowski and Duda in the first run
+```{r}
+# Visualize support for Komorowski and Duda in the first run
 tm_shape(pol_pres15) + 
   tm_borders(lwd = 0.5, alpha = 0.4) + 
   tm_fill(col = "Support", style = "cat", palette = "-RdYlBu", title = "Support for Candidates") +
@@ -392,14 +386,14 @@ tm_shape(pol_pres15) +
 • One visualization should investigate possible issues with postal voting envelopes.
 We want to investigate if Issues occured because voting envelopes got lost on the way to the voters.
 
-%# Visualization investigating possible issues with postal voting envelopes
-%# Calculate the proportion of postal voting envelopes received to postal voting packages sent
+# Visualization investigating possible issues with postal voting envelopes
+# Calculate the proportion of postal voting envelopes received to postal voting packages sent
 pol_pres15$Envelope_Proportion <- pol_pres15$I_postal_voting_envelopes_received / pol_pres15$I_voters_sent_postal_voting_package
 
-%# Define a threshold for the proportion indicating possible issues
+# Define a threshold for the proportion indicating possible issues
 threshold <- 0.99  # You can adjust this threshold as needed
 
-%# Create a new column indicating possible issues with postal voting envelopes based on the proportion
+# Create a new column indicating possible issues with postal voting envelopes based on the proportion
 pol_pres15$Envelope_Issues <- ifelse(pol_pres15$Envelope_Proportion < threshold, "Possible Issues", "No Issues")
 
 tm_shape(pol_pres15) + 
@@ -410,9 +404,11 @@ tm_shape(pol_pres15) +
 
 
 • Third vizualization
-%# Visualize support for Komorowski and Duda in the second run
+# Visualize support for Komorowski and Duda in the second run
 pol_pres15$Support <- ifelse(pol_pres15$II_Komorowski_share > pol_pres15$II_Duda_share, "Komorowski", "Duda")
+
 tm_shape(pol_pres15) + 
   tm_borders(lwd = 0.5, alpha = 0.4) + 
-  tm_fill(col = "Support", style = "cat", palette = "-RdYlBu", title = "Support for Candidates") +
-  tm_layout(legend.position = c("central", "bottom"))
+  tm_fill(col = "Support", style = "cat", palette = "-RdYlBu", title = "Support for Candidates") 
+```
+
