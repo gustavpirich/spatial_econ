@@ -276,15 +276,15 @@ shp_merged_filter <- shp_merged %>%
 # Your existing code for plotting
 ggplot(data = shp_merged_filter) +
   geom_sf(aes(fill = ag_value_added_1)) + 
-  scale_fill_viridis_c(name = "Agricultural Value Added in Millions of Euros",
+  scale_fill_viridis_c(name = "Millions EUR",
                        option = "D") + # 'option' can be "C" for the default viridis palette, or "A", "B", "D", "E" for other variants +
   labs(title = "Agricultural Value Added by NUTS-2 Region in 2021") +
   theme_minimal() +
   theme(legend.position = "bottom") +
   theme(legend.position = "bottom",
-        legend.text = element_text(size = 7), # Decrease text size
-        legend.title = element_text(size = 8), # Decrease title size
-        legend.key.size = unit(0.3, "cm")) # Decrease key size (you can adjust the value as needed)
+        legend.text = element_text(size = 8), # Decrease text size
+        legend.title = element_text(size = 9), # Decrease title size
+        legend.key.size = unit(0.5, "cm")) # Decrease key size (you can adjust the value as needed)
 
 # Define the breaks for the bins   scale_fill_gradientn(colors = c("lightblue2", "turquoise4", "navyblue"), 
                        #values = scales::rescale(c(min(shp_merged_filter$ag_value_added_1, na.rm = TRUE), 
@@ -310,13 +310,13 @@ shp_merged_filter_1 <- shp_merged_filter %>%
 # Plot the map with the discretized bins using the viridis color palette
 ggplot(data = shp_merged_filter_1) +
   geom_sf(aes(fill = share_bins)) +
-  scale_fill_viridis_d(name = "Agricultural Value Added (in bins) in Millions of Euros", option = "D") + # 'option' can be "C" for the default viridis palette, or "A", "B", "D", "E" for other variants
-  labs(title = "Agricultural Value Added per NUTS-2 Region in 2021") +
+  scale_fill_viridis_d(name = "Millions EUR", option = "D") + # 'option' can be "C" for the default viridis palette, or "A", "B", "D", "E" for other variants
+  labs(title = "Binned Agricultural Value Added per NUTS-2 Region in 2021") +
   theme_minimal() +
   theme(legend.position = "bottom",
-        legend.text = element_text(size = 7), # Decrease text size
-        legend.title = element_text(size = 8), # Decrease title size
-        legend.key.size = unit(0.3, "cm")) # Decrease key size (you can adjust the value as needed)
+        legend.text = element_text(size = 5), # Decrease text size
+        legend.title = element_text(size = 6), # Decrease title size
+        legend.key.size = unit(0.5, "cm")) # Decrease key size (you can adjust the value as needed)
 ```
 
 The discrete scaling shows the agricultural value added in million Euros at a NUTS-2 Level in 2021. While the first map visualizes the value added in continous scaling. The second map portrays agricultral value added in a binned scaling. Note that animal production and fishing is also included, which accounts for the high agrilcutlral value added in Western France.  
@@ -342,73 +342,75 @@ tm_shape(pol_pres15) +
 
 ```
 
+#Preliminaries
+```{r pol_pres15}
+install.packages("spDataLarge", repos = "https://geocompr.r-universe.dev")
+library(tmap)
+library(spDataLarge)
+data("pol_pres15")
+summary(pol_pres15$I_Duda_share)
+summary(pol_pres15$I_Komorowski_share)
+par(mfrow = c(1, 2))
+hist(pol_pres15$I_Duda_share, main = "Support for Komorowski", xlab = "Support")
+hist(pol_pres15$I_Komorowski_share, main = "Support for Duda", xlab = "Support")
+par(mfrow = c(1, 1))
+```
 
+#Support for Komorowski and Duda
+##Support in the first run
 
-
-Another way: 
-Install and load the tmap and spDataLarge packages (available from GitHub). Load and review the pol_pres15 dataset on the Polish Presidential election in 2015 (see ?pol_pres15). Create three different, insightful visualizations of the underlying data.
-
-• One visualization should compare the support for Komorowski and Duda.
-```{r, eval=FALSE, echo = FALSE}
+The first visualization shows the support of the two most promising candidates for the Polish Presidency, Duda and Komorowski. One can observe that the support for DUda came from the southern and eastern parts of Poland while the north and west of the countries supported Komorowski:
+```{r pol_pres15$Support, echo=FALSE}
+# Visualization comparing support for Komorowski and Duda
 pol_pres15$Support <- ifelse(pol_pres15$I_Komorowski_share > pol_pres15$I_Duda_share, "Komorowski", "Duda")
 
+# Visualization comparing support for Komorowski and Duda in the first round
 tm_shape(pol_pres15) + 
   tm_borders(lwd = 0.5, alpha = 0.4) + 
-  tm_fill(col = "Support", style = "cat", palette = "-RdYlBu", title = "Support for Candidates") +
+  tm_fill(col = "Support", style = "cat", palette = "-RdYlBu", 
+          title = "Support for Candidates") +
   tm_layout(legend.position = c("left", "bottom"))
 
-pol_pres15$Envelope_Proportion <- pol_pres15$I_postal_voting_envelopes_received / pol_pres15$I_voters_sent_postal_voting_package
-
-threshold <- 0.99  # You can adjust this threshold as needed
-
-pol_pres15$Envelope_Issues <- ifelse(pol_pres15$Envelope_Proportion < threshold, "Possible Issues", "No Issues")
-
-tm_shape(pol_pres15) + 
-  tm_borders(lwd = 0.5, alpha = 0.4) + 
-  tm_fill(col = "Envelope_Issues", style = "cat", palette = c("green", "red"), 
-          title = "Possible Issues with Postal Voting Envelopes") +
-  tm_layout(legend.position = c("left", "bottom"))
-
-pol_pres15$Support <- ifelse(pol_pres15$II_Komorowski_share > pol_pres15$II_Duda_share, "Komorowski", "Duda")
-
-tm_shape(pol_pres15) + 
-  tm_borders(lwd = 0.5, alpha = 0.4) + 
-  tm_fill(col = "Support", style = "cat", palette = "-RdYlBu", title = "Support for Candidates") +
-  tm_layout(legend.position = c("central", "bottom"))
 ```
-```{r}
-# Visualize support for Komorowski and Duda in the first run
+
+##Support in the second run
+
+In the second run, we wanted to show again the outcome of the results, but now for the second round. We can see when observing the map that in some municipalities the majority for one candidate changed to the opposing candidate and vice versa. However, what seems to withstand the first and second run is that in the southern and eastern part of Poland, Duda was elected in majority and in the northern and western part of the country, Komorowski won got the majority of the votes:
+
+```{r pol_pres15$SupportII, echo=FALSE}
+# Visualization comparing support for Komorowski and Duda in the second round
+pol_pres15$SupportII <- ifelse(pol_pres15$II_Komorowski_share > pol_pres15$II_Duda_share, "Komorowski", "Duda")
+
+# Visualize support for candidates
 tm_shape(pol_pres15) + 
   tm_borders(lwd = 0.5, alpha = 0.4) + 
-  tm_fill(col = "Support", style = "cat", palette = "-RdYlBu", title = "Support for Candidates") +
+  tm_fill(col = "Support", style = "cat", palette = "-RdYlBu", 
+          title = "Support for Candidates") +
   tm_layout(legend.position = c("left", "bottom"))
+```
+##Possible Issues with voting envelopes
 
-• One visualization should investigate possible issues with postal voting envelopes.
-We want to investigate if Issues occured because voting envelopes got lost on the way to the voters.
+The next map is showing possible issues with voting envelopes. Specifically, we wanted to investigate if all envelopes sent were also received. If the number of envelopes received is equal to the number of the envelopes sent, the municipality is visualized green. If the municipality is visualized in grey, that means that there were no voting envelopes used for the election. If a municipality is red however, that indicates that the total number of envelopes sent is higher than the number of envelopes received (at a threshold off 99 percent). That indicates that there were probably issues with the deliviery of the voting envelopes. We can observe red clusters especially in urban regions (Warsaw, Katowice and Krakow). An intresting side fact however is that one can clearly see that in urban areas, voting envelopes were used more often than in rural areas of Poland:
 
-# Visualization investigating possible issues with postal voting envelopes
+```{r pol_pres15$Envelope_Proportion, echo=FALSE}
 # Calculate the proportion of postal voting envelopes received to postal voting packages sent
 pol_pres15$Envelope_Proportion <- pol_pres15$I_postal_voting_envelopes_received / pol_pres15$I_voters_sent_postal_voting_package
 
 # Define a threshold for the proportion indicating possible issues
-threshold <- 0.99  # You can adjust this threshold as needed
+threshold <- 0.99
 
 # Create a new column indicating possible issues with postal voting envelopes based on the proportion
 pol_pres15$Envelope_Issues <- ifelse(pol_pres15$Envelope_Proportion < threshold, "Possible Issues", "No Issues")
 
+# Visualization investigating possible issues with postal voting envelopes
 tm_shape(pol_pres15) + 
   tm_borders(lwd = 0.5, alpha = 0.4) + 
   tm_fill(col = "Envelope_Issues", style = "cat", palette = c("green", "red"), 
           title = "Possible Issues with Postal Voting Envelopes") +
   tm_layout(legend.position = c("left", "bottom"))
-
-
-• Third vizualization
-# Visualize support for Komorowski and Duda in the second run
-pol_pres15$Support <- ifelse(pol_pres15$II_Komorowski_share > pol_pres15$II_Duda_share, "Komorowski", "Duda")
-
-tm_shape(pol_pres15) + 
-  tm_borders(lwd = 0.5, alpha = 0.4) + 
-  tm_fill(col = "Support", style = "cat", palette = "-RdYlBu", title = "Support for Candidates") 
 ```
+
+
+
+
 
