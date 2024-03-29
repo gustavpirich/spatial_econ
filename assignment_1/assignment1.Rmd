@@ -333,15 +333,15 @@ There are two types of spatial data, raster and vector data. Raster graphics can
 
 # Exercise D
 
-The first visualization shows the support of the two most promising candidates for the Polish Presidency, Duda and Komorowski. One can observe that the support for DUda came from the southern and eastern parts of Poland while the north and west of the countries supported Komorowski:
-```{r pol_pres15$Support, echo=FALSE}
+We start by visualizing the results of the second round of the Polish election. The first map displays the winner of the respecetive district. Overall we can see that the election was extremely close, with Duda winning just 51.55% and Komorowski winning  48.45% of the popular vote. One can clearly observe an east west pattern, where the Western part of the country predominantly voted for Duda and likewise the eastern part of the country for Komrowski.
+
+```{r pol_pres15$Support, echo=FALSE, fig.align='center'}
 # Visualization comparing support for Komorowski and Duda
-pol_pres15$Support <- ifelse(pol_pres15$I_Komorowski_share > pol_pres15$I_Duda_share, "Komorowski", "Duda")
+pol_pres15$Support <- ifelse(pol_pres15$I_Komorowski_share > pol_pres15$I_Duda_share, "Komorowski (48.45%)", "Duda (51.55%)")
 
 # Visualization comparing support for Komorowski and Duda in the first round
 tm_shape(pol_pres15) + 
-  tm_borders(lwd = 0.5, alpha = 0.4) + 
-  tm_fill(col = "Support", style = "cat", palette = "-RdYlBu", 
+  tm_fill(col = "Support", style = "cat", palette = "RdYlBu", 
           title = "Majority for Candidate in Second Round") +
   tm_layout(legend.position = c("left", "bottom"))
 ```
@@ -355,16 +355,16 @@ data <- pol_pres15 %>%
   mutate(II_Duda_share = 100*II_Duda_share) 
 ```
 
-
-```{r, echo = FALSE}
+We now zoom in on the shares by using the function tm_facets, which allows to display the vote shares of the candidates separatley. The maps now display the vote shares of the respective candidates in each district. We can observe a strong polarization, as a large number of districts voted by above 80% for the respective candidate.
+```{r, echo = FALSE, fig.width= 12}
 tm_shape(data) +
   tm_facets(free.scales = TRUE) +  # Enables independent scaling of facets
   tm_fill(c("II_Komorowski_share", "II_Duda_share"), title = "2. Round Vote Share",
               palette=list("II_Komorowski_share" = komorowskiPalette,
                            "II_Duda_share" = dudaPalette),
               midpoint=50) + 
-  tm_borders(lwd = 1, alpha = 0.5) +
-  tm_layout(legend.position = c("left", "bottom"))
+  #tm_borders(lwd = 0.2, alpha = 0.7) +
+  tm_layout(legend.position = c("left", "bottom"), scale = 0.6)
 ```
 
 
@@ -375,17 +375,19 @@ The next map is showing possible issues with voting envelopes. Specifically, we 
 ```{r pol_pres15$Envelope_Proportion, echo=FALSE}
 # Calculate the proportion of postal voting envelopes received to postal voting packages sent
 pol_pres15$Envelope_Proportion <- pol_pres15$I_postal_voting_envelopes_received / pol_pres15$I_voters_sent_postal_voting_package
+pol_pres15$II_Envelope_Proportion <- pol_pres15$II_postal_voting_envelopes_received / pol_pres15$II_voters_sent_postal_voting_package
+
+pol_pres15$II_Envelope_Proportion <- ifelse(is.na(pol_pres15$II_Envelope_Proportion), 1, pol_pres15$II_Envelope_Proportion)
 
 # Define a threshold for the proportion indicating possible issues
 threshold <- 0.99
 
 # Create a new column indicating possible issues with postal voting envelopes based on the proportion
-pol_pres15$Envelope_Issues <- ifelse(pol_pres15$Envelope_Proportion < threshold, "Possible Issues", "No Issues")
+pol_pres15$Envelope_Issues <- ifelse(pol_pres15$II_Envelope_Proportion < threshold, "Possible Issues", "No Issues")
 
 # Visualization investigating possible issues with postal voting envelopes
 tm_shape(pol_pres15) + 
-  tm_borders(lwd = 0.5, alpha = 0.4) + 
-  tm_fill(col = "Envelope_Issues", style = "cat", palette = c("green", "red"), 
+  tm_fill(col = "Envelope_Issues", palette = c("blue", "orange"),
           title = "Postal voting Received") +
   tm_layout(legend.position = c("left", "bottom"))
 ```
