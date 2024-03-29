@@ -131,10 +131,24 @@ print(adj)
 
 A very basic concept of centrality could define an agent as most central, if it has the highest number of directed edges pointing towards itself (i.e. if it is important export country for most other countries). Using this criterion we can see from the graph that or from columns of adjacency matrix that US the most central agents in this network, because it is top 5 trading partner for all 5 other countries. The least central agents would be Austria and India, since they are not a top 5 export country for any country from this network.
 
-Another basic criterion of centrality could be the amount of outwards pointing arrows of an agent. Thus a country would be considered central if it exports to highest number of countries from this network. In this sense, Germany is least central with only 1 outward arrow, while Austria is most central with 3 outward arrows.
+Another basic criterion of centrality could be the amount of outwards pointing arrows of an agent. Thus a country would be considered central if it exports a lot to high number of countries from this network. In this sense, Germany is least central with only 1 outward arrow, while Austria is most central with 3 outward arrows. This criterion makes perhaps less sense than the first one, but we mention it to explain the concepts. Another possible centrality concept would be function of the two basic concepts above, e.g. sum of in- and outward pointing arrows of an agent. 
 
-Eigenvector centrality: There is no sink, but not possible to get to Austria. ?
-Page Rank: weights (probs) need to be defined?
+In the class we briefly introduced the intuition for eigenvector centrality. This tells us how often a node is visited on average if started at random node. This method does not work if there are sinks. Many applied algorithms such as page rank introduce jump probabilities for sinks. Once in a sink, i.e. node which has no outward connections, a probability distribution of jumping to other nodes is specified. While defining and computing page rank would be perhaps beyond the scope of this small exercise, below we display the eigenvector centrality computed using the package igraph.
+
+```{r}
+eigvcen1 <- eigen_centrality(
+  graph_from_adjacency_matrix(adj),
+  directed = TRUE,
+  scale = TRUE,
+  weights = NULL,
+  options = arpack_defaults
+)
+
+eigvcen1$vector
+```
+Using eigenvector centrality, We observe that US is the most central agent, followed by china. Austria and India are the least central agents with value of 0. This is because they are source only - there are no directed edges pointing to them, meaning that they are not a top 5 trading partner to any country. 
+
+
 
 - How would centralities change if you considered a row-normalized network
 instead?
@@ -147,11 +161,22 @@ scale <- function(x){
 adj.rn <- t(apply(adj,1,scale))
 ```
 
-Germany which had only 1 connection, is the only row with sum of 1. Thus its the only edge which survives row normalization. Thus here depending on criterion US or Germany would be most central agent. Other countries would be all least central.
+Germany which had only 1 connection, is the only row with sum of 1. Thus its the only edge which survives row normalization. Here, depending on criterion US or Germany would be most central agent. Other countries would be all least central. We can see that there is a strong distortion resulting from row normalization. Possible solutions to this would be to use some weights for the connections between agents. E.g. connection could be there if trade is not zero, weighted by the amount of the trade. Then row normalization would not delete the edge completely. Another possibility would be to normalizing by scaling by a constant instead of row normalization. 
 
 ```{r, echo=FALSE}
 plot(graph_from_adjacency_matrix(adj.rn),vertex.size = 30, main="Trade network row normalized",edge.arrow.size = 0.7)
 ```
+```{r, eval=FALSE}
+eigen_centrality(
+  graph_from_adjacency_matrix(adj.rn),
+  directed = TRUE,
+  scale = TRUE,
+  weights = NULL,
+  options = arpack_defaults
+)
+```
+
+Notice that We get a directed acyclic graph (DAG), for which eigenvector centrality is not defined, since there are no cycles at all and US is a sink. 
 
 - How would the network change if you removed or added a specific agent?
 Lets consider the case of removing US:
@@ -164,7 +189,23 @@ plot(graph_from_adjacency_matrix(adj[-1,-1]),vertex.size = 30, main="Trade netwo
 Based on Inflowing arrows, China becomes the most central agent and India, Austria and Mexico the least central agents. 
 Based on Outflowing arrows, Austria is still the most central agent, while Germany is the least central agent.
 
+<<<<<<< Updated upstream
 3. Simulate some agent characteristic based on a standard Normal distribution; use this characteristic to simulate responses following a liner-in-means model with your network. Repeat this a couple of times, and compare estimates of a standard linear model ($y_{i} = x_{\beta} + \varepsilon_{i}$) with the true values that you used to simulate the data
+=======
+Similarly to above, eigenvector centrality is undefined since there is a sink - Germany.
+
+```{r, eval=FALSE}
+eigen_centrality(
+  graph_from_adjacency_matrix(adj[-1,-1]),
+  directed = TRUE,
+  scale = TRUE,
+  weights = NULL,
+  options = arpack_defaults
+)
+```
+
+3.Simulate some agent characteristic based on a standard Normal distribution; use this characteristic to simulate responses following a liner-in-means model with your network. Repeat this a couple of times, and compare estimates of a standard linear model ($y_{i} = x_{\beta} + \varepsilon_{i}$) with the true values that you used to simulate the data
+>>>>>>> Stashed changes
 
 We simulate the data based on the row normalized adjacency matrix for trade partner connections, that we created in the preceding exercise.
 
@@ -252,7 +293,9 @@ The projection used is the "World Geodetic System 1984" or for short "WGS 84" (E
 2. Merge the shapefile and the chosen dataset Create tow meaningful visualizations of the chosen dataset using different scales (e.g. continuous versus discrete scaling of the data)
 
 ```{r, include = FALSE, warning=FALSE}
-agr_r_accts_page_spreadsheet <- read_excel("/Users/gustavpirich/Desktop/GITHUB/spatial_econ/data/agriculture_NUTS2_2022/agr_r_accts_page_spreadsheet.xlsx", sheet = 3, range = "A11:C472")
+path1 <- file.path(".","data","agriculture_NUTS2_2022","agr_r_accts_page_spreadsheet.xlsx")
+agr_r_accts_page_spreadsheet <- read_excel(path1,
+           sheet = 3, range="A11:C472")
 
 agr_r_accts_page_spreadsheet_1 <- agr_r_accts_page_spreadsheet %>%
   rename("NUTS_ID" = "GEO (Codes)") %>%
