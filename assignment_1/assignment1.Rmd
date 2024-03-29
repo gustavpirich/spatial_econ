@@ -1,20 +1,23 @@
 ---
-title: '**Spatial Economics -- Assignment 1**'
+title: "**Spatial Economics -- Assignment 1**"
 author:
 - Gustav Pirich (h11742049@s.wu.ac.at)
 - Gabriel Konecny (h11775903@s.wu.ac.at)
 - Jan Trimmel (h11809096@s.wu.ac.at)
 date: "`r Sys.Date()`"
-output: 
+output:
   pdf_document:
     toc: true
-    includes: 
-      in_header:
-header-includes: 
-  - \usepackage{tcolorbox}
-  - \usepackage{arev}
-  - \usepackage[T1]{fontenc}
-  - \usepackage{setspace}\onehalfspace
+    includes:
+      in_header: null
+  html_document:
+    toc: true
+    df_print: paged
+header-includes:
+- \usepackage{tcolorbox}
+- \usepackage{arev}
+- \usepackage[T1]{fontenc}
+- \usepackage{setspace}\onehalfspace
 papersize: a4
 geometry: margin = 2cm
 urlcolor: DarkOrchid!65!black
@@ -34,6 +37,7 @@ library(RColorBrewer)
 library(gt)
 library(sf)
 library(readxl)
+library(colorRamps)
 library(viridis)
 
 ```
@@ -160,7 +164,7 @@ plot(graph_from_adjacency_matrix(adj[-1,-1]),vertex.size = 30, main="Trade netwo
 Based on Inflowing arrows, China becomes the most central agent and India, Austria and Mexico the least central agents. 
 Based on Outflowing arrows, Austria is still the most central agent, while Germany is the least central agent.
 
-3.Simulate some agent characteristic based on a standard Normal distribution; use this characteristic to simulate responses following a liner-in-means model with your network. Repeat this a couple of times, and compare estimates of a standard linear model ($y_{i} = x_{\beta} + \varepsilon_{i}$) with the true values that you used to simulate the data
+3. Simulate some agent characteristic based on a standard Normal distribution; use this characteristic to simulate responses following a liner-in-means model with your network. Repeat this a couple of times, and compare estimates of a standard linear model ($y_{i} = x_{\beta} + \varepsilon_{i}$) with the true values that you used to simulate the data
 
 We simulate the data based on the row normalized adjacency matrix for trade partner connections, that we created in the preceding exercise.
 
@@ -174,6 +178,7 @@ Where $Wy$ denotes the average death rate from drugs of countries that are close
 To simulate the values for y, we need to solve for the reduced form. 
 $$y = (I - W\lambda)^{-1}(Wx \delta + x\beta + \varepsilon)$$
 ```{r}
+set.seed(123)
 # number of agents
 N = 6
 
@@ -218,7 +223,7 @@ my_data <- data.frame(
 knitr::kable(my_data, format = "markdown")
 ```
 
-We set the true value for $\beta$ to 2, $\lambda$ to 0.9, and $\delta$ to 2.2. We then regress y on x, repeat this a 1000 times, and find that the mean of the estimand is 1.702144 Thus using the simple linear regression fails to recover the true value of $\beta$. 
+We set the true value for $\beta$ to 2, $\lambda$ to 0.6, and $\delta$ to 0.3. We then regress y on x, repeat this a 1000 times, and find that the mean of the estimand is 1.718638. Thus using the simple linear regression fails to recover the true value of $\beta$. 
 
 # Exercise C
 Download a suitable shapefile for NUTS2 regions (from here or using R directly) and some
@@ -327,70 +332,47 @@ The discrete scaling shows the agricultural value added in million Euros at a NU
 There are two types of spatial data, raster and vector data. Raster graphics can be stored as a png and jpeg. Vector graphics can be stored as a svg (Scalable Vector Graphics) or eps (Encapsulated PostScript) file. Vector graphics use mathematical equations like shapes, colours, and lines. An advanatage of vector graphics is that they do not lose resolution when you zoom in on them. 
 
 # Exercise D
-```{r, include=FALSE}
-komorowskiPalette <- brewer.pal(n = 7, name = "Blues")
-dudaPalette <- brewer.pal(n = 7, name = "Reds")
+```{r, echo = FALSE, fig.width=8, fig.height=6}
+komorowskiPalette <- brewer.pal(n = 9, name = "Blues")
+dudaPalette <- brewer.pal(n = 9, name = "Reds")
 
-# Corrected tm_polygons function call
-tm_shape(pol_pres15) +
-  tm_facets(free.scales = TRUE) +  # Enables independent scaling of facets
-  tm_polygons(c("II_Komorowski_share", "II_Duda_share"), title = "2. Round Vote Share",
-              palette=list("II_Komorowski_share" = komorowskiPalette,
-                           "II_Duda_share" = dudaPalette),
-              midpoint=0.5) +  # Correct placement of midpoint argument
-  tm_layout(legend.position = c("left", "top"))
+data <- pol_pres15 %>% 
+  mutate(II_Komorowski_share = 100*II_Komorowski_share) %>%
+  mutate(II_Duda_share = 100*II_Duda_share) 
 
+# Map for Komorowski
+komorowski_map <- tm_shape(data) +
+  tm_polygons("II_Komorowski_share", title = "Komorowski Vote Share",
+              palette = komorowskiPalette,  
+              midpoint = 50) +
+  tm_layout(main.title = "Komorowski Second Round Votes in %", 
+            legend.position = c("left", "bottom"),
+            legend.title.size = 0.7,  
+            legend.text.size = 0.6)
+
+komorowski_map
 ```
 
-#Preliminaries
-```{r pol_pres15}
-install.packages("spDataLarge", repos = "https://geocompr.r-universe.dev")
-library(tmap)
-library(spDataLarge)
-data("pol_pres15")
-summary(pol_pres15$I_Duda_share)
-summary(pol_pres15$I_Komorowski_share)
-par(mfrow = c(1, 2))
-hist(pol_pres15$I_Duda_share, main = "Support for Komorowski", xlab = "Support")
-hist(pol_pres15$I_Komorowski_share, main = "Support for Duda", xlab = "Support")
-par(mfrow = c(1, 1))
+
+```{r, echo = FALSE, fig.width=8, fig.height=6}
+# Map for Duda
+duda_map <- tm_shape(data) +
+  tm_polygons("II_Duda_share", title = "Duda Vote Share",
+              palette = dudaPalette,
+              midpoint = 50) +
+  tm_layout(main.title = "Duda Second Round Votes in %", 
+            legend.position = c("left", "bottom"),
+            legend.title.size = 0.7,  
+            legend.text.size = 0.6)
+
+# Print maps
+duda_map
 ```
 
-#Support for Komorowski and Duda
-##Support in the first run
 
-The first visualization shows the support of the two most promising candidates for the Polish Presidency, Duda and Komorowski. One can observe that the support for DUda came from the southern and eastern parts of Poland while the north and west of the countries supported Komorowski:
-```{r pol_pres15$Support, echo=FALSE}
-# Visualization comparing support for Komorowski and Duda
-pol_pres15$Support <- ifelse(pol_pres15$I_Komorowski_share > pol_pres15$I_Duda_share, "Komorowski", "Duda")
-
-# Visualization comparing support for Komorowski and Duda in the first round
-tm_shape(pol_pres15) + 
-  tm_borders(lwd = 0.5, alpha = 0.4) + 
-  tm_fill(col = "Support", style = "cat", palette = "-RdYlBu", 
-          title = "Support for Candidates") +
-  tm_layout(legend.position = c("left", "bottom"))
-
-```
-
-##Support in the second run
-
-In the second run, we wanted to show again the outcome of the results, but now for the second round. We can see when observing the map that in some municipalities the majority for one candidate changed to the opposing candidate and vice versa. However, what seems to withstand the first and second run is that in the southern and eastern part of Poland, Duda was elected in majority and in the northern and western part of the country, Komorowski won got the majority of the votes:
-
-```{r pol_pres15$SupportII, echo=FALSE}
-# Visualization comparing support for Komorowski and Duda in the second round
-pol_pres15$SupportII <- ifelse(pol_pres15$II_Komorowski_share > pol_pres15$II_Duda_share, "Komorowski", "Duda")
-
-# Visualize support for candidates
-tm_shape(pol_pres15) + 
-  tm_borders(lwd = 0.5, alpha = 0.4) + 
-  tm_fill(col = "Support", style = "cat", palette = "-RdYlBu", 
-          title = "Support for Candidates") +
-  tm_layout(legend.position = c("left", "bottom"))
-```
 ##Possible Issues with voting envelopes
 
-The next map is showing possible issues with voting envelopes. Specifically, we wanted to investigate if all envelopes sent were also received. If the number of envelopes received is equal to the number of the envelopes sent, the municipality is visualized green. If the municipality is visualized in grey, that means that there were no voting envelopes used for the election. If a municipality is red however, that indicates that the total number of envelopes sent is higher than the number of envelopes received (at a threshold off 99 percent). That indicates that there were probably issues with the deliviery of the voting envelopes. We can observe red clusters especially in urban regions (Warsaw, Katowice and Krakow). An intresting side fact however is that one can clearly see that in urban areas, voting envelopes were used more often than in rural areas of Poland:
+The next map is showing possible issues with voting envelopes. Specifically, we wanted to investigate if all envelopes sent were also received. If the number of envelopes received is equal to the number of the envelopes sent, the municipality is visualized green. If the municipality is visualized in grey, that means that there were no voting envelopes used for the election. If a municipality is red however, that indicates that the total number of envelopes sent is higher than the number of envelopes received (at a threshold off 99 percent). That indicates that there were probably issues with the delievery of the voting envelopes. We can observe red clusters especially in urban regions (Warsaw, Katowice and Krakow). An interesting side fact however is that one can clearly see that in urban areas, voting envelopes were used more often than in rural areas of Poland:
 
 ```{r pol_pres15$Envelope_Proportion, echo=FALSE}
 # Calculate the proportion of postal voting envelopes received to postal voting packages sent
@@ -406,7 +388,7 @@ pol_pres15$Envelope_Issues <- ifelse(pol_pres15$Envelope_Proportion < threshold,
 tm_shape(pol_pres15) + 
   tm_borders(lwd = 0.5, alpha = 0.4) + 
   tm_fill(col = "Envelope_Issues", style = "cat", palette = c("green", "red"), 
-          title = "Possible Issues with Postal Voting Envelopes") +
+          title = "Postal voting Received") +
   tm_layout(legend.position = c("left", "bottom"))
 ```
 
