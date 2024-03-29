@@ -332,45 +332,43 @@ The discrete scaling shows the agricultural value added in million Euros at a NU
 There are two types of spatial data, raster and vector data. Raster graphics can be stored as a png and jpeg. Vector graphics can be stored as a svg (Scalable Vector Graphics) or eps (Encapsulated PostScript) file. Vector graphics use mathematical equations like shapes, colours, and lines. An advanatage of vector graphics is that they do not lose resolution when you zoom in on them. 
 
 # Exercise D
-```{r, echo = FALSE, fig.width=8, fig.height=6}
+
+The first visualization shows the support of the two most promising candidates for the Polish Presidency, Duda and Komorowski. One can observe that the support for DUda came from the southern and eastern parts of Poland while the north and west of the countries supported Komorowski:
+```{r pol_pres15$Support, echo=FALSE}
+# Visualization comparing support for Komorowski and Duda
+pol_pres15$Support <- ifelse(pol_pres15$I_Komorowski_share > pol_pres15$I_Duda_share, "Komorowski", "Duda")
+
+# Visualization comparing support for Komorowski and Duda in the first round
+tm_shape(pol_pres15) + 
+  tm_borders(lwd = 0.5, alpha = 0.4) + 
+  tm_fill(col = "Support", style = "cat", palette = "-RdYlBu", 
+          title = "Majority for Candidate in Second Round") +
+  tm_layout(legend.position = c("left", "bottom"))
+```
+
+```{r, echo = FALSE}
 komorowskiPalette <- brewer.pal(n = 9, name = "Blues")
 dudaPalette <- brewer.pal(n = 9, name = "Reds")
 
 data <- pol_pres15 %>% 
   mutate(II_Komorowski_share = 100*II_Komorowski_share) %>%
   mutate(II_Duda_share = 100*II_Duda_share) 
-
-# Map for Komorowski
-komorowski_map <- tm_shape(data) +
-  tm_polygons("II_Komorowski_share", title = "Komorowski Vote Share",
-              palette = komorowskiPalette,  
-              midpoint = 50) +
-  tm_layout(main.title = "Komorowski Second Round Votes in %", 
-            legend.position = c("left", "bottom"),
-            legend.title.size = 0.7,  
-            legend.text.size = 0.6)
-
-komorowski_map
 ```
 
 
-```{r, echo = FALSE, fig.width=8, fig.height=6}
-# Map for Duda
-duda_map <- tm_shape(data) +
-  tm_polygons("II_Duda_share", title = "Duda Vote Share",
-              palette = dudaPalette,
-              midpoint = 50) +
-  tm_layout(main.title = "Duda Second Round Votes in %", 
-            legend.position = c("left", "bottom"),
-            legend.title.size = 0.7,  
-            legend.text.size = 0.6)
-
-# Print maps
-duda_map
+```{r, echo = FALSE}
+tm_shape(data) +
+  tm_facets(free.scales = TRUE) +  # Enables independent scaling of facets
+  tm_fill(c("II_Komorowski_share", "II_Duda_share"), title = "2. Round Vote Share",
+              palette=list("II_Komorowski_share" = komorowskiPalette,
+                           "II_Duda_share" = dudaPalette),
+              midpoint=50) + 
+  tm_borders(lwd = 1, alpha = 0.5) +
+  tm_layout(legend.position = c("left", "bottom"))
 ```
 
 
-##Possible Issues with voting envelopes
+## Possible Issues with voting envelopes
 
 The next map is showing possible issues with voting envelopes. Specifically, we wanted to investigate if all envelopes sent were also received. If the number of envelopes received is equal to the number of the envelopes sent, the municipality is visualized green. If the municipality is visualized in grey, that means that there were no voting envelopes used for the election. If a municipality is red however, that indicates that the total number of envelopes sent is higher than the number of envelopes received (at a threshold off 99 percent). That indicates that there were probably issues with the delievery of the voting envelopes. We can observe red clusters especially in urban regions (Warsaw, Katowice and Krakow). An interesting side fact however is that one can clearly see that in urban areas, voting envelopes were used more often than in rural areas of Poland:
 
