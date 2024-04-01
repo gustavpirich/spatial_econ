@@ -273,34 +273,58 @@ sf and ggplot2 packages together with their dependencies.
 
 1. Read in the shapefile, and find out what projection and CRS the file uses. Map the data to use another projection and/or CRS of your choosing:
 
-```{r, echo = FALSE}
+```{r, include = FALSE}
 shp <- st_read(dsn = "./data", layer ="NUTS_RG_03M_2021_4326_LEVL_2") 
 
-old_crs <- st_crs(shp)
 
-print(old_crs$input)
+overseas <- c("FRY1", "FRY2", "FRY3", "FRY4", "FRY5", "FRZZ", 
+              "PT20", "PT30", "PTZZ", 
+              "ES70", "ESZZ", 
+              "NO0B", "NOZZ")
+
+shp <- shp %>%
+  filter(!NUTS_ID %in% overseas)
+
+old_crs <- st_crs(shp)
 
 shp_27700 <- st_transform(shp, 27700)
 
 new_crs <- st_crs(shp_27700)
-
-print(new_crs$input)
 ```
 
-The projection used is the "World Geodetic System 1984" or for short "WGS 84" (EPSG 4326). We then map the data to the "North American Datum 1983" (NAD83) projection, which is extremely similar to the WGS 84. 
+```{r, echo=FALSE, fig.width=10, fig.height=5, dcho = FALSE}
+# Set up the plotting area to have 1 row and 2 columns
+par(mfrow=c(1,2), oma=c(0,0,0,0), mar=c(4,4,1,1))
+
+# Plot the first map with a small legend title
+plot(st_geometry(shp), main="WGS 84 (EPSG:4326)")
+title(cex.main=0.8) # Adjust 'cex.main' to control legend title size
+
+# Plot the second map with a small legend title
+plot(st_geometry(shp_27700), main="British National Grid (EPSG:27700)")
+title(cex.main=0.8) # Adjust 'cex.main' to control legend title size
+
+# Reset the plotting layout to default
+par(mfrow=c(1,1), oma=c(0,0,0,0), mar=c(5,4,4,2) + 0.1)
+```
+
+The coordinate reference system for the first map is the "World Geodetic System 1984," or "WGS 84" (EPSG:4326) for short. The data is then re-projected to the "OSGB36 / British National Grid" coordinate reference system. The first map utilizes the Mercator projection, which is widely used in various global applications, including Google Earth. The Mercator projection is conformal, meaning it preserves angles. The second map is created using the Transverse Mercator projection, which does not have distortions along the central meridian. It's worth noting that OSGB36 is specifically designed for mapping Great Britain and is optimized for maintaining accurate scale within this region.
 
 
-2. Merge the shapefile and the chosen dataset Create tow meaningful visualizations of the chosen dataset using different scales (e.g. continuous versus discrete scaling of the data)
+
+2. Merge the shapefile and the chosen dataset. Create tow meaningful visualizations of the chosen dataset using different scales (e.g. continuous versus discrete scaling of the data)
 
 ```{r, include = FALSE, warning=FALSE}
-path1 <- file.path(".","data","agriculture_NUTS2_2022","agr_r_accts_page_spreadsheet.xlsx")
-agr_r_accts_page_spreadsheet <- read_excel(path1,
-           sheet = 3, range="A11:C472")
+#path1 <- file.path(".","data","agriculture_NUTS2_2022","agr_r_accts_page_spreadsheet.xlsx")
+#agr_r_accts_page_spreadsheet <- read_excel(path1, sheet = 3, range="A11:C472")
+
+agr_r_accts_page_spreadsheet <- read_excel("/Users/gustavpirich/Desktop/GITHUB/spatial_econ/data/agriculture_NUTS2_2022/agr_r_accts_page_spreadsheet.xlsx", 
+    sheet = "Sheet 1", range = "A11:C472")
 
 agr_r_accts_page_spreadsheet_1 <- agr_r_accts_page_spreadsheet %>%
   rename("NUTS_ID" = "GEO (Codes)") %>%
   rename("ag_value_added_1" = "...3") %>%
-  mutate(ag_value_added_1 = as.numeric(ag_value_added_1))
+  mutate(ag_value_added_1 = as.numeric(ag_value_added_1)) 
 
 # Remove commas and convert periods to decimal points if they are used as such
 #agr_r_accts_page_spreadsheet_1$ag_value_added_1 <- gsub(",", "", agr_r_accts_page_spreadsheet_1$ag_value_added_1) # Remove commas
@@ -372,7 +396,15 @@ The discrete scaling shows the agricultural value added in million Euros at a NU
 
 3. Briefly explain what two conceptually different ways there are to store visualizations, and name two formats each. Which ones are more appropriate for which types of visualizations and why? Use the one you think is more appropriate to store your visualizations.
 
-There are two types of spatial data, raster and vector data. Raster graphics can be stored as a png and jpeg. Vector graphics can be stored as a svg (Scalable Vector Graphics) or eps (Encapsulated PostScript) file. Vector graphics use mathematical equations like shapes, colours, and lines. An advanatage of vector graphics is that they do not lose resolution when you zoom in on them. 
+Visualizations can be broadly categorized into two distinct types based on the underlying spatial data they represent: raster and vector. Raster graphics are pixel-based, encoding images as arrays of multi-colored pixels. They are ideal for depicting continuous variables, such as elevation, temperature, or (as in the case above) agricultural output, where the variation is smoothly transitioned across the visualization. Common formats for storing raster graphics include PNG, JPEG, and TIFF files. The major caveat with raster graphics is their resolution dependency; zooming in too far reveals the pixel grid, leading to a loss of clarity.
+
+On the other hand, vector graphics are built using geometric shapes such as points, lines, and polygons, defined mathematically by paths rather than pixels. This method enables vector images to retain crispness and clarity regardless of scaling, making them infinitely 'zoomable' without loss of resolution. Vector graphics are commonly stored in SVG (Scalable Vector Graphics) and EPS (Encapsulated PostScript) formats. Due to their scalable nature, vector graphics are typically more compact and require less storage compared to their raster counterparts.
+
+Choosing between raster and vector formats for storing visualizations depends on the nature of the data and the intended use of the visualization. Raster images are best suited for detailed and complex imagery, such as remotely sensed measures and detailed maps with continuous data representation. They offer a more nuanced depiction of variations in data such as agricultural productivity across a landscape, although at the expense of larger file sizes and fixed resolution.
+
+Vector graphics, with their ability to scale without loss of quality, are preferable for diagrams, logos, and maps where clear, clean lines and shapes are needed. Fonts for example are stored as vector graphics.
+
+For visualizing agricultural value added in NUTS-2 regions across Europe, a TIFF file would be most appropriate due to its capability to handle complex, continuous data at a high resolution. This choice supports a detailed and accurate representation of agricultural productivity data at the pixel level, accommodating the depth and variation in the dataset, albeit with considerations for the potentially large file size.
 
 # Exercise D
 
