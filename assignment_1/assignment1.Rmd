@@ -371,6 +371,7 @@ breaks <- seq(0, 15000, by = 1000)
 # Create labels for the bins based on the breaks
 labels <- paste(head(breaks, -1), tail(breaks, -1) - 1, sep = "-")
 ```
+The discrete scaling shows the agricultural value added in million Euros at a NUTS-2 Level in 2021. While the first map visualizes the value added in continuous scaling. The second map portrays agricultural value added in a binned scaling. Note that animal production and fishing is also included, which accounts for the high agricultural value added in Western France.  
 
 ```{r, echo = FALSE, fig.align='center'}
 # Discretize the share variable into bins
@@ -394,9 +395,8 @@ ggplot(data = shp_merged_filter_1) +
         legend.key.size = unit(0.5, "cm")) # Decrease key size (you can adjust the value as needed)
 ```
 
-The discrete scaling shows the agricultural value added in million Euros at a NUTS-2 Level in 2021. While the first map visualizes the value added in continuous scaling. The second map portrays agricultural value added in a binned scaling. Note that animal production and fishing is also included, which accounts for the high agricultural value added in Western France.  
-
 It is interesting to note that the NUTS-2 level visualization might induce a somewhat distorting picture. The regions with the highest output are Andalusia in Spain and some Western regions in France. However, this is partially driven by the fact that the average NTUSS-2 region in Spain is far larger than in Germany. As the average definition of regions is smaller in Gemrany the average agricultural value added might appear somewhat smaller in Germany.
+
 
 
 3. Briefly explain what two conceptually different ways there are to store visualizations, and name two formats each. Which ones are more appropriate for which types of visualizations and why? Use the one you think is more appropriate to store your visualizations.
@@ -432,7 +432,7 @@ dudaPalette <- brewer.pal(n = 9, name = "Reds")
 
 data <- pol_pres15 %>% 
   mutate(II_Komorowski_share = 100*II_Komorowski_share) %>%
-  mutate(II_Duda_share = 100*II_Duda_share) 
+  mutate(II_Duda_share = 100*II_Duda_share)     
 ```
 
 We now zoom in on the shares by using the function tm_facets, which allows to display the vote shares of the candidates separatley. The maps now display the vote shares of the respective candidates in each district. We can observe a strong polarization, as a large number of districts voted by above 80% for the respective candidate.
@@ -466,12 +466,13 @@ tm_shape(data) +
 We now investigate possible issues with voting envelopes. To uncover any potential oddiities regarding postal voting in the second round, we calculate the share of postal votes received over the postal voting packages that were sent in. A low share indicates that a lot of postal votes were not counted. This might be preliminary evidence into some sort of inconsistency or even fraud.
 
 ```{r}
-pol_pres15$II_Envelope_Proportion <- pol_pres15$II_postal_voting_envelopes_received / pol_pres15$II_voters_sent_postal_voting_package
+pol_pres15 <- pol_pres15 %>%
+  mutate(II_Envelope_Proportion = II_postal_voting_envelopes_received/
+           II_voters_sent_postal_voting_package)
 ```
 
 
 ```{r, echo=FALSE, fig.align='center'}
-# Generate a reversed viridis color palette
 n_colors <- 7  # Number of colors you want in the palette
 reversed_palette <- viridis(n_colors, direction = -1)  # Reverse the palette
 
@@ -479,14 +480,14 @@ pol_pres15$II_Envelope_Proportion <- ifelse(is.na(pol_pres15$II_Envelope_Proport
 
 tm_shape(pol_pres15) +
   tm_fill(col = "II_Envelope_Proportion",
-          title = "Share of Postal Vote Envelopes Received",
+          title = "Share of Postal Envelopes Received",
           palette = reversed_palette,
           labels = c("0-0.2","0.2-0.4", "0.4-0.6", "0.6-0.8", "0.8-1", "No Postal Votes")) + 
   tm_layout(legend.position = c("left", "bottom"), legend.outside = TRUE)
 ```
 The figure shows districts in higher darkblue, green, or yellow if the share of postal votes that were received was lower. There seems to be no systematic relationship between any districts and candidate allegiance. Thus, we conclude that there is no indirect evidence for inconsistencies in the postal voting system based on this measure. 
 
-However, note that the map above disguises the low absolute number of votes in some districts. We see that the overall number of postal votes sent is very low in most districts and thus the inconsistencies can be driven by only a few incorrectly sent postal votes. 
+However, note that the map above disguises the low absolute number of votes in some districts. We see that the overall number of postal votes sent is very low in most rural districts and thus the inconsistencies can be driven by only a few incorrectly sent postal votes in those areas. 
 ```{r, echo=FALSE, fig.align='center'}
 n_colors <- 7  # Number of colors you want in the palette
 reversed_palette <- viridis(n_colors)  # Reverse the palette
@@ -499,20 +500,4 @@ tm_shape(pol_pres15) +
 ```
 
 
-
-We check if all envelopes that were sent, were also received. If the number of envelopes received is equal to the number of the envelopes sent, the municipality is coloured as green. If the municipality is visualized in grey, that means that there were no voting envelopes used for the election. If a municipality is red however, that indicates that the total number of envelopes sent is higher than the number of envelopes received (at a threshold off 99 percent). That indicates that there were probably issues with the delievery of the voting envelopes. We can observe red clusters especially in urban regions (Warsaw, Katowice and Krakow). An interesting side fact however is that one can clearly see that in urban areas, voting envelopes were used more often than in rural areas of Poland:
-
-```{r, echo=FALSE}
-# Calculate the proportion of postal voting envelopes received to postal voting packages sent
-pol_pres15$Envelope_Proportion <- pol_pres15$I_postal_voting_envelopes_received / pol_pres15$I_voters_sent_postal_voting_package
-pol_pres15$II_Envelope_Proportion <- pol_pres15$II_postal_voting_envelopes_received / pol_pres15$II_voters_sent_postal_voting_package
-
-pol_pres15$II_Envelope_Proportion <- ifelse(is.na(pol_pres15$II_Envelope_Proportion), 1, pol_pres15$II_Envelope_Proportion)
-
-# Define a threshold for the proportion indicating possible issues
-threshold <- 0.99
-
-# Create a new column indicating possible issues with postal voting envelopes based on the proportion
-pol_pres15$Envelope_Issues <- ifelse(pol_pres15$II_Envelope_Proportion < threshold, "Possible Issues", "No Issues")
-```
-
+‚
