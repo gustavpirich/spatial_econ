@@ -163,13 +163,13 @@ scale <- function(x){
 adj.rn <- t(apply(adj,1,scale))
 ```
 
-Germany which had only 1 connection, is the only row with sum of 1. Thus its the only edge which survives row normalization. Here, depending on criterion US or Germany would be most central agent. Other countries would be all least central. We can see that there is a strong distortion resulting from row normalization. Possible solutions to this would be to use some weights for the connections between agents. E.g. connection could be there if trade is not zero, weighted by the amount of the trade. Then row normalization would not delete the edge completely. Another possibility would be to normalizing by scaling by a constant instead of row normalization. 
+Germany which had only 1 connection, is the only row with sum of 1. Thus if we don't use weights, all edge where there was more than 1 connection disappear. This would suggest depending on criterion that US or Germany would be most central agent. Other countries would be all least central. However, this approach does not give us much information. We can see that there is a strong distortion resulting from row normalization. 
 
 ```{r, echo=FALSE, fig.align ='center'}
 plot(graph_from_adjacency_matrix(adj.rn, weighted = TRUE),vertex.size = 30, main="Trade network row normalized",edge.arrow.size = 0.7)
 ```
 
-For visualization purposes, possible solution to this would be to use some weights for the connections between agents. E.g. connection could be there if trade is not zero, weighted by the amount of the trade. Then row normalization would not delete the edge completely. Below we implement this and we can see that Germany which had only one top 5 trading partner in this list of countries, has the thickest edge. The values of adjacency matrix for other countries decrease by row normalization leading to thinner edges. E.g. India has 2 top 5 trading partner among those countries, resulting in thickness of edge being halved. Another possibility would be to normalizing by scaling by a constant instead of row normalization. 
+Possible solutions to this would be to use the row normalized values as weights for the connections between agents. Then row normalization would not delete the edge completely. Below we implement this and we can see that Germany which had only one top 5 trading partner in this list of countries, has the thickest edge. The values of adjacency matrix for other countries decrease by row normalization leading to thinner edges. E.g. India has 2 top 5 trading partner among those countries, resulting in thickness of edge being halved. Another possibility would be to normalizing by scaling by a constant instead of row normalization. 
 
 ```{r, echo=FALSE}
 g <- graph_from_adjacency_matrix(adj.rn, weighted = T, mode = "directed")
