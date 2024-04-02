@@ -44,11 +44,15 @@ set.seed(123)
 ```
 
 # Exercise A
-For our independent variables, we use per capita crime rate by town, average number of rooms per dwelling, 
-Charles River dummy variable (= 1 if tract bounds river; 0 otherwise), 
-nitrogen oxides concentration (parts per 10 million) and a constant.
 
-```{r, echo=FALSE}
+1. Load the Boston dataset from the MASS package. Think of a simple (linear) model aiming at predicting property prices involving 4–5 covariates (or interactions between some of them). Create a function that takes your dependent variable and the covariates as inputs, and return a list with: 
+- OLS point estimates for the intercept, slope parameters, and the error variance.
+- Suitable test statistics with corresponding p-values for the relevant coefficients.
+- Intervals of the coefficients for a confidence level of 95%. 
+
+As independent variables, we use per capita crime rate by town, average number of rooms per dwelling, Charles River dummy variable (= 1 if tract bounds river; 0 otherwise), nitrogen oxides concentration (parts per 10 million) and a constant.
+
+```{r}
 data1 <- MASS::Boston
 X <- as.matrix(cbind(1,data1[,c("crim", "rm","chas","nox")]))
 #X <- as.matrix(cbind(1,data1["lstat"]))
@@ -56,7 +60,7 @@ colnames(X) <- c("Constant","Crime", "Rooms", "Charles_River", "NO_pp10m")
 Y <- as.matrix(data1[,"medv"])
 ```
 
-Below we wrote a function which computes:
+Below we created a function which implements:
 OLS point estimates for the intercept, slope parameters, and the error variance.
 Suitable test statistics with corresponding p-values for the relevant coefficients.
 Intervals of the coefficients for a confidence level of 95\%.
@@ -117,25 +121,26 @@ adj <- matrix(c(
 colnames(adj) = rownames(adj) = agents
 ```
 
-We could consider 6 different countries and an indicator of a high trade between them. For illustration, we could consider a rule where there is directed edge from A to B, if B is one of the top 5 export destinations of A. We don't actually check for biggest trading partners empirically, but lets assume that such procedure gives rise to following network (arrows are mostly made up to achieve 12 edges and nice interpretations):
+We consider 6 different countries and an indicator of high trade intensity between them. For illustration, we could consider a rule where there is directed edge from A to B, if B is one of the top 5 export destinations of A. We don't actually check for biggest trading partners empirically, but lets assume that such procedure gives rise to following network (arrows are mostly made up to achieve 12 edges and nice interpretations):
 
 ```{r, echo=FALSE, fig.align ='center'}
-set.seed(123)
 plot(graph_from_adjacency_matrix(adj),vertex.size = 30, main="Trade network",edge.arrow.size = 0.7)
 ```
 
 The corresponding adjacency matrix is:
 
 ```{r, echo=FALSE, fig.align ='center'}
-knitr::kable((adj), format = "markdown")
+knitr::kable((adj), format = "markdown", caption = "Adjacency Matrix")
 ```
 2. Who are the most and least central agents in the network? Name, explain, and try to quantify different notions of centrality.
 
 A very basic concept of centrality could define an agent as most central, if it has the highest number of directed edges pointing towards itself (i.e. if it is important export country for most other countries). Using this criterion we can see from the graph that or from columns of adjacency matrix that US is the most central agents in this network, because it is among the top 5 trading partner for all 5 other countries. The least central agents would be Austria and India, since they are not a top 5 exporting destination for any country in this network.
 
-Another basic criterion of centrality could be the amount of outward pointing arrows of an agent. Thus a country would be considered central if it exports a lot to high number of countries from this network. In this sense, Germany is least central with only 1 outward arrow, while Austria is most central with 3 outward arrows. This criterion makes perhaps less sense than the first one, but we mention it to explain the concepts. Another possible centrality concept would be function of the two basic concepts above, e.g. sum of in- and outward pointing arrows of an agent. 
+Another basic criterion of centrality could be the amount of outward pointing arrows of an agent. Thus, a country would be considered central if it exports a lot to a high number of countries in this network. In this sense, Germany is the least central with only 1 outward arrow, while Austria is the most central with 3 outward arrows. This criterion makes perhaps less sense than the first one, but we mention it to explain the concepts. Another possible centrality concept would be function of the two basic concepts above, e.g. sum of in- and outward pointing arrows of an agent. 
 
-In the class we briefly introduced the intuition for eigenvector centrality. This tells us how often a node is visited on average if we start at a random node. This method does not work if there are sinks. Many applied algorithms such as page rank introduce jump probabilities for sinks. Once in a sink, i.e. node which has no outward connections, a probability distribution of jumping to other nodes is specified. While defining and computing page rank would be perhaps beyond the scope of this small exercise, below we display the eigenvector centrality computed using the package igraph.
+In class we briefly discussed the intuition for eigenvector centrality. Eigenvector centrality measures a node's influence in a network by accounting not only for the number of its connections but also for the importance of those connected nodes. Unlike simpler measures that count direct connections, eigenvector centrality assigns higher scores to nodes linked to other highly scored nodes. This means a node is considered influential if it is connected to other influential nodes.
+
+This method does not work if there are sinks. Many applied algorithms such as page rank introduce jump probabilities for sinks. Once in a sink, i.e. node which has no outward connections, a probability distribution of jumping to other nodes is specified. While defining and computing page rank would be perhaps beyond the scope of this small exercise, below we display the eigenvector centrality computed using the package igraph.
 
 ```{r, fig.align='center'}
 eigvcen1 <- eigen_centrality(
@@ -146,10 +151,9 @@ eigvcen1 <- eigen_centrality(
   options = arpack_defaults
 )
 
-eigvcen1$vector
+knitr::kable(eigvcen1$vector, caption = "Eigenvector Centrality")
 ```
-Using eigenvector centrality, We observe that US is the most central agent, followed by China. Austria and India are the least central agents with value of 0. This is because they are source only - there are no directed edges pointing to them, meaning that they are not a top 5 trading partner to any country. 
-
+Using eigenvector centrality, We observe that US is the most central agent, followed by China. Austria and India are the least central agents with values of 0. This is because they are source only - there are no directed edges pointing to them, meaning that they are not a top 5 trading partner to any country. 
 
 
 - How would centralities change if you considered a row-normalized network
@@ -161,6 +165,7 @@ scale <- function(x){
   x/sum(x)
 }
 adj.rn <- t(apply(adj,1,scale))
+knitr::kable(adj.rn, caption = "Row Normalized Adjacency Matrix")
 ```
 
 Germany which had only 1 connection, is the only row with sum of 1. Thus if we don't use weights, all edges of nodes with more than 1 connection disappear. This would suggest depending on criterion that US or Germany would be most central agent. Other countries would be all least central. However, this approach does not give us much information. We can see that there is a strong distortion resulting from row normalization. 
@@ -169,14 +174,14 @@ Germany which had only 1 connection, is the only row with sum of 1. Thus if we d
 plot(graph_from_adjacency_matrix(adj.rn, weighted = TRUE),vertex.size = 30, main="Trade network row normalized",edge.arrow.size = 0.7)
 ```
 
-Possible solutions to this would be to use the row normalized values as weights for the connections between agents. Then row normalization would not delete the edge completely. Below we implement this and we can see that Germany which had only one top 5 trading partner in this list of countries, has the thickest edge. The values of adjacency matrix for other countries decrease by row normalization leading to thinner edges. E.g. India has 2 top 5 trading partner among those countries, resulting in thickness of edge being halved. Another possibility would be to normalizing by scaling by a constant instead of row normalization. The question remains on how to judge who is the most central agent in such network. Possibly a function of number of in and out edges and weight could be defined. However, direct comparison to the concepts used above would be lost. 
+Possible solutions to this would be to use the row normalized values as weights for the connections between agents. Then row normalization would not delete the edge completely. Below we implement this and we can see that Germany which had only one top 5 trading partner in this list of countries, has the thickest edge. The values of adjacency matrix for other countries decrease by row normalization leading to thinner edges. E.g. India has 2 top 5 trading partner among those countries, resulting in thickness of edge being halved. Another possibility would be to normalize by scaling by a constant instead of row normalization. The question remains on how to judge who is the most central agent in such network. Possibly a function of number of in and out edges and weight could be defined. However, direct comparison to the concepts used above would be lost. 
 
-```{r, echo=FALSE}
+```{r, echo=FALSE, fig.align='center'}
 g <- graph_from_adjacency_matrix(adj.rn, weighted = T, mode = "directed")
 plot(g, edge.width = E(g)$weight*5,vertex.size = 30, main="Trade network row normalized",edge.arrow.size = 1)
 ```
 
-```{r, eval=FALSE, fig.align ='center'}
+```{r, include = FALSE, eval=FALSE}
 eigen_centrality(
   graph_from_adjacency_matrix(adj.rn),
   directed = TRUE,
@@ -186,7 +191,7 @@ eigen_centrality(
 )
 ```
 
-Notice that We get a directed acyclic graph (DAG), for which eigenvector centrality is not defined, since there are no cycles at all and US is a sink. 
+Notice that we get a directed acyclic graph (DAG), for which eigenvector centrality is not defined, since there are no cycles at all and the US is a sink. 
 
 - How would the network change if you removed or added a specific agent?
 Lets consider the case of removing US:
@@ -200,11 +205,11 @@ plot(graph_from_adjacency_matrix(adj[-1,-1]),
 
 ```
 
-Based on Inflowing arrows, China becomes the most central agent and India, Austria and Mexico the least central agents.Based on Outflowing arrows, Austria is still the most central agent, while Germany is the least central agent.
+Based on inflowing arrows, China becomes the most central agent and India, Austria and Mexico the least central agents. Based on outflowing arrows, Austria is still the most central agent, while Germany is the least central agent.
 
 Similarly to above, eigenvector centrality is undefined since there is a sink - Germany.
 
-```{r, eval=FALSE, fig.align='center'}
+```{r, eval=FALSE}
 eigen_centrality(
   graph_from_adjacency_matrix(adj[-1,-1]),
   directed = TRUE,
@@ -274,7 +279,7 @@ my_data <- data.frame(
 knitr::kable(my_data, format = "markdown")
 ```
 
-We set the true value for $\beta$ to 2, $\lambda$ to 0.6, and $\delta$ to 0.3. We then regress y on x, repeat this a 1000 times, and find that the mean of the estimand is 1.718638. Thus using the simple linear regression fails to recover the true value of $\beta$. 
+We set the true value for $\beta$ to 2, $\lambda$ to 0.6, and $\delta$ to 0.3. We then regress y on x, repeat this a 1000 times, and find that the mean of the estimand is 1.718638. Thus using the simple linear regression fails to recover the true value of $\beta$, the impact of a countries fentanyl precursor production on its fentanyl death rate.
 
 # Exercise C
 Download a suitable shapefile for NUTS2 regions (from here or using R directly) and some
@@ -318,9 +323,7 @@ title(cex.main=0.8) # Adjust 'cex.main' to control legend title size
 par(mfrow=c(1,1), oma=c(0,0,0,0), mar=c(5,4,4,2) + 0.1)
 ```
 
-The coordinate reference system for the first map is the "World Geodetic System 1984," or "WGS 84" (EPSG:4326) for short. The data is then re-projected to the "OSGB36 / British National Grid" coordinate reference system. The first map utilizes the Mercator projection, which is widely used in various global applications, including Google Earth. The Mercator projection is conformal, meaning it preserves angles. The second map is created using the Transverse Mercator projection, which does not have distortions along the central meridian. It's worth noting that OSGB36 is specifically designed for mapping Great Britain and is optimized for maintaining accurate scale within this region.
-
-
+The coordinate reference system for the first map is the "World Geodetic System 1984," or "WGS 84" (EPSG:4326) for short. The data is then re-projected to the "OSGB36 / British National Grid" coordinate reference system. The first map utilizes the Mercator projection, which is widely used in various global applications, including Google Earth. The Mercator projection is conformal, meaning it preserves angles. The second map is created using the Transverse Mercator projection, which does not have distortions along the central meridian. It's worth noting that OSGB36 is specifically designed for mapping Great Britain and is optimized for maintaining accurate scale within this region and thus might not be suitable for mapping larger regions.
 
 2. Merge the shapefile and the chosen dataset. Create tow meaningful visualizations of the chosen dataset using different scales (e.g. continuous versus discrete scaling of the data)
 
@@ -358,7 +361,7 @@ shp_merged_filter <- shp_merged %>%
 ggplot(data = shp_merged_filter) +
   geom_sf(aes(fill = ag_value_added_1)) + 
   scale_fill_viridis_c(name = "Millions EUR",
-                       option = "D") + # 'option' can be "C" for the default viridis palette, or "A", "B", "D", "E" for other variants +
+                       option = "D") + 
   labs(title = "Agricultural Value Added by NUTS-2 Region in 2021") +
   theme_minimal() +
   theme(legend.position = "bottom") +
@@ -367,17 +370,11 @@ ggplot(data = shp_merged_filter) +
         legend.title = element_text(size = 9), # Decrease title size
         legend.key.size = unit(0.5, "cm")) # Decrease key size (you can adjust the value as needed)
 
-# Define the breaks for the bins   scale_fill_gradientn(colors = c("lightblue2", "turquoise4", "navyblue"), 
-                       #values = scales::rescale(c(min(shp_merged_filter$ag_value_added_1, na.rm = TRUE), 
-                        #                          mean(shp_merged_filter$ag_value_added_1, na.rm = TRUE), 
-                         #                         max(shp_merged_filter$ag_value_added_1, na.rm = TRUE))),
-
 breaks <- seq(0, 15000, by = 1000)
 
-# Create labels for the bins based on the breaks
 labels <- paste(head(breaks, -1), tail(breaks, -1) - 1, sep = "-")
 ```
-The discrete scaling shows the agricultural value added in million Euros at a NUTS-2 Level in 2021. While the first map visualizes the value added in continuous scaling. The second map portrays agricultural value added in a binned scaling. Note that animal production and fishing is also included, which accounts for the high agricultural value added in Western France.  
+The discrete scaling shows the agricultural value added in million Euros at a NUTS-2 Level in 2021. While the first map visualizes the value added in continuous scaling. The second map portrays agricultural value added in a binned discrete scaling. Note that animal production and fishing is also included, which accounts for the high agricultural value added in Western France.  
 
 ```{r, echo = FALSE, fig.align='center'}
 # Discretize the share variable into bins
@@ -390,7 +387,7 @@ shp_merged_filter_1 <- shp_merged_filter %>%
 
 
 # Plot the map with the discretized bins using the viridis color palette
-ggplot(data = shp_merged_filter_1) +
+map <- ggplot(data = shp_merged_filter_1) +
   geom_sf(aes(fill = share_bins)) +
   scale_fill_viridis_d(name = "Millions EUR", option = "D") + # 'option' can be "C" for the default viridis palette, or "A", "B", "D", "E" for other variants
   labs(title = "Binned Agricultural Value Added per NUTS-2 Region in 2021") +
@@ -399,27 +396,43 @@ ggplot(data = shp_merged_filter_1) +
         legend.text = element_text(size = 5), # Decrease text size
         legend.title = element_text(size = 6), # Decrease title size
         legend.key.size = unit(0.5, "cm")) # Decrease key size (you can adjust the value as needed)
+map
 ```
 
-It is interesting to note that the NUTS-2 level visualization might induce a somewhat distorting picture. The regions with the highest output are Andalusia in Spain and some Western regions in France. However, this is partially driven by the fact that the average NTUSS-2 region in Spain is far larger than in Germany. As the average definition of regions is smaller in Gemrany the average agricultural value added might appear somewhat smaller in Germany.
+Moreover note that the NUTS-2 level visualization might induce a somewhat distorting picture. The regions with the highest output are Andalusia in Spain and some Western regions in France. However, this is partially driven by the fact that the average NTUS-2 region in Spain is much larger than in for example Germany. As the average size of NUTS-2 regions is more granular in Germany, the average agricultural value added might appear somewhat smaller.
 
+```{r}
+#saving the map as raster image
+#ggsave("map.tiff", plot = map, width = 10, height = 8, dpi = 300)
+
+#saving the map as vector image
+#ggsave("map.pdf", plot = map, width = 10, height = 8, dpi = 300)
+```
 
 
 3. Briefly explain what two conceptually different ways there are to store visualizations, and name two formats each. Which ones are more appropriate for which types of visualizations and why? Use the one you think is more appropriate to store your visualizations.
 
-Visualizations can be broadly categorized into two distinct types based on the underlying spatial data they represent: raster and vector. Raster graphics are pixel-based, encoding images as arrays of multi-colored pixels. They are ideal for depicting continuous variables, such as elevation, temperature, or (as in the case above) agricultural output, where the variation is smoothly transitioned across the visualization. Common formats for storing raster graphics include PNG, JPEG, and TIFF files. The major caveat with raster graphics is their resolution dependency; zooming in too far reveals the pixel grid, leading to a loss of clarity.
+Visualizations can be broadly categorized into two distinct types based on the underlying spatial data they represent: raster and vector. Raster graphics are pixel-based, encoding images as arrays of multi-colored pixels. They are ideal for depicting continuous variables, such as elevation, temperature, or (as in the case above) agricultural output, where the variation is smoothly transitioned across the visualization. Common formats for storing raster graphics include PNG, JPEG, and TIFF files. One major caveat with raster graphics is their resolution dependency; zooming in too far reveals the pixel grid, leading to a loss of clarity.
 
-On the other hand, vector graphics are built using geometric shapes such as points, lines, and polygons, defined mathematically by paths rather than pixels. This method enables vector images to retain crispness and clarity regardless of scaling, making them infinitely 'zoomable' without loss of resolution. Vector graphics are commonly stored in SVG (Scalable Vector Graphics) and EPS (Encapsulated PostScript) formats. Due to their scalable nature, vector graphics are typically more compact and require less storage compared to their raster counterparts.
+On the other hand, vector graphics are built using geometric shapes such as points, lines, and polygons, defined mathematically by paths rather than pixels. This method enables vector images to retain crispness and clarity regardless of scaling, making them infinitely 'zoomable' without loss of resolution. Vector graphics are commonly stored in SVG (Scalable Vector Graphics), PDF (Portable Document Format), and EPS (Encapsulated PostScript) formats. Due to their scalable nature, vector graphics are typically more compact and require less storage compared to their raster counterparts.
 
-Choosing between raster and vector formats for storing visualizations depends on the nature of the data and the intended use of the visualization. Raster images are best suited for detailed and complex imagery, such as remotely sensed measures and detailed maps with continuous data representation. They offer a more nuanced depiction of variations in data such as agricultural productivity across a landscape, although at the expense of larger file sizes and fixed resolution.
+Choosing between raster and vector formats for storing visualizations depends on the nature of the data and the intended use of the visualization. Raster images are best suited for detailed and high-quality imagery, such as remotely sensed visualization and detailed maps with continuous data representation. They can offer a more efficient depiction of variations in data such as agricultural productivity across a map, although at the expense of larger file sizes and fixed resolution.
 
 Vector graphics, with their ability to scale without loss of quality, are preferable for diagrams, logos, and maps where clear, clean lines and shapes are needed. Fonts for example are stored as vector graphics.
 
-For visualizing agricultural value added in NUTS-2 regions across Europe, a TIFF file would be most appropriate due to its capability to handle complex, continuous data at a high resolution. This choice supports a detailed and accurate representation of agricultural productivity data at the pixel level, accommodating the depth and variation in the dataset, albeit with considerations for the potentially large file size.
+For visualizing agricultural value added in NUTS-2 regions across Europe, a PDF is suitable for publications. This choice supports a detailed and accurate representation of agricultural productivity data, accommodating the depth and variation in the dataset. PNGs and JPEG can be very efficient when file size is a strict constraint. For high-quality use cases, a tiff file might be most appropriate. However, such a file can have a very large size. 
 
 # Exercise D
 
-We start by visualizing the results of the second round of the Polish election. The first map displays the winner of the respecetive district. Overall we can see that the election was extremely close, with Duda winning just 51.55% and Komorowski winning  48.45% of the popular vote. One can clearly observe an east west pattern, where the Western part of the country predominantly voted for Duda and likewise the eastern part of the country for Komrowski.
+1. Install and load the tmap and spDataLarge packages (available from GitHub). Load
+and review the pol_pres15 dataset on the Polish Presidential election in 2015 (see
+?pol_pres15). Create three different, insightful visualizations of the underlying
+data.
+- One visualization should compare the support for Komorowski and Duda.
+- One visualization should investigate possible issues with postal voting envelopes.
+- At least one visualization should use the tmap package. 
+
+We start by visualizing the results of the second round of the Polish election. The first map displays the winner of the respective district. Overall we can see that the election was extremely close, with Duda winning just 51.55% and Komorowski winning  48.45% of the popular vote. One can clearly observe an east-west pattern, where the Western part of the country predominantly voted for Duda and the eastern part of the country for Komrowski.
 
 ```{r pol_pres15$Support, echo=FALSE, fig.align='center'}
 # Visualization comparing support for Komorowski and Duda
@@ -441,7 +454,7 @@ data <- pol_pres15 %>%
   mutate(II_Duda_share = 100*II_Duda_share)     
 ```
 
-We then plot the vote shares of the candidates in the second runoff. This gives a detailed picture of the election outcome. ONe can clearly see the stronghold of the
+We then plot the percentage points of the candidates in the second runoff. This gives a detailed picture of the election outcome. One can clearly see the strongholds of the respective candidates.
 ```{r, echo = FALSE, fig.width= 12, fig.align='center'}
 #tm_shape(data) +
 #  tm_facets(free.scales = TRUE) +  # Enables independent scaling of facets
@@ -472,14 +485,13 @@ tm_shape(data) +
   tm_layout(legend.position = c("left", "bottom"), scale = 0.9, legend.outside = TRUE)
 ```
 
-We now investigate possible issues with voting envelopes. To uncover any potential oddiities regarding postal voting in the second round, we calculate the share of postal votes received over the postal voting packages that were sent in. A low share indicates that a lot of postal votes were not counted. This might be preliminary evidence into some sort of inconsistency or even fraud.
+We now investigate possible issues with voting envelopes. To uncover any potential oddities regarding postal voting in the second round, we calculate the share of postal votes received over the postal voting packages that were sent in. A low share indicates that a lot of postal votes were not counted for any reason. This might be preliminary and somewhat suggestive evidence into some sort of inconsistency or even fraud.
 
-```{r}
+```{r, echo = FALSE}
 pol_pres15 <- pol_pres15 %>%
   mutate(II_Envelope_Proportion = II_postal_voting_envelopes_received/
            II_voters_sent_postal_voting_package)
 ```
-
 
 ```{r, echo=FALSE, fig.align='center'}
 n_colors <- 7  # Number of colors you want in the palette
@@ -489,21 +501,21 @@ pol_pres15$II_Envelope_Proportion <- ifelse(is.na(pol_pres15$II_Envelope_Proport
 
 tm_shape(pol_pres15) +
   tm_fill(col = "II_Envelope_Proportion",
-          title = "Share of Postal Envelopes Received",
+          title = "Share of PVE actually counted",
           palette = reversed_palette,
           labels = c("0-0.2","0.2-0.4", "0.4-0.6", "0.6-0.8", "0.8-1", "No Postal Votes")) + 
   tm_layout(legend.position = c("left", "bottom"), legend.outside = TRUE)
 ```
-The figure shows districts in higher darkblue, green, or yellow if the share of postal votes that were received was lower. There seems to be no systematic relationship between any districts and candidate allegiance. Thus, we conclude that there is no indirect evidence for inconsistencies in the postal voting system based on this measure. 
+The figure shows districts in higher darkblue, green, or yellow if the share of postal votes that were received was lower. There seems to be no systematic relationship between any districts and candidate allegiance. We conclude that there is no evidence for inconsistencies in the postal voting system based on this measure. 
 
-However, note that the map above disguises the low absolute number of votes in some districts. We see that the overall number of postal votes sent is very low in most rural districts and thus the inconsistencies can be driven by only a few incorrectly sent postal votes in those areas. 
+However, note that the map above disguises the low absolute number of votes in some districts. We see that the overall number of postal votes sent is very low in most rural districts and thus the inconsistencies can be driven by only a few incorrectly sent postal votes. 
 ```{r, echo=FALSE, fig.align='center'}
 n_colors <- 7  # Number of colors you want in the palette
 reversed_palette <- viridis(n_colors)  # Reverse the palette
 
 tm_shape(pol_pres15) +
   tm_fill(col = "II_voters_sent_postal_voting_package",
-          title = "Absolute number of Postal Voting Envelopes Sent",
+          title = "Absolute Number of PVE Sent",
           palette = reversed_palette) +  # Use the reversed palette
   tm_layout(legend.position = c("left", "bottom"), legend.outside = TRUE)
 ```
