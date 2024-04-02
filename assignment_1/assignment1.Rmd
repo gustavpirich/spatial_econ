@@ -169,6 +169,13 @@ Germany which had only 1 connection, is the only row with sum of 1. Thus its the
 plot(graph_from_adjacency_matrix(adj.rn, weighted = TRUE),vertex.size = 30, main="Trade network row normalized",edge.arrow.size = 0.7)
 ```
 
+For visualization purposes, possible solution to this would be to use some weights for the connections between agents. E.g. connection could be there if trade is not zero, weighted by the amount of the trade. Then row normalization would not delete the edge completely. Below we implement this and we can see that Germany which had only one top 5 trading partner in this list of countries, has the thickest edge. The values of adjacency matrix for other countries decrease by row normalization leading to thinner edges. E.g. India has 2 top 5 trading partner among those countries, resulting in thickness of edge being halved. Another possibility would be to normalizing by scaling by a constant instead of row normalization. 
+
+```{r, echo=FALSE}
+g <- graph_from_adjacency_matrix(adj.rn, weighted = T, mode = "directed")
+plot(g, edge.width = E(g)$weight*5,vertex.size = 30, main="Trade network row normalized",edge.arrow.size = 1)
+```
+
 ```{r, eval=FALSE, fig.align ='center'}
 eigen_centrality(
   graph_from_adjacency_matrix(adj.rn),
