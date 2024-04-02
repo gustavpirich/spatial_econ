@@ -422,7 +422,7 @@ pol_pres15$Support <- ifelse(pol_pres15$I_Komorowski_share > pol_pres15$I_Duda_s
 tm_shape(pol_pres15) + 
   tm_fill(col = "Support", style = "cat", palette = "RdYlBu", 
           title = "Majority for Candidate in Second Round") +
-  tm_layout(legend.position = c("left", "bottom"))
+  tm_layout(legend.position = c("left", "bottom"), legend.outside = TRUE)
 ```
 
 ```{r, echo = FALSE}
@@ -435,7 +435,7 @@ data <- pol_pres15 %>%
 ```
 
 We then plot the vote shares of the candidates in the second runoff. This gives a detailed picture of the election outcome. ONe can clearly see the stronghold of the
-```{r, echo = FALSE, fig.width= 12}
+```{r, echo = FALSE, fig.width= 12, fig.align='center'}
 #tm_shape(data) +
 #  tm_facets(free.scales = TRUE) +  # Enables independent scaling of facets
 #  tm_fill(c("II_Komorowski_share", "II_Duda_share"), title = "2. Round Vote Share",
@@ -451,7 +451,10 @@ labels <- c("Duda (100-90)", "Duda (90-80)", "Duda (80-70)", "Duda (70-60)", "Du
 
 coolwarm_hcl_inverted <- colorspace::diverging_hcl(10,
   h = c(10, 250), c = 100, l = c(20, 90), power = c(0.2, 1.6))
+```
 
+
+```{r, echo = FALSE, fig.width= 12, fig.align='center'}
 tm_shape(data) +
   tm_fill(col = "II_Komorowski_share", 
           title = "2. Round Vote Share",
