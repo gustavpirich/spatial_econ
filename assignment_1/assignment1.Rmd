@@ -135,7 +135,7 @@ Another basic criterion of centrality could be the amount of outwards pointing a
 
 In the class we briefly introduced the intuition for eigenvector centrality. This tells us how often a node is visited on average if started at random node. This method does not work if there are sinks. Many applied algorithms such as page rank introduce jump probabilities for sinks. Once in a sink, i.e. node which has no outward connections, a probability distribution of jumping to other nodes is specified. While defining and computing page rank would be perhaps beyond the scope of this small exercise, below we display the eigenvector centrality computed using the package igraph.
 
-```{r}
+```{r, fig.align='center'}
 eigvcen1 <- eigen_centrality(
   graph_from_adjacency_matrix(adj),
   directed = TRUE,
@@ -181,7 +181,7 @@ Notice that We get a directed acyclic graph (DAG), for which eigenvector central
 - How would the network change if you removed or added a specific agent?
 Lets consider the case of removing US:
 
-```{r, echo=FALSE}
+```{r, echo=FALSE, fig.align='center'}
 #agents[-1]
 plot(graph_from_adjacency_matrix(adj[-1,-1]),vertex.size = 30, main="Trade network excl. US",edge.arrow.size = 0.7)
 ```
@@ -194,7 +194,7 @@ Based on Outflowing arrows, Austria is still the most central agent, while Germa
 =======
 Similarly to above, eigenvector centrality is undefined since there is a sink - Germany.
 
-```{r, eval=FALSE}
+```{r, eval=FALSE, fig.align='center'}
 eigen_centrality(
   graph_from_adjacency_matrix(adj[-1,-1]),
   directed = TRUE,
