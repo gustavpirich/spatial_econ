@@ -163,7 +163,7 @@ scale <- function(x){
 adj.rn <- t(apply(adj,1,scale))
 ```
 
-Germany which had only 1 connection, is the only row with sum of 1. Thus if we don't use weights, all edge where there was more than 1 connection disappear. This would suggest depending on criterion that US or Germany would be most central agent. Other countries would be all least central. However, this approach does not give us much information. We can see that there is a strong distortion resulting from row normalization. 
+Germany which had only 1 connection, is the only row with sum of 1. Thus if we don't use weights, all edges of nodes with more than 1 connection disappear. This would suggest depending on criterion that US or Germany would be most central agent. Other countries would be all least central. However, this approach does not give us much information. We can see that there is a strong distortion resulting from row normalization. 
 
 ```{r, echo=FALSE, fig.align ='center'}
 plot(graph_from_adjacency_matrix(adj.rn, weighted = TRUE),vertex.size = 30, main="Trade network row normalized",edge.arrow.size = 0.7)
