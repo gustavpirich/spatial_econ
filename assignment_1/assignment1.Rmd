@@ -124,16 +124,16 @@ plot(graph_from_adjacency_matrix(adj),vertex.size = 30, main="Trade network",edg
 
 The corresponding adjacency matrix is:
 
-```{r, echo=FALSE}
+```{r, echo=FALSE, fig.align ='center'}
 print(adj)
 ```
 2. Who are the most and least central agents in the network? Name, explain, and try to quantify different notions of centrality.
 
-A very basic concept of centrality could define an agent as most central, if it has the highest number of directed edges pointing towards itself (i.e. if it is important export country for most other countries). Using this criterion we can see from the graph that or from columns of adjacency matrix that US the most central agents in this network, because it is top 5 trading partner for all 5 other countries. The least central agents would be Austria and India, since they are not a top 5 export country for any country from this network.
+A very basic concept of centrality could define an agent as most central, if it has the highest number of directed edges pointing towards itself (i.e. if it is important export country for most other countries). Using this criterion we can see from the graph that or from columns of adjacency matrix that US is the most central agents in this network, because it is among the top 5 trading partner for all 5 other countries. The least central agents would be Austria and India, since they are not a top 5 exporting destination for any country in this network.
 
-Another basic criterion of centrality could be the amount of outwards pointing arrows of an agent. Thus a country would be considered central if it exports a lot to high number of countries from this network. In this sense, Germany is least central with only 1 outward arrow, while Austria is most central with 3 outward arrows. This criterion makes perhaps less sense than the first one, but we mention it to explain the concepts. Another possible centrality concept would be function of the two basic concepts above, e.g. sum of in- and outward pointing arrows of an agent. 
+Another basic criterion of centrality could be the amount of outward pointing arrows of an agent. Thus a country would be considered central if it exports a lot to high number of countries from this network. In this sense, Germany is least central with only 1 outward arrow, while Austria is most central with 3 outward arrows. This criterion makes perhaps less sense than the first one, but we mention it to explain the concepts. Another possible centrality concept would be function of the two basic concepts above, e.g. sum of in- and outward pointing arrows of an agent. 
 
-In the class we briefly introduced the intuition for eigenvector centrality. This tells us how often a node is visited on average if started at random node. This method does not work if there are sinks. Many applied algorithms such as page rank introduce jump probabilities for sinks. Once in a sink, i.e. node which has no outward connections, a probability distribution of jumping to other nodes is specified. While defining and computing page rank would be perhaps beyond the scope of this small exercise, below we display the eigenvector centrality computed using the package igraph.
+In the class we briefly introduced the intuition for eigenvector centrality. This tells us how often a node is visited on average if we start at a random node. This method does not work if there are sinks. Many applied algorithms such as page rank introduce jump probabilities for sinks. Once in a sink, i.e. node which has no outward connections, a probability distribution of jumping to other nodes is specified. While defining and computing page rank would be perhaps beyond the scope of this small exercise, below we display the eigenvector centrality computed using the package igraph.
 
 ```{r, fig.align='center'}
 eigvcen1 <- eigen_centrality(
@@ -189,8 +189,6 @@ plot(graph_from_adjacency_matrix(adj[-1,-1]),vertex.size = 30, main="Trade netwo
 Based on Inflowing arrows, China becomes the most central agent and India, Austria and Mexico the least central agents. 
 Based on Outflowing arrows, Austria is still the most central agent, while Germany is the least central agent.
 
-<<<<<<< Updated upstream
-3. Simulate some agent characteristic based on a standard Normal distribution; use this characteristic to simulate responses following a liner-in-means model with your network. Repeat this a couple of times, and compare estimates of a standard linear model ($y_{i} = x_{\beta} + \varepsilon_{i}$) with the true values that you used to simulate the data
 =======
 Similarly to above, eigenvector centrality is undefined since there is a sink - Germany.
 
@@ -205,7 +203,6 @@ eigen_centrality(
 ```
 
 3.Simulate some agent characteristic based on a standard Normal distribution; use this characteristic to simulate responses following a liner-in-means model with your network. Repeat this a couple of times, and compare estimates of a standard linear model ($y_{i} = x_{\beta} + \varepsilon_{i}$) with the true values that you used to simulate the data
->>>>>>> Stashed changes
 
 We simulate the data based on the row normalized adjacency matrix for trade partner connections, that we created in the preceding exercise.
 
