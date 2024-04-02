@@ -166,8 +166,9 @@ adj.rn <- t(apply(adj,1,scale))
 Germany which had only 1 connection, is the only row with sum of 1. Thus its the only edge which survives row normalization. Here, depending on criterion US or Germany would be most central agent. Other countries would be all least central. We can see that there is a strong distortion resulting from row normalization. Possible solutions to this would be to use some weights for the connections between agents. E.g. connection could be there if trade is not zero, weighted by the amount of the trade. Then row normalization would not delete the edge completely. Another possibility would be to normalizing by scaling by a constant instead of row normalization. 
 
 ```{r, echo=FALSE, fig.align ='center'}
-plot(graph_from_adjacency_matrix(adj.rn),vertex.size = 30, main="Trade network row normalized",edge.arrow.size = 0.7)
+plot(graph_from_adjacency_matrix(adj.rn, weighted = TRUE),vertex.size = 30, main="Trade network row normalized",edge.arrow.size = 0.7)
 ```
+
 ```{r, eval=FALSE, fig.align ='center'}
 eigen_centrality(
   graph_from_adjacency_matrix(adj.rn),
@@ -192,10 +193,8 @@ plot(graph_from_adjacency_matrix(adj[-1,-1]),
 
 ```
 
-Based on Inflowing arrows, China becomes the most central agent and India, Austria and Mexico the least central agents. 
-Based on Outflowing arrows, Austria is still the most central agent, while Germany is the least central agent.
+Based on Inflowing arrows, China becomes the most central agent and India, Austria and Mexico the least central agents.Based on Outflowing arrows, Austria is still the most central agent, while Germany is the least central agent.
 
-=======
 Similarly to above, eigenvector centrality is undefined since there is a sink - Germany.
 
 ```{r, eval=FALSE, fig.align='center'}
@@ -435,28 +434,28 @@ data <- pol_pres15 %>%
   mutate(II_Duda_share = 100*II_Duda_share)     
 ```
 
-We now zoom in on the shares by using the function tm_facets, which allows to display the vote shares of the candidates separatley. The maps now display the vote shares of the respective candidates in each district. We can observe a strong polarization, as a large number of districts voted by above 80% for the respective candidate.
+We then plot the vote shares of the candidates in the second runoff. This gives a detailed picture of the election outcome. ONe can clearly see the stronghold of the
 ```{r, echo = FALSE, fig.width= 12}
-tm_shape(data) +
-  tm_facets(free.scales = TRUE) +  # Enables independent scaling of facets
-  tm_fill(c("II_Komorowski_share", "II_Duda_share"), title = "2. Round Vote Share",
-              palette=list("II_Komorowski_share" = komorowskiPalette,
-                           "II_Duda_share" = dudaPalette),
-              midpoint=50) + 
-  #tm_borders(lwd = 0.2, alpha = 0.7) +
-  tm_layout(legend.position = c("left", "bottom"), scale = 0.6)
+#tm_shape(data) +
+#  tm_facets(free.scales = TRUE) +  # Enables independent scaling of facets
+#  tm_fill(c("II_Komorowski_share", "II_Duda_share"), title = "2. Round Vote Share",
+#              palette=list("II_Komorowski_share" = komorowskiPalette,
+#                           "II_Duda_share" = dudaPalette),
+#              midpoint=50) + 
+#  #tm_borders(lwd = 0.2, alpha = 0.7) +
+#  tm_layout(legend.position = c("left", "bottom"), scale = 0.6)
 
 
 breaks <- seq(0, 100, by = 10)
 labels <- c("Duda (100-90)", "Duda (90-80)", "Duda (80-70)", "Duda (70-60)", "Duda (60-50)", "Komorowski (50-60)", "Komorowski (60-70)", "Komorowski (70-80)", "Komorowski (80-90)", "Komorowski (90-100)")
 
-coolwarm_hcl <- colorspace::diverging_hcl(11,
-  h = c(250, 10), c = 100, l = c(20, 90), power = c(0.6, 1.7))
+coolwarm_hcl_inverted <- colorspace::diverging_hcl(10,
+  h = c(10, 250), c = 100, l = c(20, 90), power = c(0.2, 1.6))
 
 tm_shape(data) +
   tm_fill(col = "II_Komorowski_share", 
           title = "2. Round Vote Share",
-          palette = coolwarm_hcl, 
+          palette = coolwarm_hcl_inverted, 
           breaks = breaks, 
           labels = labels,
           style = "fixed") +
