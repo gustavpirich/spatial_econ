@@ -445,6 +445,41 @@ tm_shape(data) +
               midpoint=50) + 
   #tm_borders(lwd = 0.2, alpha = 0.7) +
   tm_layout(legend.position = c("left", "bottom"), scale = 0.6)
+
+tm_shape(data) +
+  tm_fill(c("II_Komorowski_share"), title = "2. Round Vote Share",
+              palette=komorowskiPalette,
+              midpoint=50) + 
+  tm_layout(legend.position = c("left", "bottom"), scale = 0.9)
+
+
+# Example komorowskiPalette for demonstration purposes
+komorowskiPalette <- c("#ADD8E6", "#0000FF")  # Light to dark blue
+
+# Custom function to create a palette with red for <50 and komorowskiPalette for >=50
+customPalette <- function(midpoint, lowColor, highPalette) {
+  # Assuming the scale is from 0 to 100, adjust if your data range is different
+  scaleValues <- seq(0, 100, length.out = length(highPalette) + 1)
+  customPalette <- c(lowColor, highPalette)
+  names(customPalette) <- scaleValues
+  return(customPalette)
+}
+
+# Using the custom function to create a new palette
+newPalette <- customPalette(midpoint = 50, lowColor = "red", highPalette = komorowskiPalette)
+
+breaks <- seq(0, 100, by = 10)
+labels <- c("Duda (100-90)", "Duda 90-80", "Duda 80-70", "Duda 70-60", "60-50", "50-60", "60-70", "70-80", "80-90", "90-100")
+colorPalette <- brewer.pal(10, "Spectral")  # Adjust based on the number of breaks/categories
+
+tm_shape(data) +
+  tm_fill(col = "II_Komorowski_share", 
+          title = "2. Round Vote Share",
+          palette = colorPalette, 
+          breaks = breaks, 
+          labels = labels,
+          style = "fixed") +
+  tm_layout(legend.position = c("left", "bottom"), scale = 0.9)
 ```
 
 We now investigate possible issues with voting envelopes. To uncover any potential oddiities regarding postal voting in the second round, we calculate the share of postal votes received over the postal voting packages that were sent in. A low share indicates that a lot of postal votes were not counted. This might be preliminary evidence into some sort of inconsistency or even fraud.
@@ -459,11 +494,14 @@ pol_pres15$II_Envelope_Proportion <- pol_pres15$II_postal_voting_envelopes_recei
 n_colors <- 7  # Number of colors you want in the palette
 reversed_palette <- viridis(n_colors, direction = -1)  # Reverse the palette
 
+pol_pres15$II_Envelope_Proportion <- ifelse(is.na(pol_pres15$II_Envelope_Proportion), 1.1, pol_pres15$II_Envelope_Proportion)
+
 tm_shape(pol_pres15) +
   tm_fill(col = "II_Envelope_Proportion",
           title = "Share of Postal Vote Envelopes Received",
-          palette = reversed_palette) +  # Use the reversed palette
-  tm_layout(legend.position = c("left", "bottom"))
+          palette = reversed_palette,
+          labels = c("0-0.2","0.2-0.4", "0.4-0.6", "0.6-0.8", "0.8-1", "No Postal Votes")) + 
+  tm_layout(legend.position = c("left", "bottom"), legend.outside = TRUE)
 ```
 The figure shows districts in higher darkblue, green, or yellow if the share of postal votes that were received was lower. There seems to be no systematic relationship between any districts and candidate allegiance. Thus, we conclude that there is no indirect evidence for inconsistencies in the postal voting system based on this measure. 
 
@@ -476,7 +514,7 @@ tm_shape(pol_pres15) +
   tm_fill(col = "II_voters_sent_postal_voting_package",
           title = "Absolute number of Postal Voting Envelopes Sent",
           palette = reversed_palette) +  # Use the reversed palette
-  tm_layout(legend.position = c("left", "bottom"))
+  tm_layout(legend.position = c("left", "bottom"), legend.outside = TRUE)
 ```
 
 
