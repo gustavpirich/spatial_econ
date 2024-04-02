@@ -184,8 +184,12 @@ Notice that We get a directed acyclic graph (DAG), for which eigenvector central
 Lets consider the case of removing US:
 
 ```{r, echo=FALSE, fig.align='center'}
-#agents[-1]
-plot(graph_from_adjacency_matrix(adj[-1,-1]),vertex.size = 30, main="Trade network excl. US",edge.arrow.size = 0.7)
+
+plot(graph_from_adjacency_matrix(adj[-1,-1]), 
+     vertex.size = 30, 
+     main="Trade network excl. US",
+     edge.arrow.size = 0.7)
+
 ```
 
 Based on Inflowing arrows, China becomes the most central agent and India, Austria and Mexico the least central agents. 
@@ -345,7 +349,6 @@ shp_merged_filter <- shp_merged %>%
 ```
 
 ```{r, echo = FALSE, warning=FALSE, fig.align='center'}
-# Your existing code for plotting
 ggplot(data = shp_merged_filter) +
   geom_sf(aes(fill = ag_value_added_1)) + 
   scale_fill_viridis_c(name = "Millions EUR",
@@ -444,12 +447,43 @@ tm_shape(data) +
   tm_layout(legend.position = c("left", "bottom"), scale = 0.6)
 ```
 
+We now investigate possible issues with voting envelopes. To uncover any potential oddiities regarding postal voting in the second round, we calculate the share of postal votes received over the postal voting packages that were sent in. A low share indicates that a lot of postal votes were not counted. This might be preliminary evidence into some sort of inconsistency or even fraud.
 
-## Possible Issues with voting envelopes
+```{r}
+pol_pres15$II_Envelope_Proportion <- pol_pres15$II_postal_voting_envelopes_received / pol_pres15$II_voters_sent_postal_voting_package
+```
 
-The next map is showing possible issues with voting envelopes. Specifically, we wanted to investigate if all envelopes sent were also received. If the number of envelopes received is equal to the number of the envelopes sent, the municipality is visualized green. If the municipality is visualized in grey, that means that there were no voting envelopes used for the election. If a municipality is red however, that indicates that the total number of envelopes sent is higher than the number of envelopes received (at a threshold off 99 percent). That indicates that there were probably issues with the delievery of the voting envelopes. We can observe red clusters especially in urban regions (Warsaw, Katowice and Krakow). An interesting side fact however is that one can clearly see that in urban areas, voting envelopes were used more often than in rural areas of Poland:
 
-```{r pol_pres15$Envelope_Proportion, echo=FALSE}
+```{r, echo=FALSE, fig.align='center'}
+# Generate a reversed viridis color palette
+n_colors <- 7  # Number of colors you want in the palette
+reversed_palette <- viridis(n_colors, direction = -1)  # Reverse the palette
+
+tm_shape(pol_pres15) +
+  tm_fill(col = "II_Envelope_Proportion",
+          title = "Share of Postal Vote Envelopes Received",
+          palette = reversed_palette) +  # Use the reversed palette
+  tm_layout(legend.position = c("left", "bottom"))
+```
+The figure shows districts in higher darkblue, green, or yellow if the share of postal votes that were received was lower. There seems to be no systematic relationship between any districts and candidate allegiance. Thus, we conclude that there is no indirect evidence for inconsistencies in the postal voting system based on this measure. 
+
+However, note that the map above disguises the low absolute number of votes in some districts. We see that the overall number of postal votes sent is very low in most districts and thus the inconsistencies can be driven by only a few incorrectly sent postal votes. 
+```{r, echo=FALSE, fig.align='center'}
+n_colors <- 7  # Number of colors you want in the palette
+reversed_palette <- viridis(n_colors)  # Reverse the palette
+
+tm_shape(pol_pres15) +
+  tm_fill(col = "II_voters_sent_postal_voting_package",
+          title = "Absolute number of Postal Voting Envelopes Sent",
+          palette = reversed_palette) +  # Use the reversed palette
+  tm_layout(legend.position = c("left", "bottom"))
+```
+
+
+
+We check if all envelopes that were sent, were also received. If the number of envelopes received is equal to the number of the envelopes sent, the municipality is coloured as green. If the municipality is visualized in grey, that means that there were no voting envelopes used for the election. If a municipality is red however, that indicates that the total number of envelopes sent is higher than the number of envelopes received (at a threshold off 99 percent). That indicates that there were probably issues with the delievery of the voting envelopes. We can observe red clusters especially in urban regions (Warsaw, Katowice and Krakow). An interesting side fact however is that one can clearly see that in urban areas, voting envelopes were used more often than in rural areas of Poland:
+
+```{r, echo=FALSE}
 # Calculate the proportion of postal voting envelopes received to postal voting packages sent
 pol_pres15$Envelope_Proportion <- pol_pres15$I_postal_voting_envelopes_received / pol_pres15$I_voters_sent_postal_voting_package
 pol_pres15$II_Envelope_Proportion <- pol_pres15$II_postal_voting_envelopes_received / pol_pres15$II_voters_sent_postal_voting_package
@@ -461,15 +495,5 @@ threshold <- 0.99
 
 # Create a new column indicating possible issues with postal voting envelopes based on the proportion
 pol_pres15$Envelope_Issues <- ifelse(pol_pres15$II_Envelope_Proportion < threshold, "Possible Issues", "No Issues")
-
-# Visualization investigating possible issues with postal voting envelopes
-tm_shape(pol_pres15) + 
-  tm_fill(col = "Envelope_Issues", palette = c("blue", "orange"),
-          title = "Postal voting Received") +
-  tm_layout(legend.position = c("left", "bottom"))
 ```
-
-
-
-
 
