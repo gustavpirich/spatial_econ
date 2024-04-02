@@ -23,6 +23,15 @@ geometry: margin = 2cm
 urlcolor: DarkOrchid!65!black
 ---
 
+\vspace{2em}
+
+\begin{tcolorbox}
+\centering \itshape The code is available on GitHub at \url{https://github.com/gustavpirich/spatial_econ/blob/main/assignment_1/assignment1.Rmd}.
+\end{tcolorbox}
+
+\newpage
+
+
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 install.packages("spDataLarge", repos = "https://geocompr.r-universe.dev")
@@ -209,7 +218,7 @@ Based on inflowing arrows, China becomes the most central agent and India, Austr
 
 Similarly to above, eigenvector centrality is undefined since there is a sink - Germany.
 
-```{r, eval=FALSE}
+```{r, eval=FALSE, include = FALSE}
 eigen_centrality(
   graph_from_adjacency_matrix(adj[-1,-1]),
   directed = TRUE,
@@ -362,7 +371,7 @@ ggplot(data = shp_merged_filter) +
   geom_sf(aes(fill = ag_value_added_1)) + 
   scale_fill_viridis_c(name = "Millions EUR",
                        option = "D") + 
-  labs(title = "Agricultural Value Added by NUTS-2 Region in 2021") +
+  labs(title = "Agricultural Value Added by NUTS-2 Region (2021)") +
   theme_minimal() +
   theme(legend.position = "bottom") +
   theme(legend.position = "bottom",
@@ -390,7 +399,7 @@ shp_merged_filter_1 <- shp_merged_filter %>%
 map <- ggplot(data = shp_merged_filter_1) +
   geom_sf(aes(fill = share_bins)) +
   scale_fill_viridis_d(name = "Millions EUR", option = "D") + # 'option' can be "C" for the default viridis palette, or "A", "B", "D", "E" for other variants
-  labs(title = "Binned Agricultural Value Added per NUTS-2 Region in 2021") +
+  labs(title = "Agricultural Value Added per NUTS-2 Region (2021)") +
   theme_minimal() +
   theme(legend.position = "bottom",
         legend.text = element_text(size = 5), # Decrease text size
@@ -441,8 +450,8 @@ pol_pres15$Support <- ifelse(pol_pres15$I_Komorowski_share > pol_pres15$I_Duda_s
 # Visualization comparing support for Komorowski and Duda in the first round
 tm_shape(pol_pres15) + 
   tm_fill(col = "Support", style = "cat", palette = "RdYlBu", 
-          title = "Majority for Candidate in Second Round") +
-  tm_layout(legend.position = c("left", "bottom"), legend.outside = TRUE)
+          title = "2. Round Majority") +
+  tm_layout(legend.position = c("left", "bottom"), scale = 0.9, legend.outside = TRUE)
 ```
 
 ```{r, echo = FALSE}
@@ -504,7 +513,7 @@ tm_shape(pol_pres15) +
           title = "Share of PVE actually counted",
           palette = reversed_palette,
           labels = c("0-0.2","0.2-0.4", "0.4-0.6", "0.6-0.8", "0.8-1", "No Postal Votes")) + 
-  tm_layout(legend.position = c("left", "bottom"), legend.outside = TRUE)
+  tm_layout(legend.position = c("left", "bottom"), scale = 0.9, legend.outside = TRUE)
 ```
 The figure shows districts in higher darkblue, green, or yellow if the share of postal votes that were received was lower. There seems to be no systematic relationship between any districts and candidate allegiance. We conclude that there is no evidence for inconsistencies in the postal voting system based on this measure. 
 
