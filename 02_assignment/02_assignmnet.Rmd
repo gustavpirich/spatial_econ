@@ -24,13 +24,68 @@ knitr::opts_chunk$set(tidy.opts = list(width.cutoff = 80), tidy = TRUE)
 knitr::opts_chunk$set(warning = FALSE, message = FALSE) 
 library(showtext)
 showtext_auto()
+
+library(sf)
+library(rgeos)
+library(tidyverse)
+library(tmap)
+library(viridis)
+
 ```
 
 \vspace{2em}
 
 \begin{tcolorbox}
-\centering \itshape The executable code that was used in compiling the assignment is available on GitHub at \url{https://github.com/maxmheinze/spatial}.
+\centering \itshape The code that was used in compiling the assignment is available on GitHub at \url{https://github.com/gustavpirich/spatial_econ/blob/main/02_assignment/02_assignmnet.Rmd}.
 \end{tcolorbox}
 
 \newpage
+
+# Exercise A
+
+We download the relevant data, and select the respective regions and variables.
+```{r, echo = FALSE}
+#reading in spatial dimension of productivity growth
+load("~/Desktop/GITHUB/spatial_econ/data/02_assignmnet/Assignment___export/data1.rda")
+
+#reading in Shapefile of EU-27
+EU27 <- read_sf("~/Desktop/GITHUB/spatial_econ/data/02_assignmnet/Assignment___export/EU27.shp")
+
+# we can also exclude all oversea territories
+overseas <- c("FRY1", "FRY2", "FRY3", "FRY4", "FRY5", "FRZZ", 
+              "PT20", "PT30", "PTZZ", 
+              "ES70", "ESZZ", 
+              "NO0B", "NOZZ")
+EU27 <- EU27[! EU27$Id %in% overseas, ]
+
+EU27
+  
+data1 <- data1[! data1$IDb %in% overseas, ]
+
+data_1 <- data1 %>%
+  filter(substr(IDb, 1, 2) %in% c("AT", "DE", "IT", "PT", "FR", "ES")) %>%
+  select(IDb, pr80b, pr103b, lninv1b, lndens.empb) %>%
+  rename("Id" = "IDb") 
+
+data_1$prod_growth <- (data_1$pr103b - data_1$pr80b) / data_1$pr80b
+
+EU27 <- EU27 %>%
+  filter(substr(Id, 1, 2) %in% c("AT", "DE", "IT", "PT", "FR", "ES")) %>%
+  left_join(data_1, by = c("Id"))
+```
+## Calculate the growth rate of productivity from 1980 to 2013 and create a map that shows the productivity growth for each region. 
+
+```{r}
+tm_shape(EU27) +
+  tm_fill("prod_growth", 
+          id = "Name",
+          style = "cont", # Treat data as continuous
+          na.color = NA, # Exclude NA values by not coloring those regions
+          title = "Productivity Growth") +
+  tm_borders() + 
+  tm_layout(title = "Europe's Productivity Growth Rate 1980-2003",
+            title.position = c("left", "top")) +
+  tm_legend(position = c("left", "bottom"))
+
+```
 
