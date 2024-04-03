@@ -83,12 +83,56 @@ tm_shape(EU27) +
   tm_layout(frame = TRUE, bg.color = "lightblue") 
 ```
 
-## Generate three different spatial weights matrixes using (i) a distance threshold, (ii) smooth distance-decay, and iii) a contiguity-based measure.
+## Generate three different spatial weights matrixes using (i) a distance threshold, (ii) smooth distance-decay, and iii) a contiguity-based measure. 
 
 
 ### (i) Distance Threshold 
 We first create a spatial weights matrix based on the distance threshold: 
-```{r}
 
+```{r}
+coords <- st_coordinates(st_centroid(EU27))
+
+distw <- dnearneigh(coords, 0, 10, row.names=EU27$Id)
+summary(distw)
+
+#plot(coords)
+#plot(distw, coords, add=TRUE, col="green", cex=0.1)
+
+# Create a distance threshold spatial weights matrix
+thresh_dist <- 10  # Threshold distance in km 
+dist_w <- dnearneigh(coords, 0, thresh_dist)
+dist_w_matrix <- nb2mat(dist_w, style="W", zero.policy=TRUE)
 ```
 
+### (ii) Smooth-Distance Decay 
+We now create a spatial weights matrix based on a smooth distance-decaqy
+```{r}
+
+# Calculate distances between all pairs
+distances <- sp::spDists(coords, longlat=TRUE)
+# Apply a distance decay function (inverse distance in this case)
+decay_function <- function(d) exp(-0.01*d)
+decay_weights_matrix <- decay_function(distances)
+
+decay_weights_matrix <- decay_weights_matrix - diag(nrow(decay_weights_matrix))
+```
+
+### (iii) Contiguity-based measure 
+```{r}
+# Create a contiguity-based spatial weights matrix
+contig_w <- poly2nb(EU27)
+contig_w_matrix <- nb2mat(contig_w, style="W", zero.policy=TRUE)
+```
+
+## Compare teh matrices; use your knowledge of graph theory and linear algebra
+
+
+
+## Plot the matrix
+```{r, fig.width=5, fig.height=4}
+image(dist_w_matrix, main="Distance Threshold Spatial Weights Matrix")
+
+image(decay_weights_matrix, main="Smooth Distance-Decay Spatial Weights Matrix")
+
+image(contig_w_matrix, main="Contiguity-Based Spatial Weights Matrix")
+```
