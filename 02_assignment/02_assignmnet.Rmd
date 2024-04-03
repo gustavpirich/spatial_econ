@@ -30,7 +30,7 @@ library(tidyverse)
 library(tmap)
 library(viridis)
 library(spdep)
-
+library(igraph)
 ```
 
 \vspace{2em}
@@ -55,6 +55,9 @@ overseas <- c("FRY1", "FRY2", "FRY3", "FRY4", "FRY5", "FRZZ",
               "PT20", "PT30", "PTZZ", 
               "ES70", "ESZZ", 
               "NO0B", "NOZZ")
+
+east_germany_nuts2 <- c("DE40", "DE80", "DED3", "DED2", "DED1","DE42", "DE41", "DE30", "DED5", "DEE0", "DEG0", "DEE3", "DEE2", "DEE1")
+
 EU27 <- EU27[! EU27$Id %in% overseas, ]
   
 data1 <- data1[! data1$IDb %in% overseas, ]
@@ -62,13 +65,16 @@ data1 <- data1[! data1$IDb %in% overseas, ]
 data_1 <- data1 %>%
   filter(substr(IDb, 1, 2) %in% c("AT", "DE", "IT", "PT", "FR", "ES")) %>%
   select(IDb, pr80b, pr103b, lninv1b, lndens.empb) %>%
-  rename("Id" = "IDb") 
+  rename("Id" = "IDb") %>%
+  filter(!Id %in% east_germany_nuts2)
 
 data_1$prod_growth <- (data_1$pr103b - data_1$pr80b) / data_1$pr80b
 
 EU27 <- EU27 %>%
   filter(substr(Id, 1, 2) %in% c("AT", "DE", "IT", "PT", "FR", "ES")) %>%
+  filter(!Id %in% east_germany_nuts2) %>%
   left_join(data_1, by = c("Id"))
+
 ```
 ## Calculate the growth rate of productivity from 1980 to 2013 and create a map that shows the productivity growth for each region. 
 
@@ -124,7 +130,7 @@ contig_w <- poly2nb(EU27)
 contig_w_matrix <- nb2mat(contig_w, style="W", zero.policy=TRUE)
 ```
 
-## Compare teh matrices; use your knowledge of graph theory and linear algebra
+## Compare the matrices; use your knowledge of graph theory and linear algebra
 
 
 
@@ -136,3 +142,43 @@ image(decay_weights_matrix, main="Smooth Distance-Decay Spatial Weights Matrix")
 
 image(contig_w_matrix, main="Contiguity-Based Spatial Weights Matrix")
 ```
+
+```{r}
+# Convert to igraph objects for graph analysis
+graph_dist <- graph_from_adjacency_matrix(dist_w_matrix, mode = "undirected", weighted = TRUE)
+graph_decay <- graph_from_adjacency_matrix(as.matrix(decay_weights_matrix), mode = "undirected", weighted = TRUE)
+graph_contig <- graph_from_adjacency_matrix(contig_w_matrix, mode = "undirected", weighted = TRUE)
+
+# Function to summarize graph properties
+summarize_graph <- function(g) {
+  cat("Number of vertices:", vcount(g), "\n")
+  cat("Number of edges:", ecount(g), "\n")
+  cat("Average path length:", average.path.length(g, directed = FALSE), "\n")
+  cat("Graph density:", edge_density(g), "\n")
+  cat("Average degree:", mean(degree(g)), "\n")
+  cat("Components:", components(g)$no, "\n")
+}
+
+# Analyze graph properties
+cat("Distance Threshold Graph:\n")
+summarize_graph(graph_dist)
+cat("\nSmooth Distance-Decay Graph:\n")
+summarize_graph(graph_decay)
+cat("\nContiguity-Based Graph:\n")
+summarize_graph(graph_contig)
+```
+## Compute a suitable measure of spatial autocorrelation for productivity growth using these matrices. Point out differences, if there are any. 
+
+```{r}
+
+# Convert the matrix to a listw object
+your_weights <- mat2listw(decay_weights_matrix)
+
+# Compute Global Moran's I
+moran_result <- moran.test(na.omit(EU27$prod_growth), listw = your_weights)
+
+# Print the results
+print(moran_result)
+
+```
+
