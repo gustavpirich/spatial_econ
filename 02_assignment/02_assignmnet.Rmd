@@ -127,7 +127,10 @@ decay_weights_matrix <- decay_weights_matrix - diag(nrow(decay_weights_matrix))
 ```{r}
 # Create a contiguity-based spatial weights matrix
 contig_w <- poly2nb(EU27)
-contig_w_matrix <- nb2mat(contig_w, style="W", zero.policy=TRUE)
+contig_w_matrix <- nb2mat(queen_weights, style="W", zero.policy=TRUE)
+
+queen_weights <- poly2nb(EU27, queen = TRUE)
+
 ```
 
 ## Compare the matrices; use your knowledge of graph theory and linear algebra
@@ -172,10 +175,14 @@ summarize_graph(graph_contig)
 ```{r}
 
 # Convert the matrix to a listw object
+your_weights <- mat2listw(dist_w_matrix)
+
 your_weights <- mat2listw(decay_weights_matrix)
 
+your_weights <- mat2listw(contig_w_matrix)
+
 # Compute Global Moran's I
-moran_result <- moran.test(na.omit(EU27$prod_growth), listw = your_weights)
+moran_result <- moran.test((EU27$prod_growth), listw = your_weights)
 
 # Print the results
 print(moran_result)
