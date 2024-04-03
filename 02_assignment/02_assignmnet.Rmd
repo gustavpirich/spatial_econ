@@ -29,6 +29,8 @@ library(sf)
 library(tidyverse)
 library(tmap)
 library(viridis)
+library(spdep)
+
 ```
 
 \vspace{2em}
@@ -41,7 +43,6 @@ library(viridis)
 
 # Exercise A
 
-We download the relevant data, and select the respective regions and variables.
 ```{r, echo = FALSE}
 #reading in spatial dimension of productivity growth
 load("~/Desktop/GITHUB/spatial_econ/data/02_assignmnet/Assignment___export/data1.rda")
@@ -69,16 +70,25 @@ EU27 <- EU27 %>%
   filter(substr(Id, 1, 2) %in% c("AT", "DE", "IT", "PT", "FR", "ES")) %>%
   left_join(data_1, by = c("Id"))
 ```
-### Calculate the growth rate of productivity from 1980 to 2013 and create a map that shows the productivity growth for each region. 
+## Calculate the growth rate of productivity from 1980 to 2013 and create a map that shows the productivity growth for each region. 
+
+The map shows the productivity growth rates in the NUTS-2 regions for the selected countries. We can see that many regions especially in Germany, Austria, and France exhibited negative productivity growth over the selected time period. Notably, Portugal's productivity has been growing the fastest. We suspect that the negative growth rates can be explained by the fact that high-income countries had a high baseline productivity to being with, while Portugal had a low baseline productivity. This could be evidence of convergence among productivity differences across Europe.
 
 ```{r,echo = FALSE}
 tm_shape(EU27) +
-  tm_fill("prod_growth",
-          style = "cont", # Treat data as continuous
-          title = "Productivity Growth") +
-  tm_borders(col = "black", lwd = 1.3) +  # Adjust border color and line width
-  tm_layout(title = "Europe's Productivity Growth Rate 1980-2003",
-            title.position = c("center", "top")) +
-  tm_legend(position = c("left", "bottom"), legend.outside = TRUE)
+  tm_polygons("prod_growth",
+          style = "cont") +
+  tm_borders(col = "black", lwd = 2) +  # Adjust border color and line width
+  tm_legend(position = c("left", "bottom"), legend.outside = TRUE) +
+  tm_layout(frame = TRUE, bg.color = "lightblue") 
+```
+
+## Generate three different spatial weights matrixes using (i) a distance threshold, (ii) smooth distance-decay, and iii) a contiguity-based measure.
+
+
+### (i) Distance Threshold 
+We first create a spatial weights matrix based on the distance threshold: 
+```{r}
+
 ```
 
