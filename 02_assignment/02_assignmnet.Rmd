@@ -82,9 +82,10 @@ The map shows the productivity growth rates in the NUTS-2 regions for the select
 
 ```{r,echo = FALSE}
 tm_shape(EU27) +
-  tm_polygons("prod_growth",
-          style = "cont") +
-  tm_borders(col = "black", lwd = 2) +  # Adjust border color and line width
+  tm_polygons("prod_growth", 
+              title = "Productivity Growth",
+              style = "cont", 
+              lwd = 2) +
   tm_legend(position = c("left", "bottom"), legend.outside = TRUE) +
   tm_layout(frame = TRUE, bg.color = "lightblue") 
 ```
@@ -127,10 +128,9 @@ decay_weights_matrix <- decay_weights_matrix - diag(nrow(decay_weights_matrix))
 ```{r}
 # Create a contiguity-based spatial weights matrix
 contig_w <- poly2nb(EU27)
-contig_w_matrix <- nb2mat(queen_weights, style="W", zero.policy=TRUE)
-
 queen_weights <- poly2nb(EU27, queen = TRUE)
 
+contig_w_matrix <- nb2mat(queen_weights, style="B", zero.policy=TRUE)
 ```
 
 ## Compare the matrices; use your knowledge of graph theory and linear algebra
@@ -175,17 +175,28 @@ summarize_graph(graph_contig)
 ```{r}
 
 # Convert the matrix to a listw object
-your_weights <- mat2listw(dist_w_matrix)
+l_dist_w_matrix <- mat2listw(dist_w_matrix)
 
-your_weights <- mat2listw(decay_weights_matrix)
+l_decay_weights_matrix <- mat2listw(decay_weights_matrix)
 
-your_weights <- mat2listw(contig_w_matrix)
+l_contig_w_matrix <- mat2listw(contig_w_matrix, zero.policy = TRUE)
 
 # Compute Global Moran's I
 moran_result <- moran.test((EU27$prod_growth), listw = your_weights)
 
 # Print the results
 print(moran_result)
+
+```
+## Estiamte a linear regression model using OLS. 
+```{r}
+sm <- lm(prod_growth ~ pr80b + lninv1b + lndens.empb, EU27)
+
+moran.plot(sm$residuals, l_dist_w_matrix)
+
+moran.plot(sm$residuals, l_decay_weights_matrix)
+
+moran.plot(sm$residuals, l_contig_w_matrix)
 
 ```
 
