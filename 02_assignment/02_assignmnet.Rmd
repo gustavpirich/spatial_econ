@@ -127,6 +127,22 @@ decay_function <- function(d) exp(-1*d)
 decay_weights_matrix <- decay_function(distances)
 
 decay_weights_matrix <- decay_weights_matrix - diag(nrow(decay_weights_matrix))
+
+
+
+
+coo <- st_centroid(EU27)
+nb <- poly2nb(coo, queen = TRUE)
+dists <- nbdists(nb, coo)
+ids <- lapply(dists, function(x){1/x})
+
+nbw <- nb2listw(nb, glist = ids, style = "B")
+nbw$weights[1:3]
+
+m2 <- listw2mat(nbw)
+lattice::levelplot(t(m2),
+scales = list(y = list(at = c(10, 20, 30, 40),
+                       labels = c(10, 20, 30, 40))))
 ```
 
 ### (iii) Contiguity-based measure 
