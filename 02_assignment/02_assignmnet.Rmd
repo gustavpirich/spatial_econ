@@ -100,30 +100,21 @@ We first create a spatial weights matrix based on the distance threshold:
 ```{r}
 coords <- st_coordinates(st_centroid(EU27))
 
+#checking the maximum distance  
 nb1 <- knn2nb(knearneigh(coords, k = 1))
 
 dist1 <- nbdists(nb1, coords)
 summary(unlist(dist1))
 
+
 distw <- dnearneigh(coords, 0, 3, row.names=EU27$Id)
 summary(distw)
 
-nb <- poly2nb(EU27, queen = TRUE)
-nblags <- spdep::nblag(neighbours = nb, maxlag = 2)
-
-# Neighbors of first order
-plot(st_geometry(EU27), border = "lightgray")
-plot.nb(nblags[[1]], st_geometry(EU27), add = TRUE)
-
-# Neighbors of second order
-plot(st_geometry(map), border = "lightgray")
-
-plot.nb(nblags[[2]], st_geometry(map), add = TRUE)
+#creating matrix based on distance threshold up to 3 kilometers
+dist_w_matrix <- nb2mat(dist_w, style="W", zero.policy=TRUE)
 
 plot(EU27$geometry)
 plot(distw, coords, add=TRUE, col="blue", cex=0.1)
-
-dist_w_matrix <- nb2mat(dist_w, style="W", zero.policy=TRUE)
 ```
 
 ### (ii) Smooth-Distance Decay 
