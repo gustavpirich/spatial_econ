@@ -219,17 +219,22 @@ moran_result_contig <- moran.test((EU27$prod_growth), listw = l_contig_w_matrix)
 summary(moran_result_dist, moran_result_decay, moran_result_contig)
 
 ```
-## Estiamte a linear regression model using OLS. 
+## Estimate a linear regression model using OLS. 
 ```{r,echo = FALSE}
 sm <- lm(prod_growth ~ pr80b + lninv1b + lndens.empb, EU27)
 
-stargazer::stargazer(sm)
+stargazer::stargazer(sm, output) %>%
+  tidy() %>%
+  kable(
+    caption = "Coefficient-Level Estimates for a Model Fitted to Estimate Variation in Peer Ratings.",
+    col.names = c("Predictor", "B", "SE", "t", "p"),
+    digits = c(0, 2, 3, 2, 3)
+  )
 
 moran.plot(sm$residuals, l_dist_w_matrix)
 
 moran.plot(sm$residuals, l_decay_weights_matrix)
 
 moran.plot(sm$residuals, l_contig_w_matrix)
-
 ```
 
