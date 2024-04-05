@@ -145,7 +145,7 @@ contig_w_matrix <- nb2mat(queen_weights, style="W", zero.policy=TRUE)
 ## Compare the matrices; use your knowledge of graph theory and linear algebra
 ```{r,echo = FALSE}
 # Convert to igraph objects for graph analysis
-graph_dist <- graph_from_adjacency_matrix(dist_w_matrix, mode = "undirected", weighted = TRUE)
+graph_dist <- graph_from_adjacency_matrix(dist_w_matrix, mode = "undirected", weighted = TRUE, add.rownames = "code")
 graph_decay <- graph_from_adjacency_matrix((decay_weights_matrix), mode = "undirected")
 graph_contig <- graph_from_adjacency_matrix(contig_w_matrix, mode = "undirected", weighted = TRUE)
 
@@ -202,6 +202,7 @@ Each graph type, therefore, offers distinct advantages and drawbacks, depending 
 
 
 ## Plot the matrix
+We now plot the three spatial weight matrices. We see that the distance decay weight matrix is symmetric. The distance decay matrix is 
 ```{r, echo = FALSE, fig.align = 'center', fig.width=5, fig.height=4}
 # Plotting each matrix
 image(dist_w_matrix, main="Distance Threshold Spatial Weights Matrix")
@@ -221,9 +222,13 @@ image(contig_w_matrix, main="Contiguity-Based Spatial Weights Matrix")
 ```
 ## Try to visualize the network they represent
 
-Let us first visualize the distance based spatial matrix. 
+Let us first visualize the distance based spatial matrix. The first plot shows the map of Europe and the blue lines indicate the connections. The map shows the connectivity in Europe based on the distance threshold. 
+
+The second map visualizes the network based on the distance decay matrix. However, the edges do not display the intensity of connections, but just the connectivity to neighboring regions. 
+
+The last map displays the queen contiguity based measure. Interestingly, the islands in the middle sea are not being counted as neighbors. This should caution the use of this network,m as it seems implausible that Silicy for example is mainland italian provinces.  
 ```{r,echo = FALSE}
-plot(EU27$geometry, border = "darkgrey")
+plot(EU27$geometry, border = "darkgrey", main = "Distance Threshold")
 plot(distw, coords, add=TRUE, col="blue", pch = 19, cex = 0.6)
 
 plot(EU27$geometry, border = "darkgrey")
@@ -235,6 +240,7 @@ plot(queen_weights, coords, pch = 19, cex = 0.6, add = TRUE, col = "red")
 
 ## Compute a suitable measure of spatial autocorrelation for productivity growth using these matrices. Point out differences, if there are any. 
 
+We calculate Global Moran's I as a measure of spatial autocorrelation for all three spatial weight matrices.  All three matrices display the strong positive spatial autocorrelation between 0.62 - 0.54, which are all highly statistically significant with p-values < 0.01. Thus there is strong evidence for the presence of sizeable levels of spatial autocorrelation. This result is robust to the choice of the spatial weights matrix. 
 ```{r,echo = FALSE}
 # Convert the matrix to a listw object
 l_dist_w_matrix <- mat2listw(dist_w_matrix, style = "B", zero.policy = TRUE)
@@ -251,11 +257,14 @@ moran_result_decay <- moran.test((EU27$prod_growth), listw = l_decay_weights_mat
 moran_result_contig <- moran.test((EU27$prod_growth), listw = l_contig_w_matrix)
 
 # Print the results
-summary(moran_result_dist, moran_result_decay, moran_result_contig)
+moran_result_dist
 
+moran_result_decay
+
+moran_result_contig
 ```
 ## Estimate a linear regression model using OLS. 
-
+We estimate the specified model and obtain the following output.
 \begin{table}[!htbp] \centering 
   \caption{} 
   \label{} 
@@ -293,12 +302,12 @@ F Statistic & 36.983$^{***}$ (df = 3; 99) \\
 ```{r,echo = FALSE}
 sm <- lm(prod_growth ~ pr80b + lninv1b + lndens.empb, EU27)
 
+# Set layout to 2x2 and adjust margins and label orientation
 #stargazer::stargazer(sm, type = "latex")
+moran.plot(sm$residuals, l_dist_w_matrix, xlab = "Residuals", ylab = "Spatially Lagged Residuals")
 
-moran.plot(sm$residuals, l_dist_w_matrix)
+moran.plot(sm$residuals, l_decay_weights_matrix, xlab = "Residuals", ylab = "Spatially Lagged Residuals")
 
-moran.plot(sm$residuals, l_decay_weights_matrix)
-
-moran.plot(sm$residuals, l_contig_w_matrix)
+moran.plot(sm$residuals, l_contig_w_matrix, xlab = "Residuals", ylab = "Spatially Lagged Residuals")
 ```
 
