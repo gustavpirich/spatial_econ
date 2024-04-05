@@ -143,7 +143,7 @@ contig_w_matrix <- nb2mat(queen_weights, style="W", zero.policy=TRUE)
 ```
 
 ## Compare the matrices; use your knowledge of graph theory and linear algebra
-```{r,eval = FALSE}
+```{r,echo = FALSE}
 # Convert to igraph objects for graph analysis
 graph_dist <- graph_from_adjacency_matrix(dist_w_matrix, mode = "undirected", weighted = TRUE)
 graph_decay <- graph_from_adjacency_matrix((decay_weights_matrix), mode = "undirected")
@@ -156,8 +156,20 @@ summarize_graph <- function(g) {
   cat("Average path length:", average.path.length(g, directed = FALSE), "\n")
   cat("Graph density:", edge_density(g), "\n")
   cat("Average degree:", mean(degree(g)), "\n")
-  #cat("Components:", components(g)$no, "\n")
+  
+  # Compute Eigenvector Centrality
+  ec <- eigen_centrality(g)
+  cat("Max Eigenvector Centrality:", max(ec$vector), "\n")
+  cat("Min Eigenvector Centrality:", min(ec$vector), "\n")
+  cat("Average Eigenvector Centrality:", mean(ec$vector), "\n")
+  
+  # Identify the most central unit
+  max_centrality_index <- which.max(ec$vector)
+  most_central_unit <- V(g)[max_centrality_index]
+  cat("Most Central Unit (Vertex ID):", as.numeric(most_central_unit), "\n")
+  cat("Most Central Unit (Vertex Name):", V(g)$name[max_centrality_index], "\n")
 }
+
 
 # Analyze graph properties
 cat("Distance Threshold Graph:\n")
@@ -167,7 +179,7 @@ summarize_graph(graph_decay)
 cat("\nContiguity-Based Graph:\n")
 summarize_graph(graph_contig)
 ```
-We compare the matrices based on a set of characteristics. All three graphs have 103 vertices, which means they represent the same number of spatial units or locations. This allows for a direct comparison of other attributes since the baseline (number of vertices) is constant across the graphs. Distance Threshold Graph has 514 edges, indicating a higher level of connections between vertices compared to the other two. This suggests that many vertices are within the distance threshold to be considered neighbors.
+We compare the matrices based on a set of characteristics.The Distance Threshold Graph has 514 edges, indicating a higher level of connections between vertices compared to the other two. This suggests that many vertices are within the distance threshold to be considered neighbors.
 Smooth Distance-Decay 
 Graph has only 40 edges, significantly fewer than the other graphs. This implies a much stricter criterion for considering two vertices to be connected, likely reflecting a much tighter control over distance decay effects. Contiguity-Based Graph strikes a balance with 222 edges, suggesting its connectivity criteria (likely based on shared boundaries or proximities) result in a moderate level of connections.
 Average Path Length 
@@ -190,24 +202,22 @@ Each graph type, therefore, offers distinct advantages and drawbacks, depending 
 
 
 ## Plot the matrix
-```{r, fig.width=5, fig.height=4}
+```{r, echo = FALSE, fig.align = 'center', fig.width=5, fig.height=4}
+# Plotting each matrix
 image(dist_w_matrix, main="Distance Threshold Spatial Weights Matrix")
-
 image(decay_weights_matrix, main="Smooth Distance-Decay Spatial Weights Matrix")
-
 image(contig_w_matrix, main="Contiguity-Based Spatial Weights Matrix")
+#lattice::levelplot(t(dist_w_matrix),
+#scales = list(y = list(at = c(10, 30, 50, 70),
+#                       labels = c(10, 20, 30, 40))))
 
-lattice::levelplot(t(dist_w_matrix),
-scales = list(y = list(at = c(10, 30, 50, 70),
-                       labels = c(10, 20, 30, 40))))
+#lattice::levelplot(t(decay_weights_matrix),
+#scales = list(y = list(at = c(10, 30, 50, 70),
+#                       labels = c(10, 20, 30, 40))))
 
-lattice::levelplot(t(decay_weights_matrix),
-scales = list(y = list(at = c(10, 30, 50, 70),
-                       labels = c(10, 20, 30, 40))))
-
-lattice::levelplot(t(contig_w_matrix),
-scales = list(y = list(at = c(10, 30, 50, 70),
-                       labels = c(10, 20, 30, 40))))
+#lattice::levelplot(t(contig_w_matrix),
+#scales = list(y = list(at = c(10, 30, 50, 70),
+#                       labels = c(10, 20, 30, 40))))
 ```
 ## Try to visualize the network they represent
 
