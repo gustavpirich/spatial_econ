@@ -32,6 +32,7 @@ library(viridis)
 library(spdep)
 library(igraph)
 library(spdep)
+library(generics)
 ```
 
 \vspace{2em}
@@ -95,7 +96,7 @@ tm_shape(EU27) +
 
 
 ### (i) Distance Threshold 
-First, we create a spatial weights matrix based on the distance threshold criterion. Any region is being assigned a '1', if the center of any other region is less than 3 km away. Note that we have chosen this value so that every region has a neighbor. We use the nb2mat function from the 'spdep' package. We directly row-normalize the matrix.
+First, we create a binary distance threshol spatial weights matrix based. Any region is being assigned a '1', if the center of any other region is less than 3 km away. Note that we have chosen this value so that every region has a neighbor. We use the nb2mat function from the 'spdep' package. We row-normalize the matrix.
 
 ```{r, echo = FALSE}
 coords <- st_coordinates(st_centroid(EU27))
@@ -114,25 +115,27 @@ dist_w_matrix <- nb2mat(distw, style="W", zero.policy=TRUE)
 
 
 ### (ii) Smooth-Distance Decay 
-Next, we create a spatial weights matrix based on a smooth distance-decay. We use the negative exponential decay function $w_{i, j} (d) = exp(-d)$. We calculate the weights for each neighboring region based on the k=2 nearest neighbors. We do not row-normalize the matrix.
+Next, we create a spatial weights matrix based on a smooth distance-decay. We use the following simple distance decay function $w_{i, j} (d) = 1/d$. We calculate the weights for each neighboring region based on the k=1 nearest neighbors. We do not row-normalize the matrix.
 
 ```{r, echo = FALSE}
-#nb <- poly2nb(EU27, queen = TRUE)
+wm_q <- poly2nb(EU27, queen = TRUE, row.names = EU27$Id)
 
-k2 <- knn2nb(knearneigh(coords, k = 1), row.names = EU27$Id)
+#summary(wm_q)
 
-dists <- nbdists(k2, coords)
+#k2 <- knn2nb(knearneigh(coords, k = 1), row.names = EU27$Id)
+
+dists <- nbdists(wm_q, coords)
+
 ids <- lapply(dists, function(d){1/d})
 
-decay_weights_matrix_list <- nb2listw(k2, glist = ids, style = "B", zero.policy = TRUE)
+decay_weights_matrix_list <- nb2listw(wm_q, glist = ids, style = "B", zero.policy = TRUE)
 
-summary(decay_weights_matrix_list)
 decay_weights_matrix <- listw2mat(decay_weights_matrix_list)
 ```
 
 ### (iii) Contiguity-based measure
 Finally, we calculate a contiguity based measure, which we row normalize as well.
-```{r}
+```{r, echo = FALSE}
 # Create a contiguity-based spatial weights matrix
 queen_weights <- poly2nb(EU27, queen = TRUE, row.names = EU27$Id)
 
@@ -140,7 +143,50 @@ contig_w_matrix <- nb2mat(queen_weights, style="W", zero.policy=TRUE)
 ```
 
 ## Compare the matrices; use your knowledge of graph theory and linear algebra
+```{r,eval = FALSE}
+# Convert to igraph objects for graph analysis
+graph_dist <- graph_from_adjacency_matrix(dist_w_matrix, mode = "undirected", weighted = TRUE)
+graph_decay <- graph_from_adjacency_matrix((decay_weights_matrix), mode = "undirected")
+graph_contig <- graph_from_adjacency_matrix(contig_w_matrix, mode = "undirected", weighted = TRUE)
 
+# Function to summarize graph properties
+summarize_graph <- function(g) {
+  cat("Number of vertices:", vcount(g), "\n")
+  cat("Number of edges:", ecount(g), "\n")
+  cat("Average path length:", average.path.length(g, directed = FALSE), "\n")
+  cat("Graph density:", edge_density(g), "\n")
+  cat("Average degree:", mean(degree(g)), "\n")
+  #cat("Components:", components(g)$no, "\n")
+}
+
+# Analyze graph properties
+cat("Distance Threshold Graph:\n")
+summarize_graph(graph_dist)
+cat("\nSmooth Distance-Decay Graph:\n")
+summarize_graph(graph_decay)
+cat("\nContiguity-Based Graph:\n")
+summarize_graph(graph_contig)
+```
+We compare the matrices based on a set of characteristics. All three graphs have 103 vertices, which means they represent the same number of spatial units or locations. This allows for a direct comparison of other attributes since the baseline (number of vertices) is constant across the graphs. Distance Threshold Graph has 514 edges, indicating a higher level of connections between vertices compared to the other two. This suggests that many vertices are within the distance threshold to be considered neighbors.
+Smooth Distance-Decay 
+Graph has only 40 edges, significantly fewer than the other graphs. This implies a much stricter criterion for considering two vertices to be connected, likely reflecting a much tighter control over distance decay effects. Contiguity-Based Graph strikes a balance with 222 edges, suggesting its connectivity criteria (likely based on shared boundaries or proximities) result in a moderate level of connections.
+Average Path Length 
+Distance Threshold Graph shows a very low average path length (0.6750662), meaning that, on average, vertices are closely connected, allowing for short paths between them.
+Smooth Distance-Decay Graph has a much higher average path length (4.531818), indicating that paths between vertices are generally longer, reflecting the sparse connections.
+Contiguity-Based Graph has an average path length (1.288804), which is between the other two, suggesting moderate ease of movement across the graph compared to the other types.
+Graph Density
+Distance Threshold Graph has a density of 0.09784885, which is higher than the others, reflecting its higher number of edges and suggesting a relatively dense network.
+Smooth Distance-Decay Graph is the sparsest, with a density of 0.007614696, aligning with its fewer edges and longer path lengths.
+Contiguity-Based Graph has a density of 0.04226156, which, while lower than the distance threshold graph, suggests a moderately dense network, possibly due to its criteria for connections.
+Average Degree
+Distance Threshold Graph has a high average degree (9.980583), suggesting that, on average, each vertex is directly connected to about 10 other vertices, indicating a high level of connectivity.
+Smooth Distance-Decay Graph has a low average degree (0.776699), showing that each vertex is connected to less than one vertex on average, emphasizing its sparse nature.
+Contiguity-Based Graph has an average degree of 4.31068, indicating moderate connectivity among its vertices.
+Comparison Summary
+Connectivity: The Distance Threshold Graph is the most connected, followed by the Contiguity-Based Graph, with the Smooth Distance-Decay Graph being the least connected.
+Cohesion: Measured by average path length and graph density, the Distance Threshold Graph shows the highest cohesion, indicating that it's easier to traverse between any two vertices. The Smooth Distance-Decay Graph has the lowest cohesion, with the Contiguity-Based Graph in the middle.
+Application Suitability: The Distance Threshold Graph may be best suited for scenarios where the emphasis is on the close and dense connections between locations. The Smooth Distance-Decay Graph might be preferred for studies focusing on the impact of distance, favoring sparse connections that significantly weaken with distance. The Contiguity-Based Graph could be suitable for applications where geographical contiguity or proximity is a primary concern, such as regional planning.
+Each graph type, therefore, offers distinct advantages and drawbacks, depending on the specific requirements of your spatial analysis or modeling efforts.
 
 
 ## Plot the matrix
@@ -168,36 +214,15 @@ scales = list(y = list(at = c(10, 30, 50, 70),
 Let us first visualize the distance based spatial matrix. 
 ```{r,echo = FALSE}
 plot(EU27$geometry, border = "darkgrey")
-plot(distw, coords, add=TRUE, col="lightblue", alpha = 0.5, cex=0.1)
+plot(distw, coords, add=TRUE, col="blue", pch = 19, cex = 0.6)
 
 plot(EU27$geometry, border = "darkgrey")
-plot(decay_weights_matrix_list, coords, add=TRUE, col= "red", alpha = 0.5, cex=0.1)
+plot(decay_weights_matrix_list, coords, add=TRUE, col= "red", pch = 19, cex = 0.6)
+
+plot(EU27$geometry, border = 'darkgrey') 
+plot(queen_weights, coords, pch = 19, cex = 0.6, add = TRUE, col = "red")
 ```
 
-```{r,echo = FALSE}
-# Convert to igraph objects for graph analysis
-graph_dist <- graph_from_adjacency_matrix(dist_w_matrix, mode = "undirected", weighted = TRUE)
-graph_decay <- graph_from_adjacency_matrix((decay_weights_matrix), mode = "undirected")
-graph_contig <- graph_from_adjacency_matrix(contig_w_matrix, mode = "undirected", weighted = TRUE)
-
-# Function to summarize graph properties
-summarize_graph <- function(g) {
-  cat("Number of vertices:", vcount(g), "\n")
-  cat("Number of edges:", ecount(g), "\n")
-  cat("Average path length:", average.path.length(g, directed = FALSE), "\n")
-  cat("Graph density:", edge_density(g), "\n")
-  cat("Average degree:", mean(degree(g)), "\n")
-  cat("Components:", components(g)$no, "\n")
-}
-
-# Analyze graph properties
-cat("Distance Threshold Graph:\n")
-summarize_graph(graph_dist)
-cat("\nSmooth Distance-Decay Graph:\n")
-summarize_graph(graph_decay)
-cat("\nContiguity-Based Graph:\n")
-summarize_graph(graph_contig)
-```
 ## Compute a suitable measure of spatial autocorrelation for productivity growth using these matrices. Point out differences, if there are any. 
 
 ```{r,echo = FALSE}
@@ -220,16 +245,45 @@ summary(moran_result_dist, moran_result_decay, moran_result_contig)
 
 ```
 ## Estimate a linear regression model using OLS. 
+
+\begin{table}[!htbp] \centering 
+  \caption{} 
+  \label{} 
+\begin{tabular}{@{\extracolsep{5pt}}lc} 
+\\[-1.8ex]\hline 
+\hline \\[-1.8ex] 
+ & \multicolumn{1}{c}{\textit{Dependent variable:}} \\ 
+\cline{2-2} 
+\\[-1.8ex] & prod\_growth \\ 
+\hline \\[-1.8ex] 
+ pr80b & $-$0.253$^{***}$ \\ 
+  & (0.025) \\ 
+  & \\ 
+ lninv1b & 0.032$^{***}$ \\ 
+  & (0.008) \\ 
+  & \\ 
+ lndens.empb & 0.007 \\ 
+  & (0.009) \\ 
+  & \\ 
+ Constant & 0.314$^{***}$ \\ 
+  & (0.061) \\ 
+  & \\ 
+\hline \\[-1.8ex] 
+Observations & 103 \\ 
+R$^{2}$ & 0.528 \\ 
+Adjusted R$^{2}$ & 0.514 \\ 
+Residual Std. Error & 0.080 (df = 99) \\ 
+F Statistic & 36.983$^{***}$ (df = 3; 99) \\ 
+\hline 
+\hline \\[-1.8ex] 
+\textit{Note:}  & \multicolumn{1}{r}{$^{*}$p$<$0.1; $^{**}$p$<$0.05; $^{***}$p$<$0.01} \\ 
+\end{tabular} 
+\end{table} 
+
 ```{r,echo = FALSE}
 sm <- lm(prod_growth ~ pr80b + lninv1b + lndens.empb, EU27)
 
-stargazer::stargazer(sm, output) %>%
-  tidy() %>%
-  kable(
-    caption = "Coefficient-Level Estimates for a Model Fitted to Estimate Variation in Peer Ratings.",
-    col.names = c("Predictor", "B", "SE", "t", "p"),
-    digits = c(0, 2, 3, 2, 3)
-  )
+#stargazer::stargazer(sm, type = "latex")
 
 moran.plot(sm$residuals, l_dist_w_matrix)
 
