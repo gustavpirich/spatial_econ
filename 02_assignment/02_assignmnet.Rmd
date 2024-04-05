@@ -303,6 +303,7 @@ F Statistic & 36.983$^{***}$ (df = 3; 99) \\
 sm <- lm(prod_growth ~ pr80b + lninv1b + lndens.empb, EU27)
 
 # Set layout to 2x2 and adjust margins and label orientation
+par(1,1)
 #stargazer::stargazer(sm, type = "latex")
 moran.plot(sm$residuals, l_dist_w_matrix, xlab = "Residuals", ylab = "Spatially Lagged Residuals")
 
