@@ -33,6 +33,8 @@ library(spdep)
 library(igraph)
 library(spdep)
 library(generics)
+library(knitr)
+library(kableExtra)
 ```
 
 \vspace{2em}
@@ -227,14 +229,16 @@ Let us first visualize the distance based spatial matrix. The first plot shows t
 The second map visualizes the network based on the distance decay matrix. However, the edges do not display the intensity of connections, but just the connectivity to neighboring regions. 
 
 The last map displays the queen contiguity based measure. Interestingly, the islands in the middle sea are not being counted as neighbors. This should caution the use of this network,m as it seems implausible that Silicy for example is mainland italian provinces.  
-```{r,echo = FALSE}
+```{r,echo = FALSE, fig.width=9, fig.height=13, fig.align='center'}
+par(mfrow = c(3, 1), las=1)
+
 plot(EU27$geometry, border = "darkgrey", main = "Distance Threshold")
 plot(distw, coords, add=TRUE, col="blue", pch = 19, cex = 0.6)
 
-plot(EU27$geometry, border = "darkgrey")
-plot(decay_weights_matrix_list, coords, add=TRUE, col= "red", pch = 19, cex = 0.6)
+plot(EU27$geometry, border = "darkgrey", main = "Distance Decay")
+plot(decay_weights_matrix_list, coords, add=TRUE, col= "green", pch = 19, cex = 0.6)
 
-plot(EU27$geometry, border = 'darkgrey') 
+plot(EU27$geometry, border = 'darkgrey', main = "Queen Contiguity") 
 plot(queen_weights, coords, pch = 19, cex = 0.6, add = TRUE, col = "red")
 ```
 
@@ -256,12 +260,28 @@ moran_result_decay <- moran.test((EU27$prod_growth), listw = l_decay_weights_mat
 
 moran_result_contig <- moran.test((EU27$prod_growth), listw = l_contig_w_matrix)
 
-# Print the results
-moran_result_dist
+# Create a data frame to hold the summarized results
+moran_summary <- data.frame(
+  Test = c("Distance Threshold", "Smooth Distance-Decay", "Contiguity-Based"),
+  Moran_I = c(moran_result_dist$estimate["Moran I statistic"], 
+              moran_result_decay$estimate["Moran I statistic"], 
+              moran_result_contig$estimate["Moran I statistic"]),
+  Expectation = c(moran_result_dist$estimate["Expectation"], 
+                  moran_result_decay$estimate["Expectation"], 
+                  moran_result_contig$estimate["Expectation"]),
+  Variance = c(moran_result_dist$estimate["Variance"], 
+               moran_result_decay$estimate["Variance"], 
+               moran_result_contig$estimate["Variance"]),
+  p_value = c(moran_result_dist$p.value, 
+              moran_result_decay$p.value, 
+              moran_result_contig$p.value)
+)
 
-moran_result_decay
-
-moran_result_contig
+# Format and print the table
+kable(moran_summary, "latex", digits = 4, booktabs = TRUE) %>%
+  kable_styling(latex_options = c("striped", "scale_down")) %>%
+  column_spec(1, bold = TRUE, border_right = TRUE) %>%
+  column_spec(5, color = ifelse(moran_summary$p_value < 0.05, "red", "black"))
 ```
 ## Estimate a linear regression model using OLS. 
 We estimate the specified model and obtain the following output.
@@ -299,11 +319,13 @@ F Statistic & 36.983$^{***}$ (df = 3; 99) \\
 \end{tabular} 
 \end{table} 
 
-```{r,echo = FALSE}
+We observe strong evidence for spatial autocorrelation. This holds for all spatial weights matrices used. The different weighting schemes highlight differnt countries. Thus the neglect fo this spatial dimension might give rise to bias in the OLS estimated coefficients.  
+
+```{r,echo = FALSE, fig.width=9, fig.height=13, fig.align='center'}
 sm <- lm(prod_growth ~ pr80b + lninv1b + lndens.empb, EU27)
 
 # Set layout to 2x2 and adjust margins and label orientation
-par(1,1)
+par(mfrow = c(3, 1), las=1)
 #stargazer::stargazer(sm, type = "latex")
 moran.plot(sm$residuals, l_dist_w_matrix, xlab = "Residuals", ylab = "Spatially Lagged Residuals")
 
