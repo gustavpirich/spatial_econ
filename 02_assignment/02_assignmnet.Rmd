@@ -51,10 +51,10 @@ library(haven)
 
 ```{r, echo = FALSE}
 #reading in spatial dimension of productivity growth
-load("~/Desktop/GITHUB/spatial_econ/data/02_assignmnet/Assignment___export/data1.rda")
+load("~/Desktop/GITHUB/spatial_econ/data/02_assignmnet/export/data1.rda")
 
 #reading in Shapefile of EU-27
-EU27 <- read_sf("~/Desktop/GITHUB/spatial_econ/data/02_assignmnet/Assignment___export/EU27.shp")
+EU27 <- read_sf("~/Desktop/GITHUB/spatial_econ/data/02_assignmnet/export/EU27.shp")
 
 # we can also exclude all oversea territories
 overseas <- c("FRY1", "FRY2", "FRY3", "FRY4", "FRY5", "FRZZ", 
