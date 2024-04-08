@@ -340,7 +340,7 @@ moran.plot(sm$residuals, l_contig_w_matrix, xlab = "Residuals", ylab = "Spatiall
 
 ## Creating maps
 ```{r, echo = FALSE}
-literacy_Arg_Bra_Par <- read_dta("data/02_assignmnet/export/literacy_Arg-Bra-Par.dta", encoding = "ISO-8859-1")
+literacy_Arg_Bra_Par <- read_dta("~/Desktop/GITHUB/spatial_econ/data/02_assignmnet/export/literacy_Arg-Bra-Par.dta", encoding = "ISO-8859-1")
 
 #downloading the respective shapefiles take care of the file paths!!!
 
@@ -350,23 +350,32 @@ gadm41_ARG_2 <- read_sf("/Users/gustavpirich/Library/Mobile Documents/com~apple~
 
 gadm41_BRA_2 <- read_sf("/Users/gustavpirich/Library/Mobile Documents/com~apple~CloudDocs/Wirtschaftsuniversitaet/MASTER/summer_term_2024/spatial_economics/data/boundaries/gadm41_BRA_shp/gadm41_BRA_2.shp")
 
-dat <- rbind(gadm41_PRY_2,gadm41_ARG_2,gadm41_BRA_2)
+dat_1 <- gadm41_BRA_2 %<>%
+  filter(NAME_1 %in% c("Rio Grande do Sul"))
 
-dat_1 <- dat %<>%
-  filter(NAME_1 %in% c("Misiones", "Corrientes", "Rio Grande do Sul", "Itapúa"))
+dat_2 <- gadm41_ARG_2 %<>%
+  filter(NAME_1 %in% c("Misiones", "Corrientes"))
 
-list_1 <- dat_1 %>%
-  select(COUNTRY, geometry, NAME_2) 
+dat_3 <- gadm41_PRY_2 %<>%
+  filter(NAME_1 %in% c("Misiones", "Itapúa"))
 
-literacy_Arg_Bra_Par <- literacy_Arg_Bra_Par %>%
+dat <- rbind(dat_1, dat_2, dat_3)
+
+list_1 <- dat %>%
+  select(COUNTRY, geometry, NAME_1, NAME_2) %>%
+  mutate(COUNTRY = ifelse(COUNTRY == "Brazil", "BRA", COUNTRY))
+
+literacy_Arg_Bra_Par_1 <- literacy_Arg_Bra_Par %>%
   rename("NAME_2" = "muni") %>%
   rename("COUNTRY" = "country")
 
 #merging the data
-literacy_Arg_Bra_Par_1 <- left_join(literacy_Arg_Bra_Par, list_1, by = c("NAME_2", "COUNTRY"))
+literacy_Arg_Bra_Par_2 <- left_join(literacy_Arg_Bra_Par_1, list_1, by = c("NAME_2", "COUNTRY"))
+
+tm_shape(literacy_Arg_Bra_Par_2) + 
+  tm_fill(literacy)
 ```
 
 ```{r}
-view(literacy_Arg_Bra_Par_1)
 
 ```
