@@ -26,6 +26,7 @@ library(showtext)
 showtext_auto()
 
 library(sf)
+library(magrittr)
 library(tidyverse)
 library(tmap)
 library(viridis)
@@ -351,7 +352,7 @@ gadm41_BRA_2 <- read_sf("/Users/gustavpirich/Library/Mobile Documents/com~apple~
 
 dat <- rbind(gadm41_PRY_2,gadm41_ARG_2,gadm41_BRA_2)
 
-dat_1 <- dat %>%
+dat_1 <- dat %<>%
   filter(NAME_1 %in% c("Misiones", "Corrientes", "Rio Grande do Sul", "Itapúa"))
 
 list_1 <- dat_1 %>%
