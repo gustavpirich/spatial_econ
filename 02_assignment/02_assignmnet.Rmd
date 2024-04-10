@@ -412,9 +412,9 @@ literacy_Arg_Bra_Par_2 <- list_1 %>%
 
 # Corrected country name and efficient use of tm_layout
 coords <- data.frame(
-  country = c("Argentina", "Brazil", "Paraguay"),
-  lon = c(-58, -55, -56), # Correct longitudes
-  lat = c(-29, -30, -26)  # Correct latitudes
+  country = c("ARGENTINA", "BRAZIL", "PARAGUAY", "URUGUAY"),
+  lon = c(-58, -55, -56, -56), # Correct longitudes
+  lat = c(-29, -30, -26, -33)  # Correct latitudes
 )
 
 # Convert to an sf object
@@ -429,9 +429,9 @@ map2 <- tm_shape(literacy_Arg_Bra_Par_2) +
   tm_borders(lwd = 3, col = "black") +
   tm_shape(coords_sf) +
   tm_text("country", size = 1,fontface="bold") +
-  tm_compass(type = "8star", position = c("right", "top")) +
+  #tm_compass(type = "8star", position = c("right", "top")) +
   tm_layout(frame = FALSE) +
-  tm_scale_bar(position = c(0.1, 0.8)) + 
+  tm_scale_bar(position = c(0.9, 0.8)) + 
   tm_shape(dat1) +
   tm_borders(lty = 2)
 
@@ -441,6 +441,6 @@ map2
 
 We now replicate table 2
 ```{r}
-summary(lm(illiteracy ~ distmiss + state, data = literacy_Arg_Bra_Par_2))
+summary(lm(illiteracy ~ distmiss + state, data = literacy_Arg_Bra_Par))
 ```
 
