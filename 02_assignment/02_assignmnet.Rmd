@@ -550,4 +550,6 @@ F Statistic & 3.370$^{***}$ (df = 7; 541) & 2.793$^{***}$ (df = 15; 532) & 6.880
 \end{tabular} 
 \end{table} 
 
+# Exercise C
+
 
