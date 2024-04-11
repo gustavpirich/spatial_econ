@@ -34,6 +34,7 @@ library(spdep)
 library(igraph)
 library(spdep)
 library(generics)
+library(stargazer)
 library(knitr)
 library(kableExtra)
 library(haven)
@@ -340,7 +341,7 @@ moran.plot(sm$residuals, l_contig_w_matrix, xlab = "Residuals", ylab = "Spatiall
 
 ## Creating maps
 ```{r, echo = FALSE}
-literacy_Arg_Bra_Par <- read_dta("./data/02_assignmnet/export/literacy_Arg-Bra-Par.dta", encoding = "ISO-8859-1")
+literacy_Arg_Bra_Par <- read_dta("~/Desktop/GITHUB/spatial_econ/data/02_assignmnet/export/literacy_Arg-Bra-Par.dta", encoding = "ISO-8859-1")
 
 #downloading the respective shapefiles take care of the file paths!!!
 gadm41_PRY_0 <- read_sf("/Users/gustavpirich/Library/Mobile Documents/com~apple~CloudDocs/Wirtschaftsuniversitaet/MASTER/summer_term_2024/spatial_economics/data/boundaries/gadm41_PRY_shp/gadm41_PRY_0.shp")
@@ -378,15 +379,18 @@ gadm41_PRY_2 %<>%
 
 dat2 <- rbind(gadm41_BRA_2, gadm41_ARG_2, gadm41_PRY_2)
 
-list_1 <- dat2 %>%
+list_2 <- dat2 %>%
   select(COUNTRY, geometry, NAME_1, NAME_2) %>%
-  mutate(COUNTRY = ifelse(COUNTRY == "Brazil", "BRA", COUNTRY))
+  mutate(country = ifelse(COUNTRY == "Brazil", "BRA", COUNTRY)) %>%
+  rename("muni" = "NAME_2") %>%
+  mutate(state = ifelse(NAME_1 == "Rio Grande do Sul", "RS", NAME_1)) 
+
 
 #merging the data
 #literacy_Arg_Bra_Par_2 <- left_join(literacy_Arg_Bra_Par_1, list_1, by = c("NAME_2", "COUNTRY"))
 
-literacy_Arg_Bra_Par_2 <- list_1 %>%
-  left_join(literacy_Arg_Bra_Par, by = c("NAME_2" = "muni"))
+literacy_Arg_Bra_Par_2 <- literacy_Arg_Bra_Par %>%
+  left_join(list_2, by = c("muni", "state", "country"))
 ```
 
 ```{r, echo = FALSE}
@@ -426,9 +430,9 @@ map2 <- tm_shape(literacy_Arg_Bra_Par_2) +
   tm_borders() +
   tm_legend(legend.outside = TRUE, position = c("right", "bottom")) + 
   tm_shape(dat0) + 
-  tm_borders(lwd = 3, col = "black") +
+  tm_borders(lwd = 3.5, col = "black") +
   tm_shape(coords_sf) +
-  tm_text("country", size = 1,fontface="bold") +
+  tm_text("country", size = 1.2) +
   #tm_compass(type = "8star", position = c("right", "top")) +
   tm_layout(frame = FALSE) +
   tm_scale_bar(position = c(0.9, 0.8)) + 
@@ -441,6 +445,109 @@ map2
 
 We now replicate table 2
 ```{r}
-summary(lm(illiteracy ~ distmiss + state, data = literacy_Arg_Bra_Par))
+mod1 <- lm(illiteracy ~ (lati) + (longi) + distmiss + state, data = literacy_Arg_Bra_Par_2)
+
+mod2 <- lm(illiteracy ~ (lati) + (longi) + distmiss + state + coast + river + slope + rugg + alti + tempe + preci + area, data = literacy_Arg_Bra_Par_2)
+
+
+bra <- literacy_Arg_Bra_Par_2 %>% 
+             filter(country == "BRA")
+
+mod3 <- lm(illiteracy ~ (lati) + (longi) + distmiss + mesorregi, data = bra)
+
+mod4 <- lm(illiteracy ~ (lati) + (longi) + distmiss + mesorregi + coast + river + slope + rugg + alti + tempe + preci + area, data = bra)
+
+
+arg <- literacy_Arg_Bra_Par_2 %>% 
+             filter(country == "Argentina")
+
+mod5 <- lm(illiteracy ~ (lati) + (longi) + distmiss, data = arg)
+
+mod6 <- lm(illiteracy ~ (lati) + (longi) + distmiss + coast + river + slope + rugg + alti + tempe + preci + area, data = arg)
+
+
+par <- literacy_Arg_Bra_Par_2 %>% 
+             filter(country == "Paraguay")
+
+mod7 <- lm(illiteracy ~ (lati) + (longi) + distmiss + state, data = par)
+
+mod8 <- lm(illiteracy ~ (lati) + (longi) + distmiss + state + coast + river + slope + rugg + alti + tempe + preci + area, data = par)
+
+stargazer(mod1, mod2, mod3, mod4, mod5, mod6, mod7, mod8)
+
 ```
+\begin{table}[!htbp] \centering 
+  \caption{} 
+  \label{} 
+\begin{tabular}{@{\extracolsep{5pt}}lcccccccc} 
+\\[-1.8ex]\hline 
+\hline \\[-1.8ex] 
+ & \multicolumn{8}{c}{\textit{Dependent variable:}} \\ 
+\cline{2-9} 
+\\[-1.8ex] & \multicolumn{8}{c}{illiteracy} \\ 
+\\[-1.8ex] & (1) & (2) & (3) & (4) & (5) & (6) & (7) & (8)\\ 
+\hline \\[-1.8ex] 
+ lati & 0.556$^{**}$ & 0.072 & 0.359 & 3.206$^{**}$ & 0.043 & $-$6.724$^{**}$ & 3.540$^{**}$ & $-$7.429 \\ 
+  & (0.251) & (0.782) & (0.403) & (1.473) & (0.643) & (2.599) & (1.622) & (4.381) \\ 
+  & & & & & & & & \\ 
+ longi & $-$1.108$^{***}$ & $-$1.007 & $-$1.716$^{***}$ & $-$5.054$^{***}$ & 0.054 & 6.704$^{***}$ & 0.298 & 20.866$^{***}$ \\ 
+  & (0.269) & (0.687) & (0.369) & (1.521) & (0.496) & (1.934) & (1.017) & (6.364) \\ 
+  & & & & & & & & \\ 
+ distmiss & 0.011$^{***}$ & 0.011$^{**}$ & 0.020$^{***}$ & 0.031$^{***}$ & 0.013 & 0.055$^{***}$ & $-$0.035 & $-$0.071$^{**}$ \\ 
+  & (0.004) & (0.005) & (0.006) & (0.008) & (0.008) & (0.019) & (0.023) & (0.029) \\ 
+  & & & & & & & & \\ 
+ stateItapúa & 2.154 & 3.619$^{**}$ &  &  &  &  &  &  \\ 
+  & (1.350) & (1.693) &  &  &  &  &  &  \\ 
+  & & & & & & & & \\ 
+ stateMisiones & 1.017 & 1.297 &  &  &  &  & 0.200 & $-$2.053 \\ 
+  & (1.572) & (1.865) &  &  &  &  & (1.481) & (1.661) \\ 
+  & & & & & & & & \\ 
+ stateMisiones1 & 2.061 & 3.733$^{**}$ &  &  &  &  &  &  \\ 
+  & (1.565) & (1.881) &  &  &  &  &  &  \\ 
+  & & & & & & & & \\ 
+ stateRS & 5.341$^{***}$ & 6.027$^{***}$ &  &  &  &  &  &  \\ 
+  & (1.521) & (1.798) &  &  &  &  &  &  \\ 
+  & & & & & & & & \\ 
+ coast &  & 0.209 &  & $-$3.864$^{**}$ &  & $-$0.764 &  & 21.631$^{***}$ \\ 
+  &  & (0.989) &  & (1.848) &  & (2.857) &  & (7.366) \\ 
+  & & & & & & & & \\ 
+ river &  & 1.465$^{**}$ &  & 1.645$^{**}$ &  & 10.574$^{***}$ &  & $-$4.913 \\ 
+  &  & (0.741) &  & (0.802) &  & (2.672) &  & (4.569) \\ 
+  & & & & & & & & \\ 
+ slope &  & $-$0.00001 &  & 0.00002 &  & $-$0.053$^{*}$ &  & $-$0.071$^{***}$ \\ 
+  &  & (0.0002) &  & (0.0002) &  & (0.028) &  & (0.021) \\ 
+  & & & & & & & & \\ 
+ rugg &  & $-$0.00000 &  & $-$0.00000 &  & 0.001$^{*}$ &  & 0.002$^{***}$ \\ 
+  &  & (0.00000) &  & (0.00000) &  & (0.001) &  & (0.001) \\ 
+  & & & & & & & & \\ 
+ alti &  & 0.006 &  & 0.005 &  & 0.062$^{***}$ &  & 0.038$^{**}$ \\ 
+  &  & (0.004) &  & (0.005) &  & (0.011) &  & (0.014) \\ 
+  & & & & & & & & \\ 
+ tempe &  & 0.058 &  & 0.057 &  & 0.915$^{***}$ &  & 0.842$^{***}$ \\ 
+  &  & (0.079) &  & (0.099) &  & (0.208) &  & (0.204) \\ 
+  & & & & & & & & \\ 
+ preci &  & $-$0.003 &  & $-$0.002 &  & $-$0.019$^{**}$ &  & $-$0.012$^{**}$ \\ 
+  &  & (0.002) &  & (0.002) &  & (0.007) &  & (0.005) \\ 
+  & & & & & & & & \\ 
+ area &  & 0.0001 &  & $-$0.0004 &  & $-$0.0003 &  & 0.002$^{***}$ \\ 
+  &  & (0.0002) &  & (0.0003) &  & (0.0002) &  & (0.001) \\ 
+  & & & & & & & & \\ 
+ mesorregi &  &  & $-$0.418$^{*}$ & $-$0.216 &  &  &  &  \\ 
+  &  &  & (0.216) & (0.261) &  &  &  &  \\ 
+  & & & & & & & & \\ 
+ Constant & $-$40.669$^{***}$ & $-$59.567 & 1,724.668$^{*}$ & 755.296 & 11.554 & 31.195 & 121.370$^{*}$ & 685.427$^{***}$ \\ 
+  & (13.191) & (36.199) & (919.888) & (1,111.741) & (20.002) & (72.708) & (60.387) & (208.813) \\ 
+  & & & & & & & & \\ 
+\hline \\[-1.8ex] 
+Observations & 549 & 548 & 467 & 467 & 42 & 42 & 40 & 39 \\ 
+R$^{2}$ & 0.042 & 0.073 & 0.056 & 0.095 & 0.099 & 0.695 & 0.145 & 0.652 \\ 
+Adjusted R$^{2}$ & 0.029 & 0.047 & 0.048 & 0.071 & 0.028 & 0.583 & 0.047 & 0.491 \\ 
+Residual Std. Error & 3.948 (df = 541) & 3.916 (df = 532) & 4.101 (df = 462) & 4.050 (df = 454) & 2.997 (df = 38) & 1.962 (df = 30) & 2.048 (df = 35) & 1.513 (df = 26) \\ 
+F Statistic & 3.370$^{***}$ (df = 7; 541) & 2.793$^{***}$ (df = 15; 532) & 6.880$^{***}$ (df = 4; 462) & 3.976$^{***}$ (df = 12; 454) & 1.396 (df = 3; 38) & 6.218$^{***}$ (df = 11; 30) & 1.482 (df = 4; 35) & 4.058$^{***}$ (df = 12; 26) \\ 
+\hline 
+\hline \\[-1.8ex] 
+\textit{Note:}  & \multicolumn{8}{r}{$^{*}$p$<$0.1; $^{**}$p$<$0.05; $^{***}$p$<$0.01} \\ 
+\end{tabular} 
+\end{table} 
+
 
