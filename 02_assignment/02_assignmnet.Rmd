@@ -25,19 +25,7 @@ knitr::opts_chunk$set(warning = FALSE, message = FALSE)
 library(showtext)
 showtext_auto()
 
-library(sf)
-library(magrittr)
-library(tidyverse)
-library(tmap)
-library(viridis)
-library(spdep)
-library(igraph)
-library(spdep)
-library(generics)
-library(stargazer)
-library(knitr)
-library(kableExtra)
-library(haven)
+p_load(sf, magrittr, tidyverse, tmap, viridis, spdep, igraph, generics, stargazer, knitr, kableExtra, haven)
 ```
 
 \vspace{2em}
@@ -75,7 +63,7 @@ data_1 <- data1 %>%
   rename("Id" = "IDb") %>%
   filter(!Id %in% east_germany_nuts2)
 
-data_1$prod_growth <- (data_1$pr103b - data_1$pr80b) / data_1$pr80b
+data_1$prod_growth <- 100*((data_1$pr103b - data_1$pr80b) / data_1$pr80b)
 
 EU27 <- EU27 %>%
   filter(substr(Id, 1, 2) %in% c("AT", "DE", "IT", "PT", "FR", "ES")) %>%
@@ -85,14 +73,15 @@ EU27 <- EU27 %>%
 ```
 ## Calculate the growth rate of productivity from 1980 to 2013 and create a map that shows the productivity growth for each region. 
 
-The map shows the productivity growth rates in the NUTS-2 regions for the selected countries. We can see that many regions especially in Germany, Austria, and France exhibited negative productivity growth over the selected time period. Notably, Portugal's productivity has been growing the fastest. We suspect that the negative growth rates can be explained by the fact that high-income countries had a high baseline productivity to being with, while Portugal had a low baseline productivity. This could be evidence of convergence among productivity differences across Europe.
+The map shows the productivity growth rates in NUTS-2 regions for the selected countries. We can see that many regions especially in West Germany, Austria, and France exhibited negative productivity growth over the selected period. Notably, Portugal's productivity has been growing the fastest. We suspect that the negative growth rates can be explained by the fact that high-income countries had a high baseline productivity to begin with, while Portugal started from a rather low baseline productivity. Thus we can interpret this as productivity convergence across Europe.
 
 ```{r,echo = FALSE}
 tm_shape(EU27) +
   tm_polygons("prod_growth", 
-              title = "Productivity Growth",
+              title = "Productivity Growth in %",
               style = "cont", 
-              lwd = 2) +
+              lwd = 2, 
+              midpoint =10) +
   tm_legend(position = c("left", "bottom"), legend.outside = TRUE) +
   tm_layout(frame = TRUE, bg.color = "lightblue") 
 ```
@@ -101,7 +90,7 @@ tm_shape(EU27) +
 
 
 ### (i) Distance Threshold 
-First, we create a binary distance threshol spatial weights matrix based. Any region is being assigned a '1', if the center of any other region is less than 3 km away. Note that we have chosen this value so that every region has a neighbor. We use the nb2mat function from the 'spdep' package. We row-normalize the matrix.
+First, we create a binary distance threshold spatial weights matrix based. Any region is being assigned a '1' with respect to another region, if it is less than 3 km away. We have chosen this threshold so that every region has a neighbor. We use the nb2mat function from the 'spdep' package. We row-normalize the matrix.
 
 ```{r, echo = FALSE}
 coords <- st_coordinates(st_centroid(EU27))
@@ -112,7 +101,7 @@ nb1 <- knn2nb(knearneigh(coords, k = 1))
 dist1 <- nbdists(nb1, coords)
 summary(unlist(dist1))
 
-distw <- dnearneigh(coords, 0, 3, row.names=EU27$Id)
+distw <- dnearneigh(coords, 0, 3)
 
 #creating matrix based on distance threshold up to 3 kilometers
 dist_w_matrix <- nb2mat(distw, style="W", zero.policy=TRUE)
@@ -120,20 +109,17 @@ dist_w_matrix <- nb2mat(distw, style="W", zero.policy=TRUE)
 
 
 ### (ii) Smooth-Distance Decay 
-Next, we create a spatial weights matrix based on a smooth distance-decay. We use the following simple distance decay function $w_{i, j} (d) = 1/d$. We calculate the weights for each neighboring region based on the k=1 nearest neighbors. We do not row-normalize the matrix.
+Next, we create a spatial weights matrix based on a smooth distance-decay. We use the following simple distance decay function $w_{i, j} (d) = 1/d$. We calculate the weights for each neighboring region based on the k=20 nearest neighbors. We do not row-normalize the matrix.
 
 ```{r, echo = FALSE}
-wm_q <- poly2nb(EU27, queen = TRUE, row.names = EU27$Id)
+k1 <- knearneigh(coords, k=20)
+k2 <- knn2nb(k1)
 
-#summary(wm_q)
-
-#k2 <- knn2nb(knearneigh(coords, k = 1), row.names = EU27$Id)
-
-dists <- nbdists(wm_q, coords)
+dists <- nbdists(k2, coords)
 
 ids <- lapply(dists, function(d){1/d})
 
-decay_weights_matrix_list <- nb2listw(wm_q, glist = ids, style = "B", zero.policy = TRUE)
+decay_weights_matrix_list <- nb2listw(k2, glist = ids, style = "B", zero.policy = TRUE)
 
 decay_weights_matrix <- listw2mat(decay_weights_matrix_list)
 ```
@@ -142,7 +128,7 @@ decay_weights_matrix <- listw2mat(decay_weights_matrix_list)
 Finally, we calculate a contiguity based measure, which we row normalize as well.
 ```{r, echo = FALSE}
 # Create a contiguity-based spatial weights matrix
-queen_weights <- poly2nb(EU27, queen = TRUE, row.names = EU27$Id)
+queen_weights <- poly2nb(EU27, queen = TRUE)
 
 contig_w_matrix <- nb2mat(queen_weights, style="W", zero.policy=TRUE)
 ```
@@ -150,8 +136,8 @@ contig_w_matrix <- nb2mat(queen_weights, style="W", zero.policy=TRUE)
 ## Compare the matrices; use your knowledge of graph theory and linear algebra
 ```{r,echo = FALSE, results = "asis"}
 # Convert to igraph objects for graph analysis
-graph_dist <- graph_from_adjacency_matrix(dist_w_matrix, mode = "undirected", weighted = TRUE, add.rownames = "code")
-graph_decay <- graph_from_adjacency_matrix((decay_weights_matrix), mode = "undirected")
+graph_dist <- graph_from_adjacency_matrix(dist_w_matrix, mode = "undirected", weighted = TRUE)
+graph_decay <- graph_from_adjacency_matrix((decay_weights_matrix), mode = "undirected", weighted = TRUE)
 graph_contig <- graph_from_adjacency_matrix(contig_w_matrix, mode = "undirected", weighted = TRUE)
 
 # Function to summarize graph properties
@@ -172,7 +158,6 @@ summarize_graph <- function(g) {
   max_centrality_index <- which.max(ec$vector)
   most_central_unit <- V(g)[max_centrality_index]
   cat("Most Central Unit (Vertex ID):", as.numeric(most_central_unit), "\n")
-  cat("Most Central Unit (Vertex Name):", V(g)$name[max_centrality_index], "\n")
 }
 
 
@@ -184,46 +169,52 @@ summarize_graph(graph_decay)
 cat("\nContiguity-Based Graph:\n")
 summarize_graph(graph_contig)
 ```
-We compare the matrices based on a set of characteristics.The Distance Threshold Graph has 514 edges, indicating a higher level of connections between vertices compared to the other two. This suggests that many vertices are within the distance threshold to be considered neighbors.
-Smooth Distance-Decay 
-Graph has only 40 edges, significantly fewer than the other graphs. This implies a much stricter criterion for considering two vertices to be connected, likely reflecting a much tighter control over distance decay effects. Contiguity-Based Graph strikes a balance with 222 edges, suggesting its connectivity criteria (likely based on shared boundaries or proximities) result in a moderate level of connections.
-Average Path Length 
-Distance Threshold Graph shows a very low average path length (0.6750662), meaning that, on average, vertices are closely connected, allowing for short paths between them.
-Smooth Distance-Decay Graph has a much higher average path length (4.531818), indicating that paths between vertices are generally longer, reflecting the sparse connections.
-Contiguity-Based Graph has an average path length (1.288804), which is between the other two, suggesting moderate ease of movement across the graph compared to the other types.
-Graph Density
-Distance Threshold Graph has a density of 0.09784885, which is higher than the others, reflecting its higher number of edges and suggesting a relatively dense network.
-Smooth Distance-Decay Graph is the sparsest, with a density of 0.007614696, aligning with its fewer edges and longer path lengths.
-Contiguity-Based Graph has a density of 0.04226156, which, while lower than the distance threshold graph, suggests a moderately dense network, possibly due to its criteria for connections.
-Average Degree
-Distance Threshold Graph has a high average degree (9.980583), suggesting that, on average, each vertex is directly connected to about 10 other vertices, indicating a high level of connectivity.
-Smooth Distance-Decay Graph has a low average degree (0.776699), showing that each vertex is connected to less than one vertex on average, emphasizing its sparse nature.
-Contiguity-Based Graph has an average degree of 4.31068, indicating moderate connectivity among its vertices.
-Comparison Summary
-Connectivity: The Distance Threshold Graph is the most connected, followed by the Contiguity-Based Graph, with the Smooth Distance-Decay Graph being the least connected.
-Cohesion: Measured by average path length and graph density, the Distance Threshold Graph shows the highest cohesion, indicating that it's easier to traverse between any two vertices. The Smooth Distance-Decay Graph has the lowest cohesion, with the Contiguity-Based Graph in the middle.
-Application Suitability: The Distance Threshold Graph may be best suited for scenarios where the emphasis is on the close and dense connections between locations. The Smooth Distance-Decay Graph might be preferred for studies focusing on the impact of distance, favoring sparse connections that significantly weaken with distance. The Contiguity-Based Graph could be suitable for applications where geographical contiguity or proximity is a primary concern, such as regional planning.
-Each graph type, therefore, offers distinct advantages and drawbacks, depending on the specific requirements of your spatial analysis or modeling efforts.
+We compare the matrices based on a set of characteristics. We compare the row-normalized matrices for the queen contiguity and distance threshold matrix. Note that normalization procedure does not preserve the structure of the network. 
+
+**Number of edges**
+
+The Smooth Distance-Decay Graph has the most edges (1266). The Distance Threshold Graph has fewer edges (514) than the Smooth Distance-Decay Graph, implying stricter criteria for edge creation based on a fixed distance threshold. The Contiguity-Based Graph has the fewest edges (222), since only directly contiguous or neighboring entities are connected, leading to a more sparse graph structure.
+
+**Average path length**
+
+The Contiguity-Based Graph has the highest average path length (1.2888), reflecting the sparse connectivity where nodes are less directly connected.
+The Distance Threshold Graph has a medium average path length (0.6751).
+The Smooth Distance-Decay Graph has the lowest average path length (0.4933), indicative of a denser network where nodes are more directly accessible to one another.
+
+**Graph density**
+
+Consistent with the number of edges, the Smooth Distance-Decay Graph is the densest (0.2410), followed by the Distance Threshold Graph (0.0978), with the Contiguity-Based Graph being the least dense (0.0423).
+
+**Average degree**
+
+Again, the Smooth Distance-Decay Graph shows the highest average degree (24.5825), the Distance Threshold Graph shows a medium degree (9.9806), and the Contiguity-Based Graph has the lowest (4.3107).
+
+**Minimum Eigenvector Centrality**
+
+The Contiguity-Based Graph shows the most significant variation in centrality (minimum near zero), reflecting a few very poorly connected nodes, or nodes that only connect to other low-influence nodes. The Smooth Distance-Decay Graph and the Distance Threshold Graph have higher minimum values, indicating a more uniform distribution of node influence.
+
+**Average Eigenvector Centrality**
+
+Higher on average in the Smooth Distance-Decay Graph (0.2837), suggesting that, on average, nodes are better positioned or more influential within the network.
+It's lowest in the Contiguity-Based Graph (0.0898), consistent with its sparse and uneven connectivity.
+
+Looking at the most central unit through eigenvector centrality shows that different nodes are identified as most central in each graph, reflecting the impact of the underlying connection logic on the perceived importance or centrality of nodes.
 
 
 ## Plot the matrix
 We now plot the three spatial weight matrices. We see that the distance decay weight matrix is symmetric. The distance decay matrix is 
 ```{r, echo = FALSE, fig.align = 'center', fig.width=5, fig.height=4}
-# Plotting each matrix
-image(dist_w_matrix , main="Distance Threshold Spatial Weights Matrix")
-image(decay_weights_matrix, main="Smooth Distance-Decay Spatial Weights Matrix")
-image(contig_w_matrix, main="Contiguity-Based Spatial Weights Matrix")
-#lattice::levelplot(t(dist_w_matrix),
-#scales = list(y = list(at = c(10, 30, 50, 70),
-#                       labels = c(10, 20, 30, 40))))
+lattice::levelplot((dist_w_matrix), main="Distance Threshold Spatial Weights Matrix",
+scales = list(x = list(at = c(20, 40, 60, 80, 100),
+                       labels = c(20, 40, 60, 80, 100))))
 
-#lattice::levelplot(t(decay_weights_matrix),
-#scales = list(y = list(at = c(10, 30, 50, 70),
-#                       labels = c(10, 20, 30, 40))))
+lattice::levelplot((decay_weights_matrix), main="Smooth Distance-Decay Spatial Weights Matrix",
+scales = list(x = list(at = c(20, 40, 60, 80, 100),
+                       labels = c(20, 40, 60, 80, 100))))
 
-#lattice::levelplot(t(contig_w_matrix),
-#scales = list(y = list(at = c(10, 30, 50, 70),
-#                       labels = c(10, 20, 30, 40))))
+lattice::levelplot((contig_w_matrix), main="Contiguity-Based Spatial Weights Matrix",
+scales = list(x = list(at = c(20, 40, 60, 80, 100),
+                       labels = c(20, 40, 60, 80, 100))))
 ```
 ## Try to visualize the network they represent
 
@@ -231,7 +222,7 @@ Let us first visualize the distance based spatial matrix. The first plot shows t
 
 The second map visualizes the network based on the distance decay matrix. However, the edges do not display the intensity of connections, but just the connectivity to neighboring regions. 
 
-The last map displays the queen contiguity based measure. Interestingly, the islands in the middle sea are not being counted as neighbors. This should caution the use of this network,m as it seems implausible that Silicy for example is mainland italian provinces.  
+The last map displays the queen contiguity based measure. The islands in the middle sea are not being counted as neighbors. This should caution the use of this network, as it seems implausible that Siciliy for example is not connected to the mainland Italian provinces.  
 ```{r,echo = FALSE, fig.width=9, fig.height=13, fig.align='center'}
 par(mfrow = c(3, 1), las=1)
 
