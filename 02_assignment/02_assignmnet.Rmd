@@ -92,14 +92,13 @@ tm_shape(EU27) +
 ### (i) Distance Threshold 
 First, we create a binary distance threshold spatial weights matrix based. Any region is being assigned a '1' with respect to another region, if it is less than 3 km away. We have chosen this threshold so that every region has a neighbor. We use the nb2mat function from the 'spdep' package. We row-normalize the matrix.
 
-```{r, echo = FALSE}
+```{r}
 coords <- st_coordinates(st_centroid(EU27))
 
 #checking the maximum distance as to include all observations which have a matrix   
 nb1 <- knn2nb(knearneigh(coords, k = 1))
 
 dist1 <- nbdists(nb1, coords)
-summary(unlist(dist1))
 
 distw <- dnearneigh(coords, 0, 3)
 
@@ -109,9 +108,9 @@ dist_w_matrix <- nb2mat(distw, style="W", zero.policy=TRUE)
 
 
 ### (ii) Smooth-Distance Decay 
-Next, we create a spatial weights matrix based on a smooth distance-decay. We use the following simple distance decay function $w_{i, j} (d) = 1/d$. We calculate the weights for each neighboring region based on the k=20 nearest neighbors. We do not row-normalize the matrix.
+Next, we create a spatial weights matrix based on a smooth distance-decay. We use the following simple distance decay function $w_{i, j} = 1/d_{i,j}^{\lambda}$, where d denotes the distance between observation i and j, and $\lambda$ is the distance decay parameter. By ease of convention we set $\lambda = 0$. We calculate the weights for each neighboring region based on the k=20 nearest neighbors. We do \textit{not} row-normalize the matrix.
 
-```{r, echo = FALSE}
+```{r}
 k1 <- knearneigh(coords, k=20)
 k2 <- knn2nb(k1)
 
@@ -126,7 +125,7 @@ decay_weights_matrix <- listw2mat(decay_weights_matrix_list)
 
 ### (iii) Contiguity-based measure
 Finally, we calculate a contiguity based measure, which we row normalize as well.
-```{r, echo = FALSE}
+```{r}
 # Create a contiguity-based spatial weights matrix
 queen_weights <- poly2nb(EU27, queen = TRUE)
 
@@ -134,40 +133,54 @@ contig_w_matrix <- nb2mat(queen_weights, style="W", zero.policy=TRUE)
 ```
 
 ## Compare the matrices; use your knowledge of graph theory and linear algebra
-```{r,echo = FALSE, results = "asis"}
+
+We can gain deeper insights into these spatial weights matrices as well as the networks they represent by comparing key measures of the graphs that are derived from them. 
+
+```{r,echo = FALSE}
 # Convert to igraph objects for graph analysis
 graph_dist <- graph_from_adjacency_matrix(dist_w_matrix, mode = "undirected", weighted = TRUE)
 graph_decay <- graph_from_adjacency_matrix((decay_weights_matrix), mode = "undirected", weighted = TRUE)
 graph_contig <- graph_from_adjacency_matrix(contig_w_matrix, mode = "undirected", weighted = TRUE)
 
-# Function to summarize graph properties
+# Function to summarize graph properties and return as a data frame
 summarize_graph <- function(g) {
-  cat("Number of vertices:", vcount(g), "\n")
-  cat("Number of edges:", ecount(g), "\n")
-  cat("Average path length:", average.path.length(g, directed = FALSE), "\n")
-  cat("Graph density:", edge_density(g), "\n")
-  cat("Average degree:", mean(degree(g)), "\n")
+  # Function to format the number based on its value
+  format_number <- function(x) {
+    if (floor(x) == x) {  # If the number is an integer
+      return(as.character(x))  # Return without decimal places
+    } else {
+      return(format(x, nsmall = 2))  # Return with two decimal places
+    }
+  }
   
-  # Compute Eigenvector Centrality
-  ec <- eigen_centrality(g)
-  cat("Max Eigenvector Centrality:", max(ec$vector), "\n")
-  cat("Min Eigenvector Centrality:", min(ec$vector), "\n")
-  cat("Average Eigenvector Centrality:", mean(ec$vector), "\n")
+  # Apply the format_number function to each relevant graph property
+  graph_summary <- data.frame(
+    Property = c("Number of vertices", "Number of edges", "Average path length", 
+                 "Graph density", "Average degree", "Max Eigenvector Centrality", 
+                 "Min Eigenvector Centrality", "Average Eigenvector Centrality", 
+                 "Most Central Unit (Vertex ID)"),
+    Value = sapply(c(vcount(g), ecount(g), 
+              average.path.length(g, directed = FALSE), 
+              edge_density(g), 
+              mean(degree(g)),
+              max(eigen_centrality(g)$vector),
+              min(eigen_centrality(g)$vector),
+              mean(eigen_centrality(g)$vector),
+              as.numeric(V(g)[which.max(eigen_centrality(g)$vector)])), format_number)
+  )
   
-  # Identify the most central unit
-  max_centrality_index <- which.max(ec$vector)
-  most_central_unit <- V(g)[max_centrality_index]
-  cat("Most Central Unit (Vertex ID):", as.numeric(most_central_unit), "\n")
+  return(graph_summary)
 }
 
+```
+
+```{r,echo = FALSE,  fig.pos='H'}
 
 # Analyze graph properties
-cat("Distance Threshold Graph:\n")
-summarize_graph(graph_dist)
-cat("\nSmooth Distance-Decay Graph:\n")
-summarize_graph(graph_decay)
-cat("\nContiguity-Based Graph:\n")
-summarize_graph(graph_contig)
+kable(summarize_graph(graph_dist), caption = "Summary of Distance Threshold Graph")
+kable(summarize_graph(graph_decay), caption = "Summary of Smooth Distance-Decay Matrix")
+kable(summarize_graph(graph_contig), caption = "Summary of Contiguity-Based Graph")
+    
 ```
 We compare the matrices based on a set of characteristics. We compare the row-normalized matrices for the queen contiguity and distance threshold matrix. Note that normalization procedure does not preserve the structure of the network. 
 
@@ -370,14 +383,13 @@ gadm41_PRY_2 %<>%
 
 dat2 <- rbind(gadm41_BRA_2, gadm41_ARG_2, gadm41_PRY_2)
 
-list_2 <- dat2 %>%
-  select(COUNTRY, geometry, NAME_1, NAME_2) %>%
-  mutate(country = ifelse(COUNTRY == "Brazil", "BRA", COUNTRY)) %>%
-  rename("muni" = "NAME_2") %>%
-  mutate(state = ifelse(NAME_1 == "Rio Grande do Sul", "RS", NAME_1)) 
 
-literacy_Arg_Bra_Par_2 <- literacy_Arg_Bra_Par %>%
-  left_join(list_2, by = c("muni",  "state", "country"))
+list_1 <- dat2 %>%
+  select(COUNTRY, geometry, NAME_1, NAME_2) %>%
+  mutate(COUNTRY = ifelse(COUNTRY == "Brazil", "BRA", COUNTRY))
+
+literacy_Arg_Bra_Par_2 <- list_1 %>%
+  left_join(literacy_Arg_Bra_Par, by = c("NAME_2" = "muni"))
 ```
 
 ```{r, echo = FALSE}
@@ -428,6 +440,16 @@ map2
 
 We now replicate table 2
 ```{r}
+
+list_2 <- dat2 %>%
+  select(COUNTRY, geometry, NAME_1, NAME_2) %>%
+  mutate(country = ifelse(COUNTRY == "Brazil", "BRA", COUNTRY)) %>%
+  rename("muni" = "NAME_2") %>%
+  mutate(state = ifelse(NAME_1 == "Rio Grande do Sul", "RS", NAME_1)) 
+
+literacy_Arg_Bra_Par_2 <- literacy_Arg_Bra_Par %>%
+  left_join(list_2, by = c("muni",  "state", "country"))
+
 mod1 <- lm(illiteracy ~ (lati) + (longi) + distmiss + state, data = literacy_Arg_Bra_Par_2)
 
 mod2 <- lm(illiteracy ~ (lati) + (longi) + distmiss + state + coast + river + slope + rugg + alti + tempe + preci + area, data = literacy_Arg_Bra_Par_2)

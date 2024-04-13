@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.21 (TeX Live 2020) (preloaded format=pdflatex 2020.10.12)  10 APR 2024 15:52
+This is pdfTeX, Version 3.14159265-2.6-1.40.21 (TeX Live 2020) (preloaded format=pdflatex 2020.10.12)  13 APR 2024 14:05
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -799,6 +799,12 @@ File: l3backend-pdfmode.def 2020-03-12 L3 backend support: PDF mode
 \l__pdf_internal_box=\box86
 ) (./02_assignmnet.aux
 
+LaTeX Warning: Label `tab:unnamed-chunk-7' multiply defined.
+
+
+LaTeX Warning: Label `tab:unnamed-chunk-7' multiply defined.
+
+
 LaTeX Warning: Label `' multiply defined.
 
 )
@@ -991,161 +997,161 @@ LaTeX Font Info:    Font shape `T1/lato-TLF/m/it' will be
 {/usr/local/texlive/2020/texmf-var/fonts/map/pdftex/updmap/pdftex.map}]
 LaTeX Font Info:    Font shape `T1/lato-TLF/b/n' will be
 (Font)              scaled to size 12.0pt on input line 160.
-<02_assignmnet_files/figure-latex/unnamed-chunk-2-1.pdf, id=40, 415.5525pt x 30
+<02_assignmnet_files/figure-latex/unnamed-chunk-2-1.pdf, id=42, 439.6425pt x 30
 1.125pt>
 File: 02_assignmnet_files/figure-latex/unnamed-chunk-2-1.pdf Graphic file (type
  pdf)
 <use 02_assignmnet_files/figure-latex/unnamed-chunk-2-1.pdf>
 Package pdftex.def Info: 02_assignmnet_files/figure-latex/unnamed-chunk-2-1.pdf
   used on input line 172.
-(pdftex.def)             Requested size: 415.5705pt x 301.13803pt.
+(pdftex.def)             Requested size: 439.65483pt x 301.13344pt.
 LaTeX Font Info:    Trying to load font information for T1+lmtt on input line 1
-89.
+90.
 (/usr/local/texlive/2020/texmf-dist/tex/latex/lm/t1lmtt.fd
 File: t1lmtt.fd 2009/10/30 v1.6 Font defs for Latin Modern
-) [2 <./02_assignmnet_files/figure-latex/unnamed-chunk-2-1.pdf>]
-<02_assignmnet_files/figure-latex/unnamed-chunk-7-1.pdf, id=64, 308.15125pt x 2
-17.81375pt>
-File: 02_assignmnet_files/figure-latex/unnamed-chunk-7-1.pdf Graphic file (type
- pdf)
-<use 02_assignmnet_files/figure-latex/unnamed-chunk-7-1.pdf>
-Package pdftex.def Info: 02_assignmnet_files/figure-latex/unnamed-chunk-7-1.pdf
-  used on input line 288.
-(pdftex.def)             Requested size: 308.15048pt x 217.8132pt.
-[3]
-<02_assignmnet_files/figure-latex/unnamed-chunk-7-2.pdf, id=70, 324.21124pt x 2
-17.81375pt>
-File: 02_assignmnet_files/figure-latex/unnamed-chunk-7-2.pdf Graphic file (type
- pdf)
-<use 02_assignmnet_files/figure-latex/unnamed-chunk-7-2.pdf>
-Package pdftex.def Info: 02_assignmnet_files/figure-latex/unnamed-chunk-7-2.pdf
-  used on input line 290.
-(pdftex.def)             Requested size: 324.21045pt x 217.8132pt.
-<02_assignmnet_files/figure-latex/unnamed-chunk-7-3.pdf, id=71, 305.14pt x 217.
-81375pt>
-File: 02_assignmnet_files/figure-latex/unnamed-chunk-7-3.pdf Graphic file (type
- pdf)
-<use 02_assignmnet_files/figure-latex/unnamed-chunk-7-3.pdf>
-Package pdftex.def Info: 02_assignmnet_files/figure-latex/unnamed-chunk-7-3.pdf
-  used on input line 292.
-(pdftex.def)             Requested size: 305.13924pt x 217.8132pt.
-[4 <./02_assignmnet_files/figure-latex/unnamed-chunk-7-1.pdf> <./02_assignmnet_
-files/figure-latex/unnamed-chunk-7-2.pdf> <./02_assignmnet_files/figure-latex/u
-nnamed-chunk-7-3.pdf>]
-<02_assignmnet_files/figure-latex/unnamed-chunk-8-1.pdf, id=92, 308.15125pt x 8
-68.24374pt>
+)
+LaTeX Font Info:    Font shape `T1/lmtt/bx/n' in size <10> not available
+(Font)              Font shape `T1/lmtt/b/n' tried instead on input line 191.
+[2 <./02_assignmnet_files/figure-latex/unnamed-chunk-2-1.pdf>] [3]
+<02_assignmnet_files/figure-latex/unnamed-chunk-8-1.pdf, id=74, 302.12875pt x 2
+66.9975pt>
 File: 02_assignmnet_files/figure-latex/unnamed-chunk-8-1.pdf Graphic file (type
  pdf)
 <use 02_assignmnet_files/figure-latex/unnamed-chunk-8-1.pdf>
 Package pdftex.def Info: 02_assignmnet_files/figure-latex/unnamed-chunk-8-1.pdf
-  used on input line 311.
+  used on input line 406.
+(pdftex.def)             Requested size: 302.128pt x 266.99683pt.
+[4]
+<02_assignmnet_files/figure-latex/unnamed-chunk-8-2.pdf, id=81, 324.21124pt x 2
+66.9975pt>
+File: 02_assignmnet_files/figure-latex/unnamed-chunk-8-2.pdf Graphic file (type
+ pdf)
+<use 02_assignmnet_files/figure-latex/unnamed-chunk-8-2.pdf>
+Package pdftex.def Info: 02_assignmnet_files/figure-latex/unnamed-chunk-8-2.pdf
+  used on input line 408.
+(pdftex.def)             Requested size: 324.23022pt x 267.0131pt.
+<02_assignmnet_files/figure-latex/unnamed-chunk-8-3.pdf, id=82, 302.12875pt x 2
+66.9975pt>
+File: 02_assignmnet_files/figure-latex/unnamed-chunk-8-3.pdf Graphic file (type
+ pdf)
+<use 02_assignmnet_files/figure-latex/unnamed-chunk-8-3.pdf>
+Package pdftex.def Info: 02_assignmnet_files/figure-latex/unnamed-chunk-8-3.pdf
+  used on input line 410.
+(pdftex.def)             Requested size: 302.128pt x 266.99683pt.
+[5 <./02_assignmnet_files/figure-latex/unnamed-chunk-8-1.pdf> <./02_assignmnet_
+files/figure-latex/unnamed-chunk-8-2.pdf>]
+<02_assignmnet_files/figure-latex/unnamed-chunk-9-1.pdf, id=97, 308.15125pt x 8
+68.24374pt>
+File: 02_assignmnet_files/figure-latex/unnamed-chunk-9-1.pdf Graphic file (type
+ pdf)
+<use 02_assignmnet_files/figure-latex/unnamed-chunk-9-1.pdf>
+Package pdftex.def Info: 02_assignmnet_files/figure-latex/unnamed-chunk-9-1.pdf
+  used on input line 429.
 (pdftex.def)             Requested size: 259.54117pt x 731.28053pt.
-[5] [6 <./02_assignmnet_files/figure-latex/unnamed-chunk-8-1.pdf>]
-<02_assignmnet_files/figure-latex/unnamed-chunk-10-1.pdf, id=106, 629.35126pt x
+[6 <./02_assignmnet_files/figure-latex/unnamed-chunk-8-3.pdf>] [7 <./02_assignm
+net_files/figure-latex/unnamed-chunk-9-1.pdf>]
+<02_assignmnet_files/figure-latex/unnamed-chunk-11-1.pdf, id=118, 629.35126pt x
  889.3225pt>
-File: 02_assignmnet_files/figure-latex/unnamed-chunk-10-1.pdf Graphic file (typ
+File: 02_assignmnet_files/figure-latex/unnamed-chunk-11-1.pdf Graphic file (typ
 e pdf)
-<use 02_assignmnet_files/figure-latex/unnamed-chunk-10-1.pdf>
-Package pdftex.def Info: 02_assignmnet_files/figure-latex/unnamed-chunk-10-1.pd
-f  used on input line 386.
+<use 02_assignmnet_files/figure-latex/unnamed-chunk-11-1.pdf>
+Package pdftex.def Info: 02_assignmnet_files/figure-latex/unnamed-chunk-11-1.pd
+f  used on input line 504.
 (pdftex.def)             Requested size: 483.69926pt x 683.50485pt.
-[7]
-<02_assignmnet_files/figure-latex/unnamed-chunk-12-1.pdf, id=118, 436.63126pt x
+[8]
+<02_assignmnet_files/figure-latex/unnamed-chunk-13-1.pdf, id=129, 436.63126pt x
  295.1025pt>
-File: 02_assignmnet_files/figure-latex/unnamed-chunk-12-1.pdf Graphic file (typ
+File: 02_assignmnet_files/figure-latex/unnamed-chunk-13-1.pdf Graphic file (typ
 e pdf)
-<use 02_assignmnet_files/figure-latex/unnamed-chunk-12-1.pdf>
-Package pdftex.def Info: 02_assignmnet_files/figure-latex/unnamed-chunk-12-1.pd
-f  used on input line 394.
+<use 02_assignmnet_files/figure-latex/unnamed-chunk-13-1.pdf>
+Package pdftex.def Info: 02_assignmnet_files/figure-latex/unnamed-chunk-13-1.pd
+f  used on input line 512.
 (pdftex.def)             Requested size: 436.63019pt x 295.10176pt.
-[8 <./02_assignmnet_files/figure-latex/unnamed-chunk-10-1.pdf>]
-LaTeX Font Info:    Font shape `T1/lmtt/bx/n' in size <10> not available
-(Font)              Font shape `T1/lmtt/b/n' tried instead on input line 400.
-
-Overfull \vbox (13.11432pt too high) detected at line 430
+[9 <./02_assignmnet_files/figure-latex/unnamed-chunk-11-1.pdf>]
+Overfull \vbox (13.11432pt too high) detected at line 557
  []
 
-[9 <./02_assignmnet_files/figure-latex/unnamed-chunk-12-1.pdf>]
-Overfull \hbox (120.05138pt too wide) in paragraph at lines 434--434
+[10 <./02_assignmnet_files/figure-latex/unnamed-chunk-13-1.pdf>]
+Overfull \hbox (120.05138pt too wide) in paragraph at lines 561--561
 []\T1/lmtt/m/n/10 ## % Table created by stargazer v.5.2.3 by Marek Hlavac, Soci
 al Policy Institute. E-mail: marek.hlavac at gmail.com[] 
  []
 
 
-Overfull \hbox (46.55159pt too wide) in paragraph at lines 447--447
-[]\T1/lmtt/m/n/10 ##  lati & 0.552$^{**}$ & $-$0.329 & 0.373 & 2.892$^{*}$ & 0.
-364 & 0.348 & 3.612$^{**}$ & $-$6.571 \\[] 
+Overfull \hbox (88.55147pt too wide) in paragraph at lines 574--574
+[]\T1/lmtt/m/n/10 ##  lati & 0.556$^{**}$ & 0.072 & 0.359 & 3.206$^{**}$ & 0.04
+3 & $-$6.724$^{**}$ & 3.540$^{**}$ & $-$7.429 \\[] 
  []
 
 
-Overfull \hbox (214.5511pt too wide) in paragraph at lines 450--450
-[]\T1/lmtt/m/n/10 ##  longi & $-$1.193$^{***}$ & $-$0.749 & $-$1.785$^{***}$ & 
-$-$4.672$^{***}$ & $-$0.586 & 8.688$^{**}$ & $-$0.234 & 18.904$^{**}$ \\[] 
+Overfull \hbox (193.55116pt too wide) in paragraph at lines 577--577
+[]\T1/lmtt/m/n/10 ##  longi & $-$1.108$^{***}$ & $-$1.007 & $-$1.716$^{***}$ & 
+$-$5.054$^{***}$ & 0.054 & 6.704$^{***}$ & 0.298 & 20.866$^{***}$ \\[] 
  []
 
 
-Overfull \hbox (193.55116pt too wide) in paragraph at lines 453--453
-[]\T1/lmtt/m/n/10 ##  distmiss & 0.011$^{***}$ & 0.012$^{***}$ & 0.021$^{***}$ 
-& 0.031$^{***}$ & 0.001 & 0.068$^{*}$ & $-$0.037 & $-$0.062$^{*}$ \\[] 
+Overfull \hbox (204.05113pt too wide) in paragraph at lines 580--580
+[]\T1/lmtt/m/n/10 ##  distmiss & 0.011$^{***}$ & 0.011$^{**}$ & 0.020$^{***}$ &
+ 0.031$^{***}$ & 0.013 & 0.055$^{***}$ & $-$0.035 & $-$0.071$^{**}$ \\[] 
  []
 
-[10]
-Overfull \hbox (193.55116pt too wide) in paragraph at lines 492--492
-[]\T1/lmtt/m/n/10 ##  Constant & $-$45.774$^{***}$ & $-$63.298$^{*}$ & 1,709.34
-4$^{*}$ & 723.719 & $-$14.388 & 429.529 & 93.692 & 605.114$^{**}$ \\[] 
- []
-
-
-Overfull \hbox (51.80157pt too wide) in paragraph at lines 493--493
-[]\T1/lmtt/m/n/10 ##   & (13.542) & (37.578) & (923.099) & (1,118.795) & (213.4
-26) & (314.750) & (66.624) & (229.940) \\[] 
+[11]
+Overfull \hbox (183.0512pt too wide) in paragraph at lines 622--622
+[]\T1/lmtt/m/n/10 ##  Constant & $-$40.669$^{***}$ & $-$59.567 & 1,724.668$^{*}
+$ & 755.296 & 11.554 & 31.195 & 121.370$^{*}$ & 685.427$^{***}$ \\[] 
  []
 
 
-Overfull \hbox (424.55049pt too wide) in paragraph at lines 499--499
-[]\T1/lmtt/m/n/10 ## Residual Std. Error & 3.988 (df = 518) & 3.940 (df = 510) 
-& 4.104 (df = 459) & 4.052 (df = 451) & 3.251 (df = 21) & 1.781 (df = 13) & 2.0
-85 (df = 31) & 1.517 (df = 23) \\[] 
+Overfull \hbox (41.3016pt too wide) in paragraph at lines 623--623
+[]\T1/lmtt/m/n/10 ##   & (13.191) & (36.199) & (919.888) & (1,111.741) & (20.00
+2) & (72.708) & (60.387) & (208.813) \\[] 
  []
 
 
-Overfull \hbox (781.54945pt too wide) in paragraph at lines 500--500
-[]\T1/lmtt/m/n/10 ## F Statistic & 3.931$^{***}$ (df = 6; 518) & 3.205$^{***}$ 
-(df = 14; 510) & 7.205$^{***}$ (df = 4; 459) & 4.118$^{***}$ (df = 12; 451) & 0
-.249 (df = 3; 21) & 5.407$^{***}$ (df = 11; 13) & 1.237 (df = 4; 31) & 3.744$^{
-***}$ (df = 12; 23) \\[] 
+Overfull \hbox (424.55049pt too wide) in paragraph at lines 629--629
+[]\T1/lmtt/m/n/10 ## Residual Std. Error & 3.948 (df = 541) & 3.916 (df = 532) 
+& 4.101 (df = 462) & 4.050 (df = 454) & 2.997 (df = 38) & 1.962 (df = 30) & 2.0
+48 (df = 35) & 1.513 (df = 26) \\[] 
  []
 
 
-Overfull \hbox (492.81003pt too wide) in paragraph at lines 511--580
+Overfull \hbox (781.54945pt too wide) in paragraph at lines 630--630
+[]\T1/lmtt/m/n/10 ## F Statistic & 3.370$^{***}$ (df = 7; 541) & 2.793$^{***}$ 
+(df = 15; 532) & 6.880$^{***}$ (df = 4; 462) & 3.976$^{***}$ (df = 12; 454) & 1
+.396 (df = 3; 38) & 6.218$^{***}$ (df = 11; 30) & 1.482 (df = 4; 35) & 4.058$^{
+***}$ (df = 12; 26) \\[] 
+ []
+
+
+Overfull \hbox (468.41837pt too wide) in paragraph at lines 641--710
  [][] 
  []
 
 
-LaTeX Warning: Float too large for page by 33.64247pt on input line 580.
+LaTeX Warning: Float too large for page by 33.64247pt on input line 710.
 
-[11] [12]
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 582.
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 582.
+[12] [13]
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 715.
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 715.
 (./02_assignmnet.aux)
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 582.
-Package atveryend Info: Empty hook `AtEndAfterFileList' on input line 582.
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 715.
+Package atveryend Info: Empty hook `AtEndAfterFileList' on input line 715.
 
 LaTeX Warning: There were multiply-defined labels.
 
  ) 
 Here is how much of TeX's memory you used:
- 25650 strings out of 480608
- 450959 string characters out of 5903629
- 775846 words of memory out of 5000000
- 40969 multiletter control sequences out of 15000+600000
- 803561 words of font info for 83 fonts, out of 8000000 for 9000
+ 25662 strings out of 480608
+ 451096 string characters out of 5903629
+ 779325 words of memory out of 5000000
+ 40974 multiletter control sequences out of 15000+600000
+ 803880 words of font info for 84 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  59i,11n,75p,1727b,547s stack positions out of 5000i,500n,10000p,200000b,80000s
-{/usr/local/texlive/2020/texmf-dist/fonts/enc/dvips/lm/lm-ec.enc}{/usr/local/
-texlive/2020/texmf-dist/fonts/enc/dvips/lm/lm-rm.enc}{/usr/local/texlive/2020/t
-exmf-dist/fonts/enc/dvips/lm/lm-mathsy.enc}{/usr/local/texlive/2020/texmf-dist/
-fonts/enc/dvips/lm/lm-mathit.enc}{/usr/local/texlive/2020/texmf-dist/fonts/enc/
+{/usr/local/texlive/2020/texmf-dist/fonts/enc/dvips/lm/lm-rm.enc}{/usr/local/
+texlive/2020/texmf-dist/fonts/enc/dvips/lm/lm-mathsy.enc}{/usr/local/texlive/20
+20/texmf-dist/fonts/enc/dvips/lm/lm-mathit.enc}{/usr/local/texlive/2020/texmf-d
+ist/fonts/enc/dvips/lm/lm-ec.enc}{/usr/local/texlive/2020/texmf-dist/fonts/enc/
 dvips/lato/a_cl4kdn.enc}</usr/local/texlive/2020/texmf-dist/fonts/type1/typolan
 d/lato/Lato-Bold.pfb></usr/local/texlive/2020/texmf-dist/fonts/type1/typoland/l
 ato/Lato-Italic.pfb></usr/local/texlive/2020/texmf-dist/fonts/type1/typoland/la
@@ -1156,11 +1162,12 @@ texlive/2020/texmf-dist/fonts/type1/public/lm/lmr7.pfb></usr/local/texlive/2020
 /texmf-dist/fonts/type1/public/lm/lmsy10.pfb></usr/local/texlive/2020/texmf-dis
 t/fonts/type1/public/lm/lmsy7.pfb></usr/local/texlive/2020/texmf-dist/fonts/typ
 e1/public/lm/lmtk10.pfb></usr/local/texlive/2020/texmf-dist/fonts/type1/public/
-lm/lmtt10.pfb>
-Output written on 02_assignmnet.pdf (12 pages, 11830682 bytes).
+lm/lmtt10.pfb></usr/local/texlive/2020/texmf-dist/fonts/type1/public/lm/lmtti10
+.pfb>
+Output written on 02_assignmnet.pdf (13 pages, 11911746 bytes).
 PDF statistics:
- 237 PDF objects out of 1000 (max. 8388607)
- 189 compressed objects within 2 object streams
- 42 named destinations out of 1000 (max. 500000)
- 6272 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 257 PDF objects out of 1000 (max. 8388607)
+ 206 compressed objects within 3 object streams
+ 48 named destinations out of 1000 (max. 500000)
+ 6280 words of extra memory for PDF output out of 10000 (max. 10000000)
 
