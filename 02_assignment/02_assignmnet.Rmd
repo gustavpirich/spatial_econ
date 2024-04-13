@@ -376,8 +376,8 @@ list_2 <- dat2 %>%
   rename("muni" = "NAME_2") %>%
   mutate(state = ifelse(NAME_1 == "Rio Grande do Sul", "RS", NAME_1)) 
 
-literacy_Arg_Bra_Par_2 <- list_2 %>%
-  left_join(literacy_Arg_Bra_Par, by = c("muni", "state", "country"))
+literacy_Arg_Bra_Par_2 <- literacy_Arg_Bra_Par %>%
+  left_join(list_2, by = c("muni",  "state", "country"))
 ```
 
 ```{r, echo = FALSE}
