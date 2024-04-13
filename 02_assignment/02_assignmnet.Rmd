@@ -376,12 +376,8 @@ list_2 <- dat2 %>%
   rename("muni" = "NAME_2") %>%
   mutate(state = ifelse(NAME_1 == "Rio Grande do Sul", "RS", NAME_1)) 
 
-
-#merging the data
-#literacy_Arg_Bra_Par_2 <- left_join(literacy_Arg_Bra_Par_1, list_1, by = c("NAME_2", "COUNTRY"))
-
-literacy_Arg_Bra_Par_2 <- literacy_Arg_Bra_Par %>%
-  left_join(list_2, by = c("muni", "state", "country"))
+literacy_Arg_Bra_Par_2 <- list_2 %>%
+  left_join(literacy_Arg_Bra_Par, by = c("muni", "state", "country"))
 ```
 
 ```{r, echo = FALSE}
@@ -400,10 +396,6 @@ literacy_Arg_Bra_Par_2 <- literacy_Arg_Bra_Par %>%
 #  tm_borders()
 
 #map2
-
-
-
-
 
 # Corrected country name and efficient use of tm_layout
 coords <- data.frame(
