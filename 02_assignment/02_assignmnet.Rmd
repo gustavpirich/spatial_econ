@@ -1,20 +1,22 @@
 ---
-title: '**Spatial Economics -- Assignment 2**'
-author: 
+title: "Spatial Economics -- Assignment 2"
+author:
   - "Gustav Pirich (h11910449)"
   - "Peter Prlleshi ()"
   - "Filip Lukijanovic ()"
 date: "April 2, 2024"
-output: 
+output:
   pdf_document:
     toc: true
     includes:
       in_header: !expr file.path("~/Desktop/GITHUB/spatial_econ/helper/wraper_code.tex")
-header-includes: 
+bibliography: references.bib
+nocite: '@*'
+header-includes:
   - \usepackage{tcolorbox}
   - \usepackage[default]{lato}
 papersize: a4
-geometry: margin = 2cm
+geometry: margin=2cm
 urlcolor: DarkOrchid!65!black
 ---
 
@@ -478,98 +480,26 @@ mod7 <- lm(illiteracy ~ (lati) + (longi) + distmiss + state, data = par)
 
 mod8 <- lm(illiteracy ~ (lati) + (longi) + distmiss + state + coast + river + slope + rugg + alti + tempe + preci + area, data = par)
 
-stargazer(mod1, mod2, mod3, mod4, mod5, mod6, mod7, mod8)
+#stargazer(mod1, mod2, mod3, mod4, mod5, mod6, mod7, mod8)
 
 ```
-\begin{table}[!htbp] \centering 
-  \caption{} 
-  \label{} 
-\begin{tabular}{@{\extracolsep{5pt}}lcccccccc} 
-\\[-1.8ex]\hline 
-\hline \\[-1.8ex] 
- & \multicolumn{8}{c}{\textit{Dependent variable:}} \\ 
-\cline{2-9} 
-\\[-1.8ex] & \multicolumn{8}{c}{illiteracy} \\ 
-\\[-1.8ex] & (1) & (2) & (3) & (4) & (5) & (6) & (7) & (8)\\ 
-\hline \\[-1.8ex] 
- lati & 0.556$^{**}$ & 0.072 & 0.359 & 3.206$^{**}$ & 0.043 & $-$6.724$^{**}$ & 3.540$^{**}$ & $-$7.429 \\ 
-  & (0.251) & (0.782) & (0.403) & (1.473) & (0.643) & (2.599) & (1.622) & (4.381) \\ 
-  & & & & & & & & \\ 
- longi & $-$1.108$^{***}$ & $-$1.007 & $-$1.716$^{***}$ & $-$5.054$^{***}$ & 0.054 & 6.704$^{***}$ & 0.298 & 20.866$^{***}$ \\ 
-  & (0.269) & (0.687) & (0.369) & (1.521) & (0.496) & (1.934) & (1.017) & (6.364) \\ 
-  & & & & & & & & \\ 
- distmiss & 0.011$^{***}$ & 0.011$^{**}$ & 0.020$^{***}$ & 0.031$^{***}$ & 0.013 & 0.055$^{***}$ & $-$0.035 & $-$0.071$^{**}$ \\ 
-  & (0.004) & (0.005) & (0.006) & (0.008) & (0.008) & (0.019) & (0.023) & (0.029) \\ 
-  & & & & & & & & \\ 
- stateItapúa & 2.154 & 3.619$^{**}$ &  &  &  &  &  &  \\ 
-  & (1.350) & (1.693) &  &  &  &  &  &  \\ 
-  & & & & & & & & \\ 
- stateMisiones & 1.017 & 1.297 &  &  &  &  & 0.200 & $-$2.053 \\ 
-  & (1.572) & (1.865) &  &  &  &  & (1.481) & (1.661) \\ 
-  & & & & & & & & \\ 
- stateMisiones1 & 2.061 & 3.733$^{**}$ &  &  &  &  &  &  \\ 
-  & (1.565) & (1.881) &  &  &  &  &  &  \\ 
-  & & & & & & & & \\ 
- stateRS & 5.341$^{***}$ & 6.027$^{***}$ &  &  &  &  &  &  \\ 
-  & (1.521) & (1.798) &  &  &  &  &  &  \\ 
-  & & & & & & & & \\ 
- coast &  & 0.209 &  & $-$3.864$^{**}$ &  & $-$0.764 &  & 21.631$^{***}$ \\ 
-  &  & (0.989) &  & (1.848) &  & (2.857) &  & (7.366) \\ 
-  & & & & & & & & \\ 
- river &  & 1.465$^{**}$ &  & 1.645$^{**}$ &  & 10.574$^{***}$ &  & $-$4.913 \\ 
-  &  & (0.741) &  & (0.802) &  & (2.672) &  & (4.569) \\ 
-  & & & & & & & & \\ 
- slope &  & $-$0.00001 &  & 0.00002 &  & $-$0.053$^{*}$ &  & $-$0.071$^{***}$ \\ 
-  &  & (0.0002) &  & (0.0002) &  & (0.028) &  & (0.021) \\ 
-  & & & & & & & & \\ 
- rugg &  & $-$0.00000 &  & $-$0.00000 &  & 0.001$^{*}$ &  & 0.002$^{***}$ \\ 
-  &  & (0.00000) &  & (0.00000) &  & (0.001) &  & (0.001) \\ 
-  & & & & & & & & \\ 
- alti &  & 0.006 &  & 0.005 &  & 0.062$^{***}$ &  & 0.038$^{**}$ \\ 
-  &  & (0.004) &  & (0.005) &  & (0.011) &  & (0.014) \\ 
-  & & & & & & & & \\ 
- tempe &  & 0.058 &  & 0.057 &  & 0.915$^{***}$ &  & 0.842$^{***}$ \\ 
-  &  & (0.079) &  & (0.099) &  & (0.208) &  & (0.204) \\ 
-  & & & & & & & & \\ 
- preci &  & $-$0.003 &  & $-$0.002 &  & $-$0.019$^{**}$ &  & $-$0.012$^{**}$ \\ 
-  &  & (0.002) &  & (0.002) &  & (0.007) &  & (0.005) \\ 
-  & & & & & & & & \\ 
- area &  & 0.0001 &  & $-$0.0004 &  & $-$0.0003 &  & 0.002$^{***}$ \\ 
-  &  & (0.0002) &  & (0.0003) &  & (0.0002) &  & (0.001) \\ 
-  & & & & & & & & \\ 
- mesorregi &  &  & $-$0.418$^{*}$ & $-$0.216 &  &  &  &  \\ 
-  &  &  & (0.216) & (0.261) &  &  &  &  \\ 
-  & & & & & & & & \\ 
- Constant & $-$40.669$^{***}$ & $-$59.567 & 1,724.668$^{*}$ & 755.296 & 11.554 & 31.195 & 121.370$^{*}$ & 685.427$^{***}$ \\ 
-  & (13.191) & (36.199) & (919.888) & (1,111.741) & (20.002) & (72.708) & (60.387) & (208.813) \\ 
-  & & & & & & & & \\ 
-\hline \\[-1.8ex] 
-Observations & 549 & 548 & 467 & 467 & 42 & 42 & 40 & 39 \\ 
-R$^{2}$ & 0.042 & 0.073 & 0.056 & 0.095 & 0.099 & 0.695 & 0.145 & 0.652 \\ 
-Adjusted R$^{2}$ & 0.029 & 0.047 & 0.048 & 0.071 & 0.028 & 0.583 & 0.047 & 0.491 \\ 
-Residual Std. Error & 3.948 (df = 541) & 3.916 (df = 532) & 4.101 (df = 462) & 4.050 (df = 454) & 2.997 (df = 38) & 1.962 (df = 30) & 2.048 (df = 35) & 1.513 (df = 26) \\ 
-F Statistic & 3.370$^{***}$ (df = 7; 541) & 2.793$^{***}$ (df = 15; 532) & 6.880$^{***}$ (df = 4; 462) & 3.976$^{***}$ (df = 12; 454) & 1.396 (df = 3; 38) & 6.218$^{***}$ (df = 11; 30) & 1.482 (df = 4; 35) & 4.058$^{***}$ (df = 12; 26) \\ 
-\hline 
-\hline \\[-1.8ex] 
-\textit{Note:}  & \multicolumn{8}{r}{$^{*}$p$<$0.1; $^{**}$p$<$0.05; $^{***}$p$<$0.01} \\ 
-\end{tabular} 
-\end{table} 
 
 # Exercise C
 
-Recall ‘The perils of peer effects’ (Angrist, 2014)2. Write a short text (not more than 800 words) on the ‘The perils of ignoring peer effects’.
+Recall ‘The perils of peer effects’ (Angrist, 2014). Write a short text (not more than 800 words) on the ‘The perils of ignoring peer effects’.
 \begin{itemize}
     \item Touch on the topics of drawing valid inference and the trade-off between internal and external validity (think of an experimental setting vs, e.g. an actual classroom), and the goals of (applied and methodological) scientific research.
-    \item Briefly explain how network dependence (spatial, social, etc.) may impact \emph{validity} and \emph{relevance} of a certain instrument. Consider weather instruments, the quarter of birth instrument by Angrist and Krueger (2001), or some instrument that yoiu are familiar with as an example.\end{itemize}
+    \item Briefly explain how network dependence (spatial, social, etc.) may impact \emph{validity} and \emph{relevance} of a certain instrument. Consider weather instruments, the quarter of birth instrument by Angrist and Krueger (2001), or some instrument that yoiu are familiar with as an example.
+    \end{itemize}
 
 
-In a sweeping review, Angrist (2014) provides a critique of the economics literature estimating peer effects. He derives and demonstrates potential pitfalls by linking the behaviour of IV estimation with group-level dummies with OLS. In a linear-in-means model with exogenous effects, he shows that the ‚social multiplier‘ is equivalent to the \emph{ratio} between the IV 2SLS and OLS estimand. 
-Y_{i} = W X_{i} \beta + \varespilon_{i}
-\phi_{1} = IV / OLS
+In a sweeping review, @angrist_perils_2014 provides a critique of the economics literature estimating peer effects. He derives and demonstrates potential pitfalls by linking the behaviour of IV estimation with group-level dummies with OLS. In a linear-in-means model with exogenous effects, he shows that the ‚social multiplier‘ is equivalent to the \emph{ratio} between the IV 2SLS and OLS estimand. 
+$Y_{i} = W X_{i} \beta + \varepsilon{i}$
+$\phi_{1} = \frac{IV}{OLS}$
 
 For an endogenous effects model the \emph{difference} between the IV estimate and the OLS estimated is equivalent to the social multiplier.
-Y_{i} = W Y_{i} \delta + \varespilon_{i}
-\phi_{2} = IV - OLS
+$Y_{i} = W Y_{i} \delta + \varepsilon{i}$
+$\phi_{2} = IV - OLS$
 
 Selection bias, omitted variables, and measurement error can inflate or deflate the IV estimate of the coefficient and thus Angrist cautions attributing the ratio (or difference) to peer effects. 
 
@@ -577,24 +507,30 @@ Applied researchers might have considered network dynamics as sources of potenti
 
 As peer effects and network dependency are everywhere and always present in the realm of social science research it is necessary to be explicit about their existence. While empirical estimation is bedevilled by problems, better data can provide a way forward to empirically establish the impact of peer effects.
 
-The External Validity Tradeoff 
+\textbf{The External Validity Tradeoff} 
+
 Randomisation of peers in experimental settings might allow researchers to draw internally valid inference, the problem is that these research strategies might lack external validity. Network structure emerge endogenously, making the randomisation of peers in studies infeasible. In the real-world friends are not being randomly assigned, but people sort into groups and networks (often based on homophile). In many settings, it is practically infeasible to vary the structure of peers exogenously. For example, when trying to estimate the long-run effect of peers it is hard to imagine a practically feasible experiment where the network structure was determined exogenously and evolved so over time. 
 
-Policy Relevance and Peer Effects 
+\textbf{Policy Relevance and Peer Effects} 
+
 How then can we learn something about peer effect and the importance of social networks? An innovative methodological contribution that sheds light on peer effects is Chetty et al. (2022). The researchers demonstrate that economic connectedness and social mobility demonstrates importance of social networks for economic outcomes. Chetty et al. (2022) do not rely on random assignment, nor do they estimate the impact of a certain policy. Thus the relationship between economic connectedness and economic mobility is fraught by a set of issues, but the incredible rich data allows to demonstrate that even broad based correlations can give us societally (and policy) relevant insights into the dynamics of social networks. This data-driven approach and correlational evidence coupled with extremely granular data can preclude concerns over threats to identification like reverse causality.
 
-Network Dependence and Instruments
+\textbf{Network Dependence and Instruments} 
+
 To consider how network dependence might affect the \textit{relevance} and \textit{validity} of an instrument let us consider the paper by Ramsay (2011). The author studies the relationship between natural resource wealth and a countries level of political freedom. More specifically, he is interested in the causal effect of a countries annual oil income per capita on the level of democracy as measured by the polity IV score. Let us consider the simplified equation: 
-Democracy_{i,t} = \mu + OilIncomepercapita_{i,t} + \delta X_{i,t} + \varepsilon_{i,t} 
+$Democracy_{i,t} = \mu + OilIncomepercapita_{i,t} + \delta X_{i,t} + \varepsilon_{i,t}$ 
 where X is a vector of controls and for country i in year t. 
 
 However, this relationship likely suffers from reverse causality, as a countries political institutions will determine its oil income, while concurrently oil income determines democracy (the effect we are interested in). Ramsay (2011) proposes the out-of-region natural disaster as an IV for annual oil income. He splits the world into five regions and uses natural disasters, which impact the global oil price in other regions as an IV for annual oil income. Thus, Ramsay (2011) identifies the variation in annual oil income of a country in lets say Africa that is caused by a natural disaster in Colombia. 
-Oilincomepercapita_{i,t} = \mu + \theta OutofRegionNaturalDisaster_{i,t} + \delta X_{i,t} + \varepsilon_{i,t}
+$Oilincomepercapita_{i,t} = \mu + \theta OutofRegionNaturalDisaster_{i,t} + \delta X_{i,t} + \varepsilon_{i,t}$
 
 Now how might spatial dependence in networks impact the validity (i.e. the exclusion restriction) of the instrument. 
-Cov(OutofRegionNaturalDisaster_{i,t}, \varepsilon_{i,t} / \delta X_{i,t}) = 0
+$Cov(\text{OutofRegionNaturalDisaster}_{i,t}, \varepsilon_{i,t} / \delta X_{i,t}) = 0$
 Network dependence through spatial interdependence can lead to a violation of the instruments validity of the exclusion restriction. Changes and levels of countries political institutions are correlated and clustered in space. Take for example the recent wave of military coups in Africa propagated through Africa and is likely to afflict political stability in other regions as well. The coarse aggregation of the world into five regions is creating spatial dependence. Additionally, the shocks induced by natural disasters is affecting other channels. Consider maybe a natural disaster in South America which might induce changes in the US foreign aid network, by redirecting resources away from one country to another. A reduction in foreign aid in Africa might then concurrently impact political freedom in Africa. Another obvious candidate for violations of the assumptions is that natural disasters will affect shock trade networks which will have a direct impact on countries political institutions. Thus the effects of shocks induced by natural disasters are clustered in space through countless channels. The authors assumption that, by dividing the world into five regions and that the shocks in those regions do not spill over in systematic ways seems implausible. 
 The \textit{relevance} of the instrument, however, is not directly impaired by network dependence as the first stage F-test still demonstrates that the instrument is highly correlated with oil income per capita.
 
+\newpage
+
+\textbf{Bibliography}
 
 
