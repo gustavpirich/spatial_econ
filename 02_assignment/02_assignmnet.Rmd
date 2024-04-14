@@ -557,4 +557,44 @@ F Statistic & 3.370$^{***}$ (df = 7; 541) & 2.793$^{***}$ (df = 15; 532) & 6.880
 
 # Exercise C
 
+Recall ‘The perils of peer effects’ (Angrist, 2014)2. Write a short text (not more than 800 words) on the ‘The perils of ignoring peer effects’.
+\begin{itemize}
+    \item Touch on the topics of drawing valid inference and the trade-off between internal and external validity (think of an experimental setting vs, e.g. an actual classroom), and the goals of (applied and methodological) scientific research.
+    \item Briefly explain how network dependence (spatial, social, etc.) may impact \emph{validity} and \emph{relevance} of a certain instrument. Consider weather instruments, the quarter of birth instrument by Angrist and Krueger (2001), or some instrument that yoiu are familiar with as an example.\end{itemize}
+
+
+In a sweeping review, Angrist (2014) provides a critique of the economics literature estimating peer effects. He derives and demonstrates potential pitfalls by linking the behaviour of IV estimation with group-level dummies with OLS. In a linear-in-means model with exogenous effects, he shows that the ‚social multiplier‘ is equivalent to the \emph{ratio} between the IV 2SLS and OLS estimand. 
+Y_{i} = W X_{i} \beta + \varespilon_{i}
+\phi_{1} = IV / OLS
+
+For an endogenous effects model the \emph{difference} between the IV estimate and the OLS estimated is equivalent to the social multiplier.
+Y_{i} = W Y_{i} \delta + \varespilon_{i}
+\phi_{2} = IV - OLS
+
+Selection bias, omitted variables, and measurement error can inflate or deflate the IV estimate of the coefficient and thus Angrist cautions attributing the ratio (or difference) to peer effects. 
+
+Applied researchers might have considered network dynamics as sources of potential contamination in a randomised experiment or observational study with quasi experimental variation. Thus researchers conceptualised peer effects as a violation of the stable unit treatment variable assumption (Rubin, 1978). Only recently economists have begun to explicitly model these network dependencies as ‚spillover effects’. Ignoring peer effects threatens the internal validity of both experimental and non-experimental findings. Consider for example the effect of a program at an individual level (some sort of mentoring program) on grades. By employing class or school fixed effects, the estimated effect size of the treatment at the individual level might be affected, because of positive peer effects (the mental health improve the mental health of others). Miguel and Kremer (2004) study the effects of a deworming RCT in Kenya. They highlight that by not including peer effects and reduced network transmission, the reduction in school absenteeism of the intervention are doubly undercounted. The reduced disease transmission, which spilled over to control schools leads to an undercount of the positive benefits of the intervention. Thus, ignoring peer effects is equivalent to ignoring an externality.  
+
+As peer effects and network dependency are everywhere and always present in the realm of social science research it is necessary to be explicit about their existence. While empirical estimation is bedevilled by problems, better data can provide a way forward to empirically establish the impact of peer effects.
+
+The External Validity Tradeoff 
+Randomisation of peers in experimental settings might allow researchers to draw internally valid inference, the problem is that these research strategies might lack external validity. Network structure emerge endogenously, making the randomisation of peers in studies infeasible. In the real-world friends are not being randomly assigned, but people sort into groups and networks (often based on homophile). In many settings, it is practically infeasible to vary the structure of peers exogenously. For example, when trying to estimate the long-run effect of peers it is hard to imagine a practically feasible experiment where the network structure was determined exogenously and evolved so over time. 
+
+Policy Relevance and Peer Effects 
+How then can we learn something about peer effect and the importance of social networks? An innovative methodological contribution that sheds light on peer effects is Chetty et al. (2022). The researchers demonstrate that economic connectedness and social mobility demonstrates importance of social networks for economic outcomes. Chetty et al. (2022) do not rely on random assignment, nor do they estimate the impact of a certain policy. Thus the relationship between economic connectedness and economic mobility is fraught by a set of issues, but the incredible rich data allows to demonstrate that even broad based correlations can give us societally (and policy) relevant insights into the dynamics of social networks. This data-driven approach and correlational evidence coupled with extremely granular data can preclude concerns over threats to identification like reverse causality.
+
+Network Dependence and Instruments
+To consider how network dependence might affect the \textit{relevance} and \textit{validity} of an instrument let us consider the paper by Ramsay (2011). The author studies the relationship between natural resource wealth and a countries level of political freedom. More specifically, he is interested in the causal effect of a countries annual oil income per capita on the level of democracy as measured by the polity IV score. Let us consider the simplified equation: 
+Democracy_{i,t} = \mu + OilIncomepercapita_{i,t} + \delta X_{i,t} + \varepsilon_{i,t} 
+where X is a vector of controls and for country i in year t. 
+
+However, this relationship likely suffers from reverse causality, as a countries political institutions will determine its oil income, while concurrently oil income determines democracy (the effect we are interested in). Ramsay (2011) proposes the out-of-region natural disaster as an IV for annual oil income. He splits the world into five regions and uses natural disasters, which impact the global oil price in other regions as an IV for annual oil income. Thus, Ramsay (2011) identifies the variation in annual oil income of a country in lets say Africa that is caused by a natural disaster in Colombia. 
+Oilincomepercapita_{i,t} = \mu + \theta OutofRegionNaturalDisaster_{i,t} + \delta X_{i,t} + \varepsilon_{i,t}
+
+Now how might spatial dependence in networks impact the validity (i.e. the exclusion restriction) of the instrument. 
+Cov(OutofRegionNaturalDisaster_{i,t}, \varepsilon_{i,t} / \delta X_{i,t}) = 0
+Network dependence through spatial interdependence can lead to a violation of the instruments validity of the exclusion restriction. Changes and levels of countries political institutions are correlated and clustered in space. Take for example the recent wave of military coups in Africa propagated through Africa and is likely to afflict political stability in other regions as well. The coarse aggregation of the world into five regions is creating spatial dependence. Additionally, the shocks induced by natural disasters is affecting other channels. Consider maybe a natural disaster in South America which might induce changes in the US foreign aid network, by redirecting resources away from one country to another. A reduction in foreign aid in Africa might then concurrently impact political freedom in Africa. Another obvious candidate for violations of the assumptions is that natural disasters will affect shock trade networks which will have a direct impact on countries political institutions. Thus the effects of shocks induced by natural disasters are clustered in space through countless channels. The authors assumption that, by dividing the world into five regions and that the shocks in those regions do not spill over in systematic ways seems implausible. 
+The \textit{relevance} of the instrument, however, is not directly impaired by network dependence as the first stage F-test still demonstrates that the instrument is highly correlated with oil income per capita.
+
+
 
