@@ -79,7 +79,7 @@ EU27 <- EU27 %>%
 ```
 ## Growth Rate of Productivity form 1980 to 2013 
 
-The map shows the productivity growth rates in NUTS-2 regions for the selected countries. We can see that many regions especially in West Germany, Austria, and France exhibited negative productivity growth over the selected period. Notably, Portugal's productivity has been growing the fastest. We suspect that the negative growth rates can be explained by the fact that high-income countries had a high baseline productivity to begin with, while Portugal started from a rather low baseline productivity. Thus we can interpret this as productivity convergence across Europe.
+The map shows the productivity growth rates in NUTS-2 regions for the selected countries. We can see that many regions especially in West Germany, Austria, and France exhibited negative productivity growth over the selected period. Notably, Portugal's productivity has been growing the fastest. We suspect that the negative growth rates can be explained by the fact that high-income countries had a high baseline productivity to begin with, while Portugal started from a rather low baseline productivity. One might interpret this as productivity convergence across Europe.
 
 ```{r,echo = FALSE}
 tm_shape(EU27) +
@@ -92,11 +92,11 @@ tm_shape(EU27) +
   tm_layout(frame = TRUE, bg.color = "lightblue") 
 ```
 
-## Spatial Weight Matrices based on (i) a distance threshold, (ii) smooth distance-decay, and (iii) a contiguity-based measure. 
+## Spatial Weight Matrices
 
 
 ### (i) Distance Threshold 
-First, we create a binary distance threshold spatial weights matrix based. Any region is being assigned a '1' with respect to another region, if it is less than 3 km away. We have chosen this threshold so that every region has a neighbor. We use the nb2mat function from the 'spdep' package. We row-normalize the matrix.
+First, we create a spatial weights matrix based on a distance threshold. Any region is being assigned a '1' with respect to another region, if it is less than 3 km away. We have chosen this threshold so that every region has a neighbor. We use the nb2mat function from the 'spdep' package. We row-normalize the matrix.
 
 ```{r}
 coords <- st_coordinates(st_centroid(EU27))
@@ -140,7 +140,7 @@ contig_w_matrix <- nb2mat(queen_weights, style="W", zero.policy=TRUE)
 
 ## Matrix Comparison
 
-We can gain deeper insights into these spatial weights matrices as well as the networks they represent by comparing key measures of the graphs that are derived from them. To that end, we program a function which summarizes key features of these graphs. We compare the row-normalized matrices for the queen contiguity and distance threshold matrix. Note that the row-normalization procedure does not preserve the structure of the network. 
+We can gain deeper insights into these spatial weights matrices as well as the networks they represent by comparing key measures of the graphs that are derived from them. To that end, we create a function which computes key summary statistics. Note that interpretation of the obtained summary statistics might be somewhat impaired by the fact that the matrices are row-normalized as compared to the smooth distance decay matrix.  
 
 ```{r}
 graph_dist <- graph_from_adjacency_matrix(dist_w_matrix, mode = "undirected", weighted = TRUE)
@@ -215,10 +215,27 @@ The Contiguity-Based Graph shows the most significant variation in centrality (m
 Higher in the Smooth Distance-Decay Graph (0.2837), suggesting that, on average, nodes are better positioned or more influential within the network. It's lowest in the Contiguity-Based Graph (0.0898), consistent with its sparse and uneven connectivity.
 
 Looking at the most central unit through eigenvector centrality shows that different nodes are identified as most central in each graph. 
+```{r}
+t1 <- table(degree(graph_dist))
+sum(t1)
+## [1] 4
+relafreq_1 <- t1/sum(t1)
+barplot(relafreq_1, xlab = "k", ylab = "Relative frequencies", 
+        main = "Degree distribution Distance Threshold",
+        col = "blue")
 
+t1 <- table(degree(graph_contig))
+sum(t1)
+## [1] 4
+relafreq_1 <- t1/sum(t1)
+barplot(relafreq_1, xlab = "k", ylab = "Relative frequencies", 
+        main = "Degree distribution Queen contiguity",
+        col = "orange")
+```
+We also present the degree distribution for the distance threshold graph and the queen contiguity graph. We consider the degree distribution to be of rather low informational value for the distance decay matrix, which is why we omit it. For queen contiguity the degree distribution is somewhat normally distributed around 4.5. For the distance threshold we can see that there are many regions with a high number of links.
 
 ## Plot the matrix
-We now plot the three spatial weight matrices. We see that the distance decay weight matrix is symmetric. The distance decay matrix is 
+We now plot the three spatial weight matrices. The column and rows denote the ids of the regions. The colours denote the intensity. The row-normalized matrices range from 0-1, the distance decay matrix is not row-normalized.
 ```{r, echo = FALSE, fig.align = 'center', fig.width=5, fig.height=4}
 lattice::levelplot((dist_w_matrix), main="Distance Threshold Spatial Weights Matrix",
 scales = list(x = list(at = c(20, 40, 60, 80, 100),
@@ -234,7 +251,7 @@ scales = list(x = list(at = c(20, 40, 60, 80, 100),
 ```
 ## Try to visualize the network they represent
 
-Let us first visualize the distance based spatial matrix. The first plot shows the map of Europe and the blue lines indicate the connections. The map shows the connectivity in Europe based on the distance threshold. 
+Let us first visualize the distance threshold based spatial weights matrix. The first plot shows the map of Europe and the blue lines indicate the connections. The map shows the connectivity in Europe based on a distance threshold. 
 
 The second map visualizes the network based on the distance-decay matrix. However, the edges do not display the intensity of connections, but just the connectivity to neighboring regions. 
 
@@ -562,12 +579,6 @@ paraguay_literacy <- read_dta("./Data/Tables/Paraguay Literacy Spatial.dta")
 ```
 
 
-In replicating the table, we used the author's Stata code and approximated our r code as best as possible to the variables included in the Stata code and its considerably different syntax.
-
-## Formulas for OLS
-
-Below, we specified the 8 individual regressions used by the author into objects for multiple uses.
-
 ```{r, echo = FALSE}
 formula1 <- illiteracy ~ distmiss + lati + longi + corr + ita + mis + mis1 + one
 formula2 <- illiteracy ~ distmiss + lati + longi + corr + ita + mis + mis1 + one +
@@ -586,9 +597,6 @@ formula7 <- illiteracy ~  one + distmiss + ita
 formula8 <- illiteracy ~ one + distmiss + ita+
   area + tempe + alti + preci + rugg + river + coast
 ```
-
-
-What stuck out was the fact that the author did indeed alter the variables for individual countries, beyond the inclusion of mesorregion controls for Brazil. For Paraguay, e.g., the variables for longitude and altitude were not included for the model but rather only used to compute the Conley standard errors.
 
 ```{r, echo = FALSE}
 model1 <- lm(formula1, data = argentina_brazil_paraguay)
@@ -628,7 +636,6 @@ models <- list(
 )
 ```
 
-We then specified fixed effects models to solely to extract within \(R^2\) values.
 
 ```{r, message=FALSE, echo = FALSE, warning=FALSE}
 
@@ -681,7 +688,7 @@ for (i in 1:length(FEs)){
 
 ```
 
-For the Conley SE's we duplicate latitude and longitude entries as apparently, they cannot be simultaneously taken as explanatory variables and as autocorrelation variables with the same name (unlike in Stata).
+We use the conleyreg function to estimate the conley standard errors. We tried to replicate the table as best as we could. 
 
 ```{r, echo = FALSE}
 
@@ -850,11 +857,12 @@ R$^{2}$ & 0.0419 & 0.0730 & 0.0562 & 0.0951 & 0.1651 & 0.6689 & 0.0039 & 0.2513 
 \end{tabular} 
 \end{sidewaystable} 
 
+
 ## Operationalizations of Distances
 Below, we see each municipality and its proximity to its nearest Jesuit mission via color intensity.
 
-@ValenciaCaicedo2018 uses the nominal ditance in km from each municipality's centroid to arrive at his distance measures.
-Alternative transformations to that could be log -transformations (i.e. \(log(d)\)) or methods for computing decay such as \(\frac{1}{x}\) or exponential decay. For the latter we used a beta of -0.01.
+@ValenciaCaicedo2018 uses the nominal distance in km from each municipality's centroid to arrive at his distance measures.
+Alternative transformations to that could be log -transformations (i.e. \(log(d)\)) or methods for computing decay such as \(\frac{1}{distance^\gamma}\) or exponential decay. For the latter we used a beta of -0.01, for the former a $\gamma = 0.5$.
 
 
 ```{r, echo = FALSE}
@@ -897,7 +905,7 @@ p <- ggplot(data = rbind(rbind(m_ARG_plot, m_PRY_plot),m_BRA_plot))+#[m_BRA$NAME
   theme_map() +
   theme(legend.position = 'left')+
   labs(x=NULL, y=NULL,
-       title="Distance to next Jesuit Mission - Logarithmic Decay")+
+       title="Distance to next Jesuit Mission")+
   labs(fill="Distance (km)")
 
 
@@ -921,10 +929,6 @@ final_plot_zoom <- country_borders +
 ```
 
 
-```{r, echo = FALSE}
-final_plot_zoom
-```
-
 
 ```{r, echo = FALSE}
 ############## DISTANCE COMPUTATIONS ################
@@ -943,9 +947,13 @@ plotdata$distmiss_onex <-  1/(plotdata$distmiss^gamma)
 ```
 
 Linear Decay: This function shows a direct, proportional decrease in weight with distance.
+
 Exponential Decay: The weight decreases exponentially with distance; the processes loses influence more rapidly.
+
 Inverse Decay: This function decreases inversely with the square root of distance, representing a more gradual decrease than exponential.
+
 Logarithmic Decay: Logarithmic decay shows a decrease that slows as distance increases; the initial decay is rapid but significant influence still extends over longer distances.
+
 ```{r, echo = FALSE}
 # Create a sequence of distances, avoiding zero for logarithmic calculations
 distances <- seq(1, 500, length.out = 100)
@@ -960,7 +968,7 @@ logarithmic_decay <- -log(distances)  # Adding logarithmic decay
 data <- data.frame(
   Distance = rep(distances, 4),
   Weight = c(linear_decay, exponential_decay, inverse_decay, logarithmic_decay),
-  Type = factor(rep(c("Linear", "Exponential", "Inverse", "Logarithmic"), each = 100))
+  Type = factor(rep(c("Linear * (-1)", "Exponential", "Inverse", "Logarithmic * (-1)"), each = 100))
 )
 
 # Plot using ggplot2
@@ -981,7 +989,7 @@ ggplot(data, aes(x = Distance, y = Weight, color = Type)) +
     theme_map() +
     theme(legend.position = 'left')+
     labs(x=NULL, y=NULL,
-         title="Distance to next Jesuit Mission - logarithmic decay")+
+         title="Distance to next Jesuit Mission - Logarithmic Decay")+
     labs(fill="Log(Distance (km))")
   
   second<- first +
@@ -1024,8 +1032,6 @@ ggplot(data, aes(x = Distance, y = Weight, color = Type)) +
     annotate("text", x = 58, y = -29, label = 'atop(bold("ARGENTINA"))', size = 2.5, col='red', parse=T)+
     annotate("text", x = 54, y = -30, label = 'atop(bold("BRAZIL"))', size = 2.5, col='red', parse=T)+
     annotate("text", x = 56.5, y = -27, label = 'atop(bold("PARAGUAY"))', size = 2.5, col='red', parse=T)
-  
-  third_exp
 ```
 
 
@@ -1048,19 +1054,26 @@ second<- first +
     geom_sf(data = border_PRY, color = "red", fill=NA) +
     theme_minimal()
   
-third_ <- second +
+third_inv <- second +
     xlim(xmin = 62, xmax = 48) +
     ylim(ymin = -35, ymax = -25)+
     annotate("text", x = 58, y = -29, label = 'atop(bold("ARGENTINA"))', size = 2.5, col='red', parse=T)+
     annotate("text", x = 54, y = -30, label = 'atop(bold("BRAZIL"))', size = 2.5, col='red', parse=T)+
     annotate("text", x = 56.5, y = -27, label = 'atop(bold("PARAGUAY"))', size = 2.5, col='red', parse=T)
   
-third
-
-
 ```
 
-The choice of the distance decay function governs the propagation of treatment and spillover effects. We can see that different specifications of the distance parameters lead to significantly different treatment intensities. There is no objective criterion for the choice of the best distance decay function. Any deviation from the true underlying distance decay function will bias the results and reduce efficiency. @ValenciaCaicedo2018 baseline linear distance decay suggests that moving from 100 to 200 km has the same effect as moving from 400 to 500 kilometers. This seems somewhat unrealisitic. In any case, at best the results are robust to the choice of the distance decay function. As an additional robustness check we replicate the main specification for three different distance decay functions. 
+
+```{r echo=FALSE, out.width="70%", fig.align='center'}
+print(final_plot_zoom)
+print(third_log)
+print(third_exp)
+print(third_inv)
+```
+
+
+
+The choice of the distance decay function governs the propagation of treatment and spillover effects. We can see that different specifications of the distance parameters lead to significantly different treatment intensities. There is no objective criterion for the choice of the best distance decay function. Any deviation from the true underlying distance decay function will bias the results and reduce efficiency. @ValenciaCaicedo2018 baseline linear distance decay suggests that moving from 100 to 200 km has the same effect as moving from 400 to 500 kilometers. This seems somewhat unrealistic. In any case, at best the results are robust to the choice of the distance decay function. As an additional robustness check we replicate the main specification for three different distance decay functions. 
 
 
 ```{r, echo = FALSE, include = FALSE}
@@ -1134,18 +1147,18 @@ Observations & 548 & 548 & 548 & 548 \\
 \end{tabular} 
 \end{table} 
 
+We do not find a statistically significant effect for other transformed distance decay specifications.
+
+## Spatial Dependence and the Role of Geography
+
+A salient factor to consider with analyses using spatial and geographic data in general is spatial autocorrelation, which implies that areas in close proximity may have correlated outcomes due to a higher similarity in covariates as well, which usually are geographic features that are prone to correlate highly. Furthermore, it should be noted that space and geography greatly impact any propagation of impulses which necessitates the use of adjustments for spatial autocorrelation.
+Why is this bothersome in a conventional regression specification? Both due to confounding (i.e. similar covariates between spatially close observations) and due to outcomes having greater similarity among spatially close observations, which would then induce residuals to not be uniformly distributed. Hence, an adjustment must be made to arrive at more accurate statistical inference, i.e. they need to be adjusted for spatial autocorrelation. The Conley standard errors are one such way to account for the effect of such correlations. Especially in the case of Caicedo the issue of correlated covariates can become an issue. Think of the scenario where the environment shapes culture and beliefs (taking a more Hegelian perspective in that case). Given more education and a potential for higher emphasis on infrastructure that depends on human capital, feasible travel distances over time may have shortened in and around Mission areas, in turn actually reducing distances over time. We would then be presented with a covariate that is influenced by the outcome - solvable via models akin to an SAR.
 
 # Exercise C
 
-Recall ‘The perils of peer effects’ (Angrist, 2014). Write a short text (not more than 800 words) on the ‘The perils of ignoring peer effects’.
-\begin{itemize}
-    \item Touch on the topics of drawing valid inference and the trade-off between internal and external validity (think of an experimental setting vs, e.g. an actual classroom), and the goals of (applied and methodological) scientific research.
-    \item Briefly explain how network dependence (spatial, social, etc.) may impact \emph{validity} and \emph{relevance} of a certain instrument. Consider weather instruments, the quarter of birth instrument by Angrist and Krueger (2001), or some instrument that yoiu are familiar with as an example.
-    \end{itemize}
+##The perils of ignoring peer effects 
 
-\textbf{The perils of ignoring peer effects}
-
-For a long time, researchers have considered network dynamics as sources of potential contamination in randomized experiments, or a violation of the stable unit treatment variable assumption [@Rubin1978]. Only recently economists have begun to explicitly model these network dependencies as ‚spillover effects’ [@bramoulle_peer_2020]. Ignoring peer effects threatens the internal validity of both experimental and non-experimental findings. Consider for example the effect of a program assigned at an individual level (some sort of mentoring program) on grades. To estimate the effect reasearchers typically employ class or school fixed effects. However, the presence of peer effects (i.e. the mental health improvement might improve the mental health of other students), can bias the estimated coefficients. To give a concrete example, @miguel_worms_2004 study the effects of a deworming RCT in Kenya. They highlight that by not including peer effects through reduced network transmission, the reduction in school absenteeism of the intervention are doubly undercounted. The reduced disease transmission, which spilled over to control schools leads to an undercount of the positive benefits of the intervention. Thus, ignoring peer effects is equivalent to ignoring an externality.  
+For a long time, researchers have considered network dynamics (and thus peer effects) as sources of potential contamination in randomized experiments; a violation of the stable unit treatment variable assumption [@Rubin1978]. Only recently economists have begun to explicitly model these network dependencies as ‚spillover effects’ [@bramoulle_peer_2020]. Ignoring peer effects threatens the internal validity of both experimental and non-experimental findings. To illustrate this, consider the effect of a program assigned at an individual level (some sort of mentoring program). To estimate the effect of such an intervention on an outcome of interest say grades, researchers typically employ class or school fixed effects. However, the fixed effects might capture some of the benefits if the intervention also improved the outcomes of peers. @miguel_worms_2004 study the effects of a deworming RCT in Kenya. They highlight that by not including peer effects in the form of reduced network transmission, the reduction in school absenteeism of the intervention are doubly undercounted. The intervention also reduced the incidence and thus school attendence at the control schools, which lead to an underestimate of the positive benefits of the intervention. 
 
 \textbf{Estimating Peer Effects} 
 
@@ -1160,33 +1173,34 @@ $\phi_{2} = \text{IV} - \text{OLS}$
 
 However, @angrist_perils_2014 cautions to interpret any obtained difference as the causal effect of peers. Selection bias, omitted variables, nonlinearities, and measurement error can inflate or deflate the IV estimate of the coefficient. Thus, any such study according to @angrist_perils_2014 is prone to misinterpretation.
 
-To uncover peer effects, randomization of peers into different environments allows researchers to draw internally valid inferences about exogenous peer effects. However, these research strategies can lack external validity, and are often practically infeasible. The reason is that networks structure emerges endogenously. In the real-world friends are not being randomly assigned, but people sort into groups and networks (often based on homophily). Especially when it comes to long-run effects, it is hard to imagine that truly assigns peers characteristics in a manner that is orthogonal to individual characteristics. 
+To uncover peer effects, randomization of peers into different environments allows researchers to draw internally valid inferences about exogenous peer effects. However, these research strategies can lack external validity, and are often practically infeasible. Network structure emerges endogenously. In the real-world friends are not being randomly assigned, but people sort into groups and networks (often based on homophily). Especially when it comes to long-run effects, it is hard to imagine an experiment or observational study that truly assigns peers characteristics in a manner that is orthogonal to individual characteristics. 
 
-\textbf{The predicitve value of Peer Effect Studies} 
+How then can we learn something about peer effect and the importance of social networks?
+An innovative methodological contribution that sheds light on peer effects is @chetty_social_2022. The researchers investigate the impact of economic connectedness on economic mobility. @chetty_social_2022 do not rely on random assignment, nor do they estimate the impact of a specific policy experiment. Rather by relying on incredible rich Facebook data, the researchers can alleviate potential threats to identification like reverse causality. The researchers demonstrate that broad-based correlations can give us policy relevant insights into the importance and impacts of social networks.  
 
-How then can we learn something about peer effect and the importance of social networks? An innovative methodological contribution that sheds light on peer effects is @chetty_social_2022. The researchers demonstrate that economic connectedness is connected to social mobility.  @chetty_social_2022 do not rely on random assignment, nor do they estimate the impact of a specific policy experiment. The incredible rich data allows the alleciation of potential issues and demonstrates that even broad based correlations can give us policy relevant insights into the dynamics of social networks. The extremely granular data can preclude concerns over threats to identification like reverse causality. While there are hurdles to causal interpretation of the effects, those kind of studies might still generate more credible insights than most recent studies.
-
-\textbf{Network Dependence and Instruments} 
+\textbf{Network Dependence and Instruments}
 
 Network dependence can affect and impair the \textit{relevance} and \textit{validity} of an instrument variable. Consider the paper by @ramsay_revisiting_2011 who studies the relationship between natural resource wealth and political freedom. More specifically, he is interested in the causal effect of a countries annual oil income per capita on the level of democracy as measured by the polity IV score. The author estimates: 
 
 $\text{Democracy}_{i,t} = \mu + \text{OilIncomepercapita}_{i,t} + \delta X_{i,t} + \varepsilon_{i,t}$ 
 
-where X is a vector of controls and for country i in year t. 
+where $X_{i,t}$ denotes a vector of controls and for country i in year t. 
 
-However, this relationship likely suffers from reverse causality, as a countries political institutions will determine its oil income, while concurrently oil income determines democracy. @ramsay_revisiting_2011 proposes the ‚out-of-region natural disaster‘ as an IV for annual oil income. He splits the world into five supposedly unconnected regions and uses natural disasters in other regions, which impact the global oil price as an IV for annual oil income. @ramsay_revisiting_2011 identifies the variation in annual oil income of a country in lets say Africa that is caused by a natural disaster in Colombia.
+However, this relationship likely suffers from reverse causality, as a countries political institutions will determine oil income, while concurrently oil income determines political freedom. @ramsay_revisiting_2011 proposes the ‚out-of-region natural disaster‘ as an IV for annual oil income. He splits the world into five supposedly unconnected regions and uses natural disasters in other regions, which impact the global oil price as an IV for annual oil income. Thus, @ramsay_revisiting_2011 identifies the variation in annual per capita oil income of a country that is caused by a natural disaster in other regions.
 
 $\text{Oilincomepercapita}_{i,t} = \mu + \theta \text{OutofRegionNaturalDisaster}_{i,t} + \delta X_{i,t} + \varepsilon_{i,t}$
 
 Now how might spatial dependence in networks impact the validity (i.e. the exclusion restriction) of the instrument. 
 
-$\text{Cov}(\text{OutofRegionNaturalDisaster}_{i,t}, \varepsilon_{i,t} / \delta X_{i,t}) = 0$
+$\text{Cov}(\text{OutofRegionNaturalDisaster}_{i,t}, \varepsilon_{i,t} / X_{i,t}) = 0$
 
-Network dependence through spatial interdependence can lead to a violation of the exclusion restriction. The changes and levels of countries political institutions are correlated and clustered in space. Take for example the recent wave of military coups in Africa which likely afflicts the political institutions in other regions through (for example) increased migration, as well. Secondly, the coarse aggregation of the world into five regions is creating spatial dependence. The shocks induced by natural disasters might itself be spatially correlated in a systematic manner with other shocks.  Consider a natural disaster in South America which might induce changes in the US foreign aid network, by redirecting resources away from one country to another. A reduction in foreign aid in Africa might then concurrently impact political freedom in Africa. Another obvious candidate for violations of the assumptions is that natural disasters will affect shock trade networks which will have a direct impact on countries political institutions. Thus the effects of shocks induced by natural disasters are clustered in space through countless channels. The authors assumption that, by dividing the world into five regions and that the shocks in those regions are systematically unrelated seems implausible. 
-The \textit{relevance} of the instrument, however, is not directly impaired by network dependence as the first stage F-test still demonstrates that the instrument is correlated with oil income per capita.
+Network dependence through spatial interdependence can lead to a violation of the exclusion restriction [@Betz2019]. The changes and levels of countries political institutions are correlated and clustered in space. Take for example the recent wave of military coups in Africa which likely affects the political institutions in other regions through (for example) increased migration, as well. Secondly, the coarse aggregation of the world into five regions is creating spatial dependence. The shocks induced by natural disasters might themselves be spatially correlated in a systematic manner with other shocks. Consider a natural disaster in South America which might induce changes in the US foreign aid network, by redirecting resources away from one country to another. A reduction in foreign aid in Africa might then concurrently impact political freedom in Africa. Another obvious candidate for violations of the assumptions is that natural disasters will affect trade networks which can in turn impact political institutions. Thus the effects of shocks induced by natural disasters are clustered in space through countless channels. The authors assumption that, by dividing the world into five regions and that the shocks in those regions are systematically unrelated seems implausible. 
+The \textit{relevance} of the instrument, however, is not directly impaired by network dependence as the first stage F-test still demonstrates that the instrument is correlated with oil income per capita. 
 
 
 # Exercise D
+After a quick web search, we found the photo on the Wikipedia page about 'Pandemonium Architecture', a theory in cognitive science about the visual processing of images in the brain. On Wikipedia the photo of the dog is uploaded in jpeg format. 
+However, since this is a screenshot that contains the comment with the typeface as well, we suspect that this photo is stored as a pdf or png file and was inserted as such in the assignment document. 
 
 \newpage
 
