@@ -215,23 +215,22 @@ The Contiguity-Based Graph shows the most significant variation in centrality (m
 Higher in the Smooth Distance-Decay Graph (0.2837), suggesting that, on average, nodes are better positioned or more influential within the network. It's lowest in the Contiguity-Based Graph (0.0898), consistent with its sparse and uneven connectivity.
 
 Looking at the most central unit through eigenvector centrality shows that different nodes are identified as most central in each graph. 
-```{r}
+```{r, echo = FALSE, fig.align = 'center', fig.width=5, fig.height=4}
 t1 <- table(degree(graph_dist))
-sum(t1)
-## [1] 4
+#sum(t1)
 relafreq_1 <- t1/sum(t1)
 barplot(relafreq_1, xlab = "k", ylab = "Relative frequencies", 
         main = "Degree distribution Distance Threshold",
         col = "blue")
 
 t1 <- table(degree(graph_contig))
-sum(t1)
-## [1] 4
+#sum(t1)
 relafreq_1 <- t1/sum(t1)
 barplot(relafreq_1, xlab = "k", ylab = "Relative frequencies", 
         main = "Degree distribution Queen contiguity",
         col = "orange")
 ```
+
 We also present the degree distribution for the distance threshold graph and the queen contiguity graph. We consider the degree distribution to be of rather low informational value for the distance decay matrix, which is why we omit it. For queen contiguity the degree distribution is somewhat normally distributed around 4.5. For the distance threshold we can see that there are many regions with a high number of links.
 
 ## Plot the matrix
@@ -1151,8 +1150,10 @@ We do not find a statistically significant effect for other transformed distance
 
 ## Spatial Dependence and the Role of Geography
 
-A salient factor to consider with analyses using spatial and geographic data in general is spatial autocorrelation, which implies that areas in close proximity may have correlated outcomes due to a higher similarity in covariates as well, which usually are geographic features that are prone to correlate highly. Furthermore, it should be noted that space and geography greatly impact any propagation of impulses which necessitates the use of adjustments for spatial autocorrelation.
-Why is this bothersome in a conventional regression specification? Both due to confounding (i.e. similar covariates between spatially close observations) and due to outcomes having greater similarity among spatially close observations, which would then induce residuals to not be uniformly distributed. Hence, an adjustment must be made to arrive at more accurate statistical inference, i.e. they need to be adjusted for spatial autocorrelation. The Conley standard errors are one such way to account for the effect of such correlations. Especially in the case of Caicedo the issue of correlated covariates can become an issue. Think of the scenario where the environment shapes culture and beliefs (taking a more Hegelian perspective in that case). Given more education and a potential for higher emphasis on infrastructure that depends on human capital, feasible travel distances over time may have shortened in and around Mission areas, in turn actually reducing distances over time. We would then be presented with a covariate that is influenced by the outcome - solvable via models akin to an SAR.
+The study by Caicdeo (2019) relies on the assumption that conditional on covariates the geographic location of the Jesuits missions was random. However, it is extremely difficult to control for all geographic factors that might affect both Jesuit mission locations and present day economic outcomes. In the context of Caicedo's (2019) study on the impact of Jesuit missions, it’s crucial to consider historical geographic factors which were not properly controlled for (due to data limitations) like land fertility that directly influences present-day outcomes as well as the selection of Jesuits missionaries. 
+
+Consider the alternative story to the one presented in the paper: Higher land fertility enhanced agricultural output, increasing population density and subsequently urbanization rates in areas where missions were historically located. This in turn might lead to higher literacy rates, not directly due to the missions themselves but because higher urbanization enables better access to educational resources. Additionally, areas with historically fertile land might now have higher uptake of genetically engineered soy, benefiting from greater returns on agricultural investments. This scenario illustrates how failing to account for such spatially varying historical factors could confound the results, attributing outcomes to the missions that are actually driven by underlying geographical characteristics. The fact that other missionaries did not settle in agricultural more productive places might be attributable to heterogeneity or simple spatial noise due to measurement error. 
+
 
 # Exercise C
 
