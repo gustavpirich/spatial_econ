@@ -15,6 +15,7 @@ nocite: '@*'
 header-includes:
   - \usepackage{tcolorbox}
   - \usepackage[default]{lato}
+  - \usepackage{rotating}
 papersize: a4
 geometry: margin=2cm
 urlcolor: DarkOrchid!65!black
@@ -27,7 +28,10 @@ knitr::opts_chunk$set(warning = FALSE, message = FALSE)
 library(showtext)
 showtext_auto()
 
-pacman::p_load(sf, magrittr, tidyverse, tmap, viridis, spdep, igraph, generics, stargazer, knitr, kableExtra, haven)
+pacman::p_load(stringi, stringr, stringdist, haven, sf, dplyr, fuzzyjoin, 
+               comparator, digest, zoomerjoin, ggplot2, tidyr, ggthemes, viridis, 
+               fixest, conleyreg, plm, stargazer, magrittr, tidyverse, tmap, spdep, 
+               igraph, generics, knitr, kableExtra, formatR)
 ```
 
 \vspace{2em}
@@ -440,49 +444,551 @@ map2
 ```
 
 
-We now replicate table 2
-```{r}
+Below, we see each municipality and its proximity to its nearest Jesuit mission via color intensity.
 
-list_2 <- dat2 %>%
-  select(COUNTRY, geometry, NAME_1, NAME_2) %>%
-  mutate(country = ifelse(COUNTRY == "Brazil", "BRA", COUNTRY)) %>%
-  rename("muni" = "NAME_2") %>%
-  mutate(state = ifelse(NAME_1 == "Rio Grande do Sul", "RS", NAME_1)) 
+```{r, echo = FALSE, include = FALSE}
+setwd("/Users/gustavpirich/Library/Mobile Documents/com~apple~CloudDocs/Wirtschaftsuniversitaet/MASTER/summer_term_2024/spatial_economics/data/PlotsCode")
 
-literacy_Arg_Bra_Par_2 <- literacy_Arg_Bra_Par %>%
-  left_join(list_2, by = c("muni",  "state", "country"))
+data <- read_dta("./Data/literacy_Arg-Bra-Par.dta", encoding="latin1")#ISO-8859-1
 
-mod1 <- lm(illiteracy ~ (lati) + (longi) + distmiss + state, data = literacy_Arg_Bra_Par_2)
+shapefile_BRA <- st_read("./Data/gadm41_BRA_shp/gadm41_BRA_2.shp")
+#  mutate(NAME_2 = iconv("NAME_2", to = "latin1"))
 
-mod2 <- lm(illiteracy ~ (lati) + (longi) + distmiss + state + coast + river + slope + rugg + alti + tempe + preci + area, data = literacy_Arg_Bra_Par_2)
+shapefile_ARG <- st_read("./Data/gadm41_ARG_shp/gadm41_ARG_2.shp")
+
+shapefile_PRY <- st_read("./Data/gadm41_PRY_shp/gadm41_PRY_2.shp")
 
 
-bra <- literacy_Arg_Bra_Par_2 %>% 
-             filter(country == "BRA")
+Shapefile_Area<- rbind(rbind(shapefile_ARG, shapefile_BRA),shapefile_PRY)
 
-mod3 <- lm(illiteracy ~ (lati) + (longi) + distmiss + mesorregi, data = bra)
+m_PRY <- data[data$country=="Paraguay",]%>%
+  stringdist_right_join(shapefile_PRY, by = c("muni" ="NAME_2" , "state"="NAME_1"), 
+                        max_dist = 1)
 
-mod4 <- lm(illiteracy ~ (lati) + (longi) + distmiss + mesorregi + coast + river + slope + rugg + alti + tempe + preci + area, data = bra)
-
-
-arg <- literacy_Arg_Bra_Par_2 %>% 
-             filter(country == "Argentina")
-
-mod5 <- lm(illiteracy ~ (lati) + (longi) + distmiss, data = arg)
-
-mod6 <- lm(illiteracy ~ (lati) + (longi) + distmiss + coast + river + slope + rugg + alti + tempe + preci + area, data = arg)
+m_PRY[m_PRY$NAME_2=='Mayor Julio D. Otaño',1:29]<- data[data$muni=='Mayor Otaño',]
+m_PRY[m_PRY$NAME_2=='San Juan Bautista de las Misione',1:29]<- data[data$muni=='San Juan Bautista',]
 
 
-par <- literacy_Arg_Bra_Par_2 %>% 
-             filter(country == "Paraguay")
 
-mod7 <- lm(illiteracy ~ (lati) + (longi) + distmiss + state, data = par)
+m_ARG <- data[data$country=="Argentina",]%>%
+  stringdist_right_join(shapefile_ARG, by = c("muni" ="NAME_2" , "state"="NAME_1"), 
+                        max_dist = 1)
 
-mod8 <- lm(illiteracy ~ (lati) + (longi) + distmiss + state + coast + river + slope + rugg + alti + tempe + preci + area, data = par)
+m_BRA <- data[data$country=="BRA",]%>%
+  stringdist_right_join(shapefile_BRA, by = c("muni" ="NAME_2"), 
+                        max_dist = 1)
+m_BRA[m_BRA$NAME_1=="Rio Grande do Sul" ,]
 
-#stargazer(mod1, mod2, mod3, mod4, mod5, mod6, mod7, mod8)
+
+
+# Border Data
+
+states_BRA <- st_read("./Data/gadm41_BRA_1.json/gadm41_BRA_1.json")
+states_ARG <- st_read("./Data/gadm41_ARG_1.json/gadm41_ARG_1.json")
+states_PRY <- st_read("./Data/gadm41_PRY_1.json/gadm41_PRY_1.json")
+
+border_ARG <- st_read("./Data/gadm41_ARG_0.json")
+border_PRY <- st_read("./Data/gadm41_PRY_0.json")
+border_BRA <- st_read("./Data/gadm41_BRA_0.json")
+
 
 ```
+## Reproducing Table 2 
+
+```{r}
+####### Data Loading ####
+
+setwd("/Users/gustavpirich/Library/Mobile Documents/com~apple~CloudDocs/Wirtschaftsuniversitaet/MASTER/summer_term_2024/spatial_economics/data/TableCode")
+
+argentina_brazil_paraguay <- read_dta("./Data/Tables/Argentina Brazil Paraguay Spatial.dta")
+argentina_literacy <- read_dta("./Data/Tables/Argentina Literacy Spatial.dta")
+brazil_literacy <- read_dta("./Data/Tables/Brazil Literacy Spatial.dta")
+paraguay_literacy <- read_dta("./Data/Tables/Paraguay Literacy Spatial.dta")
+
+```
+
+
+In replicating the table, we used the author's Stata code and approximated our r code as best as possible to the variables included in the Stata code and its considerably different syntax.
+
+## Formulas for OLS
+
+Below, we specified the 8 individual regressions used by the author into objects for multiple uses.
+
+```{r, echo = FALSE}
+formula1 <- illiteracy ~ distmiss + lati + longi + corr + ita + mis + mis1 + one
+formula2 <- illiteracy ~ distmiss + lati + longi + corr + ita + mis + mis1 + one +
+  area+ tempe + alti + preci + rugg + river + coast
+
+formula3 <- illiteracy ~  cutoff1 + cutoff1 + distmiss + lati + 
+  longi + corr + ita + mis + mesorregi + one + mesorregi
+formula4 <- illiteracy ~ lati + longi  + one + distmiss +
+  area + tempe + alti + preci + rugg + river + coast + mesorregi 
+
+formula5 <- illiteracy ~  one + distmiss +lati + longi +  corr
+formula6 <- illiteracy ~  one + distmiss +lati + longi + 
+  area + tempe + alti + preci + rugg + river + coast + corr
+
+formula7 <- illiteracy ~  one + distmiss + ita 
+formula8 <- illiteracy ~ one + distmiss + ita+
+  area + tempe + alti + preci + rugg + river + coast
+```
+
+
+What stuck out was the fact that the author did indeed alter the variables for individual countries, beyond the inclusion of mesorregion controls for Brazil. For Paraguay, e.g., the variables for longitude and altitude were not included for the model but rather only used to compute the Conley standard errors.
+
+```{r, echo = FALSE}
+model1 <- lm(formula1, data = argentina_brazil_paraguay)
+
+model2 <- lm(formula2, data = argentina_brazil_paraguay)
+
+model3 <- lm(formula3, 
+             data = brazil_literacy)
+
+model4 <- lm(formula4 ,
+             data = brazil_literacy)
+
+model5 <- lm(formula5, data = argentina_literacy)
+
+model6 <- lm(formula6, data = argentina_literacy)
+
+### PARAGUAY ##
+
+model7 <- lm(formula7, 
+             data = paraguay_literacy)
+
+
+# lati longi cutoff1 cutoff1  illiteracy distmiss ita one
+model8 <- lm(formula8 , 
+             data = paraguay_literacy)
+
+
+models <- list(
+  model1 ,
+  model2 ,
+  model3 ,
+  model4 ,
+  model5 ,
+  model6 ,
+  model7 ,
+  model8 
+)
+```
+
+We then specified fixed effects models to solely to extract within \(R^2\) values.
+
+```{r, message=FALSE, echo = FALSE, warning=FALSE}
+
+withindata<- list(argentina_brazil_paraguay,argentina_brazil_paraguay,
+                  brazil_literacy, brazil_literacy, argentina_literacy,
+                  argentina_literacy, paraguay_literacy,paraguay_literacy)
+
+fe1 <- feols( illiteracy ~ distmiss + lati + longi + corr + ita + mis + mis1 + one |state , 
+              data = as.data.frame(withindata[[1]]))
+
+
+fe2 <- feols(illiteracy ~ distmiss + lati + longi + corr + ita + mis + mis1 + one +
+               area+ tempe + alti + preci + rugg + river + coast |state , 
+              data = as.data.frame(withindata[[2]]))
+
+fe3<-feols( illiteracy ~ lati + longi +  one + distmiss |state + mesorregi , 
+               data = as.data.frame(withindata[[3]]))
+
+
+fe4<-feols(illiteracy ~ lati + longi  + one + distmiss +
+                 area + tempe + alti + preci + rugg + river + coast
+                   |state +mesorregi, data = as.data.frame(withindata[[4]]))
+
+
+fe5 <- feols(illiteracy ~ lati + longi +  one + distmiss+ corr|state, 
+             data = as.data.frame(withindata[[5]]))
+
+fe6 <- feols( illiteracy ~ lati + longi  + one + distmiss +
+                area + tempe + alti + preci + rugg + river + coast + corr
+              |state , data = as.data.frame(withindata[[6]]))
+
+  
+fe7 <- feols( illiteracy ~  one + distmiss + ita|state,
+              data = as.data.frame(withindata[[7]]))
+
+fe8 <-  feols( illiteracy ~ one + distmiss + ita +
+                 area + tempe + alti + preci + rugg + river + coast
+               |state, data = as.data.frame(withindata[[8]]))
+
+FEs<- list(fe1,fe2,fe3,fe4,fe5,fe6,fe7, fe8)
+
+
+Withins<-c()
+
+for (i in 1:length(FEs)){
+  fereg<- FEs[[i]]
+  r2<-r2(fereg)
+  Withins[i]<- r2[6]
+}
+
+```
+
+
+For the Conley SE's we duplicate latitude and longitude entries as apparently, they cannot be simultaneously taken as explanatory variables and as autocorrelation variables with the same name (unlike in Stata).
+
+```{r, echo = FALSE}
+
+argentina_brazil_paraguay_conley<- argentina_brazil_paraguay
+argentina_brazil_paraguay_conley$lon<- argentina_brazil_paraguay$longi
+argentina_brazil_paraguay_conley$lat<- argentina_brazil_paraguay$lati
+
+brazil_conley<- brazil_literacy
+brazil_conley$lon<- brazil_literacy$longi
+brazil_conley$lat<- brazil_literacy$lati
+
+argentina_conley<- argentina_literacy
+argentina_conley$lon<- argentina_literacy$longi
+argentina_conley$lat<- argentina_literacy$lati
+
+paraguay_conley<- paraguay_literacy
+paraguay_conley$lon<- paraguay_literacy$longi
+paraguay_conley$lat<- paraguay_literacy$lati
+
+#### all models conley adj
+# Model 1: Applied to Argentina, Brazil, and Paraguay combined
+conleyreg_result1 <- conleyreg(
+  formula = formula1,
+  data = argentina_brazil_paraguay_conley,
+  dist_cutoff = 0.1,
+  lat = "lat",
+  lon = "lon",
+  model = "ols"
+)
+
+# Model 2: Applied to Argentina
+conleyreg_result2 <- conleyreg(
+  formula = formula2,
+  data = argentina_brazil_paraguay_conley,
+  dist_cutoff = 0.1,
+  lat = "lat",
+  lon = "lon",
+  model = "ols"
+)
+
+# Model 3: Applied to Paraguay
+conleyreg_result3 <- conleyreg(
+  formula = formula3, # Assuming a different formula or the same depending on your analysis
+  data = brazil_conley,
+  dist_cutoff = 0.1,
+  lat = "lat",
+  lon = "lon",
+  model = "ols"
+)
+
+# Model 4: Assuming another application on combined Argentina, Brazil, and Paraguay data
+conleyreg_result4 <- conleyreg(
+  formula = illiteracy ~  distmiss + lati + longi + one + area + tempe + alti + 
+    preci + rugg + river + coast,
+  data = brazil_conley,
+  dist_cutoff = 0.1,
+  lat = "lat",
+  lon = "lon",
+  model = "ols"
+)
+
+# Model 5: Assuming a repeated analysis on Argentina with a different formula
+conleyreg_result5 <- conleyreg(
+  formula = formula5, 
+  data = argentina_conley,
+  dist_cutoff = 0.1,
+  lat = "lat",
+  lon = "lon",
+  model = "ols"
+)
+
+# Model 6: Assuming a repeated analysis on Paraguay with a different formula
+conleyreg_result6 <- conleyreg(
+  formula = formula6, # Replace with your actual formula
+  data = argentina_conley,
+  dist_cutoff = 0.1,
+  lat = "lat",
+  lon = "lon",
+  model = "ols"
+)
+
+# Model 7 & 8: Continuing the pattern, assuming you have specific datasets or formulae
+# For illustrative purposes, I'll use placeholders. You should replace these with actual data/formula.
+
+# Model 7: Another model variant
+conleyreg_result7 <- conleyreg(
+  formula = formula7, # Replace with your actual formula
+  data = paraguay_conley, # Or whichever dataset applies
+  dist_cutoff = 0.1,
+  lat = "lat",
+  lon = "lon",
+  model = "ols"
+)
+
+# Model 8: Final model variant
+conleyreg_result8 <- conleyreg(
+  formula = formula8, # Replace with your actual formula
+  data = paraguay_conley, # Or whichever dataset applies
+  dist_cutoff = 0.1,
+  lat = "lat",
+  lon = "lon",
+  model = "ols"
+)
+
+
+modelsvec<- list(conleyreg_result1,conleyreg_result2,conleyreg_result3,conleyreg_result4,
+        conleyreg_result5,conleyreg_result6,conleyreg_result7,conleyreg_result8)
+
+SEs<-c()
+
+for (i in 1:length(modelsvec)){
+  s<-modelsvec[[i]]
+  SEs[i]<-s[,2][2]
+}
+
+```
+
+```{r, echo = FALSE, include = FALSE}
+
+stargazer(
+  models,
+  type = "latex",  # Change to "latex" if you're generating LaTeX output
+  title = "Effect on Illiteracy",
+  column.labels = c("Argentina, Brazil, and Paraguay", "Brazil", "Argentina", "Paraguay"),
+  covariate.labels = c("Mission distance", "Geo controls", "State fixed effects"),
+  omit.stat = c("adj.rsq", "f"),  # Omit adjusted R-squared and F-statistic
+  keep.stat = c("n", "rsq"), 
+  omit = "everything",  # Omit everything except the coefficients of interest
+  keep = "distmiss" , 
+  # Keep number of observations and R-squared
+  digits = 4,   
+  column.separate= c(2,2,2,2),
+  # Number of digits to round off to
+  star.cutoffs = c(0.05, 0.01, 0.001), # Set significance levels
+  add.lines = list(c("Conley SE",round(SEs,3)),
+                   c("Geo controls", "No", "Yes", "No", "Yes", "No", "Yes", "No","Yes"),
+                   c("Within R$^{2}$",round(Withins,3))),# Add line for Geocontrols
+  float.env = "sidewaystable" # to flip the table 90 degrees
+)
+
+```
+\begin{sidewaystable}[!htbp] \centering 
+  \caption{Effect on Illiteracy} 
+  \label{} 
+\begin{tabular}{@{\extracolsep{5pt}}lcccccccc} 
+\\[-1.8ex]\hline 
+\hline \\[-1.8ex] 
+ & \multicolumn{8}{c}{\textit{Dependent variable:}} \\ 
+\cline{2-9} 
+\\[-1.8ex] & \multicolumn{8}{c}{illiteracy} \\ 
+ & \multicolumn{2}{c}{Argentina, Brazil, and Paraguay} & \multicolumn{2}{c}{Brazil} & \multicolumn{2}{c}{Argentina} & \multicolumn{2}{c}{Paraguay} \\ 
+\\[-1.8ex] & (1) & (2) & (3) & (4) & (5) & (6) & (7) & (8)\\ 
+\hline \\[-1.8ex] 
+ Mission distance & 0.0105$^{**}$ & 0.0112$^{*}$ & 0.0200$^{***}$ & 0.0313$^{***}$ & 0.0157 & 0.0669$^{**}$ & 0.0043 & 0.0138 \\ 
+  & (0.0039) & (0.0046) & (0.0056) & (0.0077) & (0.0081) & (0.0232) & (0.0163) & (0.0264) \\ 
+  & & & & & & & & \\ 
+\hline \\[-1.8ex] 
+Conley SE & 0.004 & 0.005 & 0.006 & 0.009 & 0.007 & 0.019 & 0.012 & 0.023 \\ 
+Geo controls & No & Yes & No & Yes & No & Yes & No & Yes \\ 
+Within R$^{2}$ & 0.037 & 0.068 & 0.013 & 0.057 & 0.109 & 0.647 & 0.002 & 0.25 \\ 
+Observations & 548 & 548 & 467 & 467 & 42 & 42 & 39 & 39 \\ 
+R$^{2}$ & 0.0419 & 0.0730 & 0.0562 & 0.0951 & 0.1651 & 0.6689 & 0.0039 & 0.2513 \\ 
+\hline 
+\hline \\[-1.8ex] 
+\textit{Note:}  & \multicolumn{8}{r}{$^{*}$p$<$0.05; $^{**}$p$<$0.01; $^{***}$p$<$0.001} \\ 
+\end{tabular} 
+\end{sidewaystable} 
+
+## Operationalizations of Distances
+
+Caceido uses the nominal ditance in km from each municipality's centroid to arrive at his distance measures.
+Alternative transformations to that could be log -transformations (i.e. \(log(d)+1\)) or methods for computing decay such as \(\frac{1}{x}\) or exponential decay. For the latter we used a beta of -0.5.
+
+
+```{r, echo = FALSE}
+################ Plotting the (almost properly) merged data #####
+
+# BRA
+states_BRA<-states_BRA[states_BRA$NAME_1!="RioGrandedoSul",]
+additional_rows <- data.frame(matrix(NA, nrow = nrow(states_BRA), ncol = ncol(m_BRA)))
+names(additional_rows) <- names(m_BRA)
+additional_rows$geometry <- states_BRA$geometry
+
+# Bind the new rows with 'm_BRA'
+m_BRA_plot<- rbind(m_BRA[m_BRA$NAME_1=="Rio Grande do Sul" ,], additional_rows)
+
+
+
+# ARG
+states_ARG<-states_ARG[states_ARG$NAME_1!=c("Corrientes","Misiones"),]
+additional_rows <- data.frame(matrix(NA, nrow = nrow(states_ARG), ncol = ncol(m_ARG)))
+names(additional_rows) <- names(m_ARG)
+additional_rows$geometry <- states_ARG$geometry
+
+# Bind the new rows with 'm_BRA'
+m_ARG_plot<- rbind(m_ARG[m_ARG$NAME_1%in%c("Corrientes", "Misiones") ,], additional_rows)
+
+
+# PRY
+states_PRY<-states_PRY[states_PRY$NAME_1!=c("Itapúa","Misiones"),]
+additional_rows <- data.frame(matrix(NA, nrow = nrow(states_PRY), ncol = ncol(m_PRY)))
+names(additional_rows) <- names(m_PRY)
+additional_rows$geometry <- states_PRY$geometry
+
+# Bind the new rows with 'm_BRA'
+m_PRY_plot<- rbind(m_PRY[m_PRY$NAME_1%in%c("Itapúa", "Misiones") ,], additional_rows)
+
+
+
+p <- ggplot(data = rbind(rbind(m_ARG_plot, m_PRY_plot),m_BRA_plot))+#[m_BRA$NAME_1=="Rio Grande do Sul" ,]) )+
+  geom_sf(aes(fill=distmiss, geometry=geometry)) +
+  theme_map() +
+  theme(legend.position = 'left')+
+  labs(x=NULL, y=NULL,
+       title="Distance to next Jesuit Mission")+
+  labs(fill="Distance (km)")
+
+
+country_borders <- p +
+  geom_sf(data = border_BRA, color = "red", fill=NA) +
+  theme_minimal()+
+  geom_sf(data = border_ARG, color = "red", fill=NA) +
+  theme_minimal()+
+  geom_sf(data = border_PRY, color = "red", fill=NA) +
+  theme_minimal()
+
+
+
+final_plot_zoom <- country_borders +
+  xlim(xmin = 62, xmax = 48) +
+  ylim(ymin = -35, ymax = -25)+
+  annotate("text", x = 58, y = -29, label = 'atop(bold("ARGENTINA"))', size = 2.5, col='red', parse=T)+
+  annotate("text", x = 54, y = -30, label = 'atop(bold("BRAZIL"))', size = 2.5, col='red', parse=T)+
+  annotate("text", x = 56.5, y = -27, label = 'atop(bold("PARAGUAY"))', size = 2.5, col='red', parse=T)
+
+```
+
+
+```{r, echo = FALSE}
+final_plot_zoom
+```
+
+
+```{r, echo = FALSE}
+############## DISTANCE COMPUTATIONS ################
+
+plotdata<-rbind(rbind(m_ARG_plot, m_PRY_plot),m_BRA_plot)
+
+beta<- -0.5
+
+plotdata$distmiss_log<- log(plotdata$distmiss)+1
+plotdata$distmiss_decay<- exp(beta*plotdata$distmiss)
+plotdata$distmiss_onex <-  1/(plotdata$distmiss) 
+
+
+```
+
+
+```{r, echo=FALSE}
+  first <- ggplot(data = plotdata)+#[m_BRA$NAME_1=="Rio Grande do Sul" ,]) )+
+    geom_sf(aes(fill=distmiss_log , geometry=geometry)) +
+    theme_map() +
+    theme(legend.position = 'left')+
+    labs(x=NULL, y=NULL,
+         title="Distance to next Jesuit Mission")+
+    labs(fill="Log(Distance (km))")
+  
+  second<- first +
+    geom_sf(data = border_BRA, color = "red", fill=NA) +
+    theme_minimal()+
+    geom_sf(data = border_ARG, color = "red", fill=NA) +
+    theme_minimal()+
+    geom_sf(data = border_PRY, color = "red", fill=NA) +
+    theme_minimal()
+  
+  third<- second +
+    xlim(xmin = 62, xmax = 48) +
+    ylim(ymin = -35, ymax = -25)+
+    annotate("text", x = 58, y = -29, label = 'atop(bold("ARGENTINA"))', size = 2.5, col='red', parse=T)+
+    annotate("text", x = 54, y = -30, label = 'atop(bold("BRAZIL"))', size = 2.5, col='red', parse=T)+
+    annotate("text", x = 56.5, y = -27, label = 'atop(bold("PARAGUAY"))', size = 2.5, col='red', parse=T)
+  
+  third
+
+
+```
+
+
+```{r, echo=FALSE}
+  first <- ggplot(data = plotdata)+#[m_BRA$NAME_1=="Rio Grande do Sul" ,]) )+
+    geom_sf(aes(fill=distmiss_decay , geometry=geometry)) +
+    theme_map() +
+    theme(legend.position = 'left')+
+    labs(x=NULL, y=NULL,
+         title="Distance to next Jesuit Mission - Exponential Decay")+
+    labs(fill="Distance (km)")
+  
+  second<- first +
+    geom_sf(data = border_BRA, color = "red", fill=NA) +
+    theme_minimal()+
+    geom_sf(data = border_ARG, color = "red", fill=NA) +
+    theme_minimal()+
+    geom_sf(data = border_PRY, color = "red", fill=NA) +
+    theme_minimal()
+  
+  third<- second +
+    xlim(xmin = 62, xmax = 48) +
+    ylim(ymin = -35, ymax = -25)+
+    annotate("text", x = 58, y = -29, label = 'atop(bold("ARGENTINA"))', size = 2.5, col='red', parse=T)+
+    annotate("text", x = 54, y = -30, label = 'atop(bold("BRAZIL"))', size = 2.5, col='red', parse=T)+
+    annotate("text", x = 56.5, y = -27, label = 'atop(bold("PARAGUAY"))', size = 2.5, col='red', parse=T)
+  
+  third
+
+
+```
+
+
+
+
+```{r, echo=FALSE}
+  first <- ggplot(data = plotdata)+#[m_BRA$NAME_1=="Rio Grande do Sul" ,]) )+
+    geom_sf(aes(fill=distmiss_onex , geometry=geometry)) +
+    theme_map() +
+    theme(legend.position = 'left')+
+    labs(x=NULL, y=NULL,
+         title="Distance to next Jesuit Mission")+
+    labs(fill="1/Distance (km)")
+  
+  second<- first +
+    geom_sf(data = border_BRA, color = "red", fill=NA) +
+    theme_minimal()+
+    geom_sf(data = border_ARG, color = "red", fill=NA) +
+    theme_minimal()+
+    geom_sf(data = border_PRY, color = "red", fill=NA) +
+    theme_minimal()
+  
+  third<- second +
+    xlim(xmin = 62, xmax = 48) +
+    ylim(ymin = -35, ymax = -25)+
+    annotate("text", x = 58, y = -29, label = 'atop(bold("ARGENTINA"))', size = 2.5, col='red', parse=T)+
+    annotate("text", x = 54, y = -30, label = 'atop(bold("BRAZIL"))', size = 2.5, col='red', parse=T)+
+    annotate("text", x = 56.5, y = -27, label = 'atop(bold("PARAGUAY"))', size = 2.5, col='red', parse=T)
+  
+  third
+
+
+```
+
+
+We can see that distance operationalization can indeed change the notion of distance considerably and hence our results. Especially in the case of strong exponential decay, the propagation of effects over space may be understated and hence lead to a potential underestimation of the effects. That can be caused, e.g., by creating a perimeter of influence of Jesuit human capital effects that is too small, and affected units would not be included in the appropriate subset. In doing so, one would falsely assign units that were indeed "treated" into "untreated", which can reasonaby expected to worsen the efficiency of estimates.
+
+
+
+
+
+
+
+
+
 
 # Exercise C
 
