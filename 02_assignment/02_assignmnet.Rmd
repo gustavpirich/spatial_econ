@@ -2,8 +2,8 @@
 title: "Spatial Economics -- Assignment 2"
 author:
   - "Gustav Pirich (h11910449)"
-  - "Peter Prlleshi ()"
-  - "Filip Lukijanovic ()"
+  - "Peter Prlleshi (h11776041)"
+  - "Filip Lukijanovic (h11776896)"
 date: "April 2, 2024"
 output:
   pdf_document:
@@ -77,7 +77,7 @@ EU27 <- EU27 %>%
   left_join(data_1, by = c("Id"))
 
 ```
-## Calculate the growth rate of productivity from 1980 to 2013 and create a map that shows the productivity growth for each region. 
+## Growth Rate of Productivity form 1980 to 2013 
 
 The map shows the productivity growth rates in NUTS-2 regions for the selected countries. We can see that many regions especially in West Germany, Austria, and France exhibited negative productivity growth over the selected period. Notably, Portugal's productivity has been growing the fastest. We suspect that the negative growth rates can be explained by the fact that high-income countries had a high baseline productivity to begin with, while Portugal started from a rather low baseline productivity. Thus we can interpret this as productivity convergence across Europe.
 
@@ -92,7 +92,7 @@ tm_shape(EU27) +
   tm_layout(frame = TRUE, bg.color = "lightblue") 
 ```
 
-## Generate three different spatial weights matrixes using (i) a distance threshold, (ii) smooth distance-decay, and iii) a contiguity-based measure. 
+## Spatial Weight Matrices based on (i) a distance threshold, (ii) smooth distance-decay, and (iii) a contiguity-based measure. 
 
 
 ### (i) Distance Threshold 
@@ -114,7 +114,7 @@ dist_w_matrix <- nb2mat(distw, style="W", zero.policy=TRUE)
 
 
 ### (ii) Smooth-Distance Decay 
-Next, we create a spatial weights matrix based on a smooth distance-decay. We use the following simple distance decay function $w_{i, j} = 1/d_{i,j}^{\lambda}$, where d denotes the distance between observation i and j, and $\lambda$ is the distance decay parameter. By ease of convention we set $\lambda = 0$. We calculate the weights for each neighboring region based on the k=20 nearest neighbors. We do \textit{not} row-normalize the matrix.
+Next, we create a spatial weights matrix based on a smooth distance-decay. We use the following simple distance decay function $w_{i, j} = 1/d_{i,j}^{\lambda}$, where d denotes the distance between region i and j, and $\lambda$ is the distance decay parameter. We set $\lambda = 1$. We calculate the weights for each neighboring region based on at least k=20 nearest neighbors. We do \emph{not} row-normalize the matrix.
 
 ```{r}
 k1 <- knearneigh(coords, k=20)
@@ -138,12 +138,11 @@ queen_weights <- poly2nb(EU27, queen = TRUE)
 contig_w_matrix <- nb2mat(queen_weights, style="W", zero.policy=TRUE)
 ```
 
-## Compare the matrices; use your knowledge of graph theory and linear algebra
+## Matrix Comparison
 
-We can gain deeper insights into these spatial weights matrices as well as the networks they represent by comparing key measures of the graphs that are derived from them. 
+We can gain deeper insights into these spatial weights matrices as well as the networks they represent by comparing key measures of the graphs that are derived from them. To that end, we program a function which summarizes key features of these graphs. We compare the row-normalized matrices for the queen contiguity and distance threshold matrix. Note that the row-normalization procedure does not preserve the structure of the network. 
 
-```{r,echo = FALSE}
-# Convert to igraph objects for graph analysis
+```{r}
 graph_dist <- graph_from_adjacency_matrix(dist_w_matrix, mode = "undirected", weighted = TRUE)
 graph_decay <- graph_from_adjacency_matrix((decay_weights_matrix), mode = "undirected", weighted = TRUE)
 graph_contig <- graph_from_adjacency_matrix(contig_w_matrix, mode = "undirected", weighted = TRUE)
@@ -177,32 +176,31 @@ summarize_graph <- function(g) {
   
   return(graph_summary)
 }
-
 ```
 
-```{r,echo = FALSE,  fig.pos='H'}
+```{r,echo = FALSE}
 
 # Analyze graph properties
-kable(summarize_graph(graph_dist), caption = "Summary of Distance Threshold Graph")
-kable(summarize_graph(graph_decay), caption = "Summary of Smooth Distance-Decay Matrix")
-kable(summarize_graph(graph_contig), caption = "Summary of Contiguity-Based Graph")
+kable(summarize_graph(graph_dist), caption = "Summary of Distance Threshold Graph") %>%
+  kable_styling(latex_options = c("hold_position"))
+kable(summarize_graph(graph_decay), caption = "Summary of Smooth Distance-Decay Matrix") %>%
+  kable_styling(latex_options = c("hold_position"))
+kable(summarize_graph(graph_contig), caption = "Summary of Contiguity-Based Graph") %>%
+  kable_styling(latex_options = c("hold_position"))
     
 ```
-We compare the matrices based on a set of characteristics. We compare the row-normalized matrices for the queen contiguity and distance threshold matrix. Note that normalization procedure does not preserve the structure of the network. 
 
 **Number of edges**
 
-The Smooth Distance-Decay Graph has the most edges (1266). The Distance Threshold Graph has fewer edges (514) than the Smooth Distance-Decay Graph, implying stricter criteria for edge creation based on a fixed distance threshold. The Contiguity-Based Graph has the fewest edges (222), since only directly contiguous or neighboring entities are connected, leading to a more sparse graph structure.
+The Smooth Distance-Decay Graph has the highest number of edges (1266). The Distance Threshold Graph has fewer edges (514). The Contiguity-Based Graph has the fewest edges (222), since only directly contiguous or neighboring entities are connected, leading to a more sparse graph structure. However, note that this measure does not capture the strength of the ties.  
 
 **Average path length**
 
-The Contiguity-Based Graph has the highest average path length (1.2888), reflecting the sparse connectivity where nodes are less directly connected.
-The Distance Threshold Graph has a medium average path length (0.6751).
-The Smooth Distance-Decay Graph has the lowest average path length (0.4933), indicative of a denser network where nodes are more directly accessible to one another.
+The Contiguity-Based Graph has the highest average path length (1.2888), reflecting the sparse connectivity where nodes are less directly connected. The Distance Threshold Graph has a medium average path length (0.6751). The Smooth Distance-Decay Graph has the lowest average path length (0.4933), indicative of a denser network where nodes are more directly accessible to one another.
 
 **Graph density**
 
-Consistent with the number of edges, the Smooth Distance-Decay Graph is the densest (0.2410), followed by the Distance Threshold Graph (0.0978), with the Contiguity-Based Graph being the least dense (0.0423).
+Consistent with the number of edges, the Smooth Distance-Decay Graph is the densest (0.2410), followed by the Distance Threshold Graph (0.0978), with the Contiguity-Based Graph being the least dense (0.0423). However, for the distance decay spatial weights matrix the traditional density calculation might not fully capture the true nature of connectivity because they do not account for the effect of distance on interaction strength.
 
 **Average degree**
 
@@ -210,14 +208,13 @@ Again, the Smooth Distance-Decay Graph shows the highest average degree (24.5825
 
 **Minimum Eigenvector Centrality**
 
-The Contiguity-Based Graph shows the most significant variation in centrality (minimum near zero), reflecting a few very poorly connected nodes, or nodes that only connect to other low-influence nodes. The Smooth Distance-Decay Graph and the Distance Threshold Graph have higher minimum values, indicating a more uniform distribution of node influence.
+The Contiguity-Based Graph shows the most significant variation in centrality (minimum near zero), reflecting a few very poorly connected nodes, or nodes that only connect to other low-influence nodes. The Smooth Distance-Decay Graph and the Distance Threshold Graph have higher minimum values, whcih might hint at a more uniform distribution of node influence.
 
 **Average Eigenvector Centrality**
 
-Higher on average in the Smooth Distance-Decay Graph (0.2837), suggesting that, on average, nodes are better positioned or more influential within the network.
-It's lowest in the Contiguity-Based Graph (0.0898), consistent with its sparse and uneven connectivity.
+Higher in the Smooth Distance-Decay Graph (0.2837), suggesting that, on average, nodes are better positioned or more influential within the network. It's lowest in the Contiguity-Based Graph (0.0898), consistent with its sparse and uneven connectivity.
 
-Looking at the most central unit through eigenvector centrality shows that different nodes are identified as most central in each graph, reflecting the impact of the underlying connection logic on the perceived importance or centrality of nodes.
+Looking at the most central unit through eigenvector centrality shows that different nodes are identified as most central in each graph. 
 
 
 ## Plot the matrix
@@ -239,9 +236,10 @@ scales = list(x = list(at = c(20, 40, 60, 80, 100),
 
 Let us first visualize the distance based spatial matrix. The first plot shows the map of Europe and the blue lines indicate the connections. The map shows the connectivity in Europe based on the distance threshold. 
 
-The second map visualizes the network based on the distance decay matrix. However, the edges do not display the intensity of connections, but just the connectivity to neighboring regions. 
+The second map visualizes the network based on the distance-decay matrix. However, the edges do not display the intensity of connections, but just the connectivity to neighboring regions. 
 
-The last map displays the queen contiguity based measure. The islands in the middle sea are not being counted as neighbors. This should caution the use of this network, as it seems implausible that Siciliy for example is not connected to the mainland Italian provinces.  
+The last map displays the queen contiguity based measure. The islands in the middle sea are not being counted as neighbors. This should caution the use of this network, as it seems implausible that Siciliy for example is not connected to the mainland Italian provinces. 
+
 ```{r,echo = FALSE, fig.width=9, fig.height=13, fig.align='center'}
 par(mfrow = c(3, 1), las=1)
 
@@ -257,10 +255,10 @@ plot(queen_weights, coords, pch = 19, cex = 0.6, add = TRUE, col = "red")
 
 ## Compute a suitable measure of spatial autocorrelation for productivity growth using these matrices. Point out differences, if there are any. 
 
-We calculate Global Moran's I as a measure of spatial autocorrelation for all three spatial weight matrices.  All three matrices display the strong positive spatial autocorrelation between 0.62 - 0.54, which are all highly statistically significant with p-values < 0.01. Thus there is strong evidence for the presence of sizeable levels of spatial autocorrelation. This result is robust to the choice of the spatial weights matrix. 
-```{r,echo = FALSE}
+We calculate Global Moran's I as a measure of spatial autocorrelation for all three spatial weight matrices.  All three matrices display the strong positive spatial autocorrelation between 0.62 - 0.54, which are all highly statistically significant with p-values < 0.01. Thus there is strong evidence for the presence of sizeable levels of spatial autocorrelation. This result is robust to the choice of the spatial weights matrix.  
+```{r,echo = FALSE, fig.width=4, fig.height=7, fig.align='center'}
 # Convert the matrix to a listw object
-l_dist_w_matrix <- mat2listw(dist_w_matrix, style = "B", zero.policy = TRUE)
+l_dist_w_matrix <- mat2listw(dist_w_matrix, style = "W", zero.policy = TRUE)
 
 l_decay_weights_matrix <- mat2listw(decay_weights_matrix, zero.policy = TRUE, style = "B")
 
@@ -272,6 +270,7 @@ moran_result_dist <- moran.test((EU27$prod_growth), listw = l_dist_w_matrix)
 moran_result_decay <- moran.test((EU27$prod_growth), listw = l_decay_weights_matrix)
 
 moran_result_contig <- moran.test((EU27$prod_growth), listw = l_contig_w_matrix)
+
 
 # Create a data frame to hold the summarized results
 moran_summary <- data.frame(
@@ -285,16 +284,17 @@ moran_summary <- data.frame(
   Variance = c(moran_result_dist$estimate["Variance"], 
                moran_result_decay$estimate["Variance"], 
                moran_result_contig$estimate["Variance"]),
-  p_value = c(moran_result_dist$p.value, 
-              moran_result_decay$p.value, 
-              moran_result_contig$p.value)
+  p_value = c(format(moran_result_dist$p.value, scientific = TRUE), 
+              format(moran_result_decay$p.value, scientific = TRUE), 
+              format(moran_result_contig$p.value, scientific = TRUE))
 )
 
 # Format and print the table
-kable(moran_summary, "latex", digits = 4, booktabs = TRUE) %>%
-  kable_styling(latex_options = c("striped", "scale_down")) %>%
+kable(moran_summary, "latex", digits = 4, booktabs = TRUE, caption = "Summary of Moran's I Test Results for Productivity Growth") %>%
+  kable_styling(latex_options = c("striped", "scale_down"), font_size = 7) %>%
   column_spec(1, bold = TRUE, border_right = TRUE) %>%
   column_spec(5, color = ifelse(moran_summary$p_value < 0.05, "red", "black"))
+
 ```
 ## Estimate a linear regression model using OLS. 
 We estimate the specified model and obtain the following output.
@@ -332,19 +332,55 @@ F Statistic & 36.983$^{***}$ (df = 3; 99) \\
 \end{tabular} 
 \end{table} 
 
-We observe strong evidence for spatial autocorrelation. This holds for all spatial weights matrices used. The different weighting schemes highlight differnt countries. Thus the neglect fo this spatial dimension might give rise to bias in the OLS estimated coefficients.  
+## Investigating Spatial Autocorrelation in the Residuals 
 
-```{r,echo = FALSE, fig.width=9, fig.height=13, fig.align='center'}
+We observe strong evidence for spatial autocorrelation. This holds for all spatial weights matrices used. The spatial weighting schemes unanimously highlight very similar patterns and often mark the same regions. Moran's I test for spatial autocorrelation in the residuals is highly statistically significant. The Lagrange Multiplier test corroborates the results (We conduct the test only for the row-normalized spatial weights matrices). Thus, we have strong evidence that there is spatial autocorrelation in the residuals.
+The neglect of the autocorrelation will leave the OLS coefficients unbiased, however it renders the standard errors less efficient. (Similar to serial autocorrelation)
+
+
+```{r,echo = FALSE, fig.width=5.5, fig.height=9, fig.align='center'}
 sm <- lm(prod_growth ~ pr80b + lninv1b + lndens.empb, EU27)
+
+# Compute Moran's I for the model residuals using different weight matrices
+moran_result_dist <- lm.morantest(sm, l_dist_w_matrix)
+moran_result_decay <- lm.morantest(sm, l_decay_weights_matrix)
+moran_result_contig <- lm.morantest(sm, l_contig_w_matrix)
+
+# Create a data frame to hold the summarized results
+moran_summary <- data.frame(
+  Test = c("Distance Threshold", "Smooth Distance-Decay", "Contiguity-Based"),
+  Moran_I = c(moran_result_dist$estimate["Observed Moran I"], 
+              moran_result_decay$estimate["Observed Moran I"], 
+              moran_result_contig$estimate["Observed Moran I"]),
+  Expectation = c(moran_result_dist$estimate["Expectation"], 
+                  moran_result_decay$estimate["Expectation"], 
+                  moran_result_contig$estimate["Expectation"]),
+  Variance = c(moran_result_dist$estimate["Variance"], 
+               moran_result_decay$estimate["Variance"], 
+               moran_result_contig$estimate["Variance"]),
+  p_value = c(format(moran_result_dist$p.value, scientific = TRUE), 
+              format(moran_result_decay$p.value, scientific = TRUE), 
+              format(moran_result_contig$p.value, scientific = TRUE))
+)
+
+# Format and print the table using kable
+kable(moran_summary, format = "latex", digits = 4, booktabs = TRUE, caption = "Summary of Moran's I Test Results for Model Residuals") %>%
+  kable_styling(latex_options = c("striped", "scale_down"), font_size = 7) %>%
+  column_spec(1, bold = TRUE, border_right = TRUE) %>%
+  column_spec(5, color = ifelse(as.numeric(moran_summary$p_value) < 0.05, "red", "black"))
 
 # Set layout to 2x2 and adjust margins and label orientation
 par(mfrow = c(3, 1), las=1)
 #stargazer::stargazer(sm, type = "latex")
-moran.plot(sm$residuals, l_dist_w_matrix, xlab = "Residuals", ylab = "Spatially Lagged Residuals")
+moran.plot(sm$residuals, l_dist_w_matrix, xlab = "Residuals", ylab = "Spatially Lagged Residuals", main = "Distance Threshold")
 
-moran.plot(sm$residuals, l_decay_weights_matrix, xlab = "Residuals", ylab = "Spatially Lagged Residuals")
+moran.plot(sm$residuals, l_decay_weights_matrix, xlab = "Residuals", ylab = "Spatially Lagged Residuals", main = "Distance Decay")
 
-moran.plot(sm$residuals, l_contig_w_matrix, xlab = "Residuals", ylab = "Spatially Lagged Residuals")
+moran.plot(sm$residuals, l_contig_w_matrix, xlab = "Residuals", ylab = "Spatially Lagged Residuals", main = "Contiguity")
+
+# Compute robust LM tests for the model residuals using different weight matrices
+lm.RStests(sm, l_dist_w_matrix)
+lm.RStests(sm, l_contig_w_matrix)
 ```
 
 # Exercise B
@@ -1028,7 +1064,7 @@ third
 The choice of the distance decay function governs the propagation of treatment and spillover effects. We can see that different specifications of the distance parameters lead to significantly different treatment intensities. There is no objective criterion for the choice of the best distance decay function. Any deviation from the true underlying distance decay function will bias the results and reduce efficiency. @ValenciaCaicedo2018 baseline linear distance decay suggests that moving from 100 to 200 km has the same effect as moving from 400 to 500 kilometers. This seems somewhat unrealisitic. In any case, at best the results are robust to the choice of the distance decay function. As an additional robustness check we replicate the main specification for three different distance decay functions. 
 
 
-```{r, echo = FALSE}
+```{r, echo = FALSE, include = FALSE}
 withindata<- list(argentina_brazil_paraguay,argentina_brazil_paraguay,
                   brazil_literacy, brazil_literacy, argentina_literacy,
                   argentina_literacy, paraguay_literacy,paraguay_literacy)
@@ -1068,7 +1104,7 @@ model_logarithmic <- lm(update(base_formula, . ~ . + logarithmic_distmiss), data
 variables_of_interest <- c("linear_distmiss", "exponential_distmiss", "inverse_distmiss", "logarithmic_distmiss")
 
 # Present the results in a regression table focusing only on the decay variables and excluding the constant term
-stargazer(model_linear, model_exponential, model_inverse, model_logarithmic, type = "text",
+stargazer(model_linear, model_exponential, model_inverse, model_logarithmic,
           title = "Regression Results with Different Distance Decay Functions",
           keep = variables_of_interest,  # Keep only the specified decay variables
           omit = "constant",  # Correct way to omit the intercept
@@ -1076,6 +1112,28 @@ stargazer(model_linear, model_exponential, model_inverse, model_logarithmic, typ
 
 ```
 
+\begin{table}[!htbp] \centering 
+  \caption{Regression Results with Different Distance Decay Functions} 
+  \label{} 
+\begin{tabular}{@{\extracolsep{5pt}}lcccc} 
+\\[-1.8ex]\hline 
+\hline \\[-1.8ex] 
+ & \multicolumn{4}{c}{\textit{Dependent variable:}} \\ 
+\cline{2-5} 
+\\[-1.8ex] & \multicolumn{4}{c}{base\_formula} \\ 
+\\[-1.8ex] & (1) & (2) & (3) & (4)\\ 
+\hline \\[-1.8ex] 
+ linear\_distmiss & 0.011$^{**}$ (0.005) &  &  &  \\ 
+  exponential\_distmiss &  & $-$2.172 (1.511) &  &  \\ 
+  inverse\_distmiss &  &  & 0.349 (0.946) &  \\ 
+  logarithmic\_distmiss &  &  &  & 0.078 (0.276) \\ 
+ \hline \\[-1.8ex] 
+Observations & 548 & 548 & 548 & 548 \\ 
+\hline 
+\hline \\[-1.8ex] 
+\textit{Note:}  & \multicolumn{4}{r}{$^{*}$p$<$0.1; $^{**}$p$<$0.05; $^{***}$p$<$0.01} \\ 
+\end{tabular} 
+\end{table} 
 
 
 # Exercise C
@@ -1087,9 +1145,6 @@ Recall ‘The perils of peer effects’ (Angrist, 2014). Write a short text (not
     \end{itemize}
 
 \textbf{The perils of ignoring peer effects}
-
-
-%While empirical estimation is bedevilled by problems, better data can provide a way forward to empirically establish the impact of peer effects.
 
 For a long time, researchers have considered network dynamics as sources of potential contamination in a randomised experiment, or a violation of the stable unit treatment variable assumption [@Rubin1978]. Only recently economists have begun to explicitly model these network dependencies as ‚spillover effects’ [@bramoulle_peer_2020]. Ignoring peer effects threatens the internal validity of both experimental and non-experimental findings. Consider for example the effect of a program at an individual level (some sort of mentoring program) on grades. By employing class or school fixed effects, the estimated effect size of the treatment at the individual level might be affected, because of positive peer effects (the mental health improve the mental health of others). @miguel_worms_2004 study the effects of a deworming RCT in Kenya. They highlight that by not including peer effects and reduced network transmission, the reduction in school absenteeism of the intervention are doubly undercounted. The reduced disease transmission, which spilled over to control schools leads to an undercount of the positive benefits of the intervention. Thus, ignoring peer effects is equivalent to ignoring an externality.  
 
@@ -1132,6 +1187,7 @@ Network dependence through spatial interdependence can lead to a violation of th
 The \textit{relevance} of the instrument, however, is not directly impaired by network dependence as the first stage F-test still demonstrates that the instrument is correlated with oil income per capita.
 
 
+# Exercise D
 
 \newpage
 
