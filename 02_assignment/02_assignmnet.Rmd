@@ -1028,7 +1028,7 @@ third
 The choice of the distance decay function governs the propagation of treatment and spillover effects. We can see that different specifications of the distance parameters lead to significantly different treatment intensities. There is no objective criterion for the choice of the best distance decay function. Any deviation from the true underlying distance decay function will bias the results and reduce efficiency. @ValenciaCaicedo2018 baseline linear distance decay suggests that moving from 100 to 200 km has the same effect as moving from 400 to 500 kilometers. This seems somewhat unrealisitic. In any case, at best the results are robust to the choice of the distance decay function. As an additional robustness check we replicate the main specification for three different distance decay functions. 
 
 
-```{r}
+```{r, echo = FALSE}
 withindata<- list(argentina_brazil_paraguay,argentina_brazil_paraguay,
                   brazil_literacy, brazil_literacy, argentina_literacy,
                   argentina_literacy, paraguay_literacy,paraguay_literacy)
@@ -1048,18 +1048,6 @@ fe2_log <- lm(illiteracy ~ I(log(distmiss)) + lati + longi +
 fe2_inv <- lm(illiteracy ~ I(1/(sqrt(distmiss))) + lati + longi +
                area+ tempe + alti + preci + rugg + river + coast +state , 
               data = as.data.frame(withindata[[2]]))
-
-FEs<- list(fe2_lin, fe2_exp, fe2_log, fe2_inv)
-
-
-Withins<-c()
-
-for (i in 1:length(FEs)){
-  fereg<- FEs[[i]]
-  r2<-r2(fereg)
-  Withins[i]<- r2[6]
-}
-
 
 argentina_brazil_paraguay$linear_distmiss = argentina_brazil_paraguay$distmiss
 argentina_brazil_paraguay$exponential_distmiss = exp(-0.01 * argentina_brazil_paraguay$distmiss)
