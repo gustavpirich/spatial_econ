@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.21 (TeX Live 2020) (preloaded format=pdflatex 2020.10.12)  15 APR 2024 12:28
+This is pdfTeX, Version 3.14159265-2.6-1.40.21 (TeX Live 2020) (preloaded format=pdflatex 2020.10.12)  15 APR 2024 16:20
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1079,114 +1079,131 @@ e pdf)
 Package pdftex.def Info: 02_assignmnet_files/figure-latex/unnamed-chunk-11-1.pd
 f  used on input line 531.
 (pdftex.def)             Requested size: 483.69926pt x 683.50485pt.
-[8]
-<02_assignmnet_files/figure-latex/unnamed-chunk-13-1.pdf, id=135, 436.63126pt x
+[8] [9 <./02_assignmnet_files/figure-latex/unnamed-chunk-11-1.pdf>]
+<02_assignmnet_files/figure-latex/unnamed-chunk-13-1.pdf, id=145, 436.63126pt x
  295.1025pt>
 File: 02_assignmnet_files/figure-latex/unnamed-chunk-13-1.pdf Graphic file (typ
 e pdf)
 <use 02_assignmnet_files/figure-latex/unnamed-chunk-13-1.pdf>
 Package pdftex.def Info: 02_assignmnet_files/figure-latex/unnamed-chunk-13-1.pd
-f  used on input line 539.
+f  used on input line 541.
 (pdftex.def)             Requested size: 436.63019pt x 295.10176pt.
-[9 <./02_assignmnet_files/figure-latex/unnamed-chunk-11-1.pdf>]
-
-LaTeX Font Warning: Font shape `T1/lmtt/bx/it' in size <10> not available
-(Font)              Font shape `T1/lmtt/b/sl' tried instead on input line 549.
-
-
-Overfull \hbox (104.30142pt too wide) in paragraph at lines 551--551
-\T1/lmtt/m/n/10 Documents/com~apple~CloudDocs/Wirtschaftsuniversitaet/MASTER/su
-mmer_term_2024/spatial_economics/data/TableCode"[])|  
- []
-
-[10 <./02_assignmnet_files/figure-latex/unnamed-chunk-13-1.pdf>] [11]
-<02_assignmnet_files/figure-latex/unnamed-chunk-22-1.pdf, id=166, 453.695pt x 3
+<02_assignmnet_files/figure-latex/unnamed-chunk-14-1.pdf, id=146, 436.63126pt x
+ 295.1025pt>
+File: 02_assignmnet_files/figure-latex/unnamed-chunk-14-1.pdf Graphic file (typ
+e pdf)
+<use 02_assignmnet_files/figure-latex/unnamed-chunk-14-1.pdf>
+Package pdftex.def Info: 02_assignmnet_files/figure-latex/unnamed-chunk-14-1.pd
+f  used on input line 543.
+(pdftex.def)             Requested size: 436.63019pt x 295.10176pt.
+[10 <./02_assignmnet_files/figure-latex/unnamed-chunk-13-1.pdf> <./02_assignmne
+t_files/figure-latex/unnamed-chunk-14-1.pdf>]
+<02_assignmnet_files/figure-latex/unnamed-chunk-23-1.pdf, id=165, 453.695pt x 3
 14.17375pt>
-File: 02_assignmnet_files/figure-latex/unnamed-chunk-22-1.pdf Graphic file (typ
+File: 02_assignmnet_files/figure-latex/unnamed-chunk-23-1.pdf Graphic file (typ
 e pdf)
-<use 02_assignmnet_files/figure-latex/unnamed-chunk-22-1.pdf>
-Package pdftex.def Info: 02_assignmnet_files/figure-latex/unnamed-chunk-22-1.pd
-f  used on input line 620.
+<use 02_assignmnet_files/figure-latex/unnamed-chunk-23-1.pdf>
+Package pdftex.def Info: 02_assignmnet_files/figure-latex/unnamed-chunk-23-1.pd
+f  used on input line 611.
 (pdftex.def)             Requested size: 453.6939pt x 314.17297pt.
-<02_assignmnet_files/figure-latex/unnamed-chunk-24-1.pdf, id=167, 453.695pt x 2
-93.095pt>
-File: 02_assignmnet_files/figure-latex/unnamed-chunk-24-1.pdf Graphic file (typ
-e pdf)
-<use 02_assignmnet_files/figure-latex/unnamed-chunk-24-1.pdf>
-Package pdftex.def Info: 02_assignmnet_files/figure-latex/unnamed-chunk-24-1.pd
-f  used on input line 622.
-(pdftex.def)             Requested size: 453.6939pt x 293.09427pt.
-<02_assignmnet_files/figure-latex/unnamed-chunk-25-1.pdf, id=168, 453.695pt x 3
+<02_assignmnet_files/figure-latex/unnamed-chunk-25-1.pdf, id=166, 453.695pt x 3
 14.17375pt>
 File: 02_assignmnet_files/figure-latex/unnamed-chunk-25-1.pdf Graphic file (typ
 e pdf)
 <use 02_assignmnet_files/figure-latex/unnamed-chunk-25-1.pdf>
 Package pdftex.def Info: 02_assignmnet_files/figure-latex/unnamed-chunk-25-1.pd
-f  used on input line 624.
+f  used on input line 621.
 (pdftex.def)             Requested size: 453.6939pt x 314.17297pt.
-[12 <./02_assignmnet_files/figure-latex/unnamed-chunk-22-1.pdf> <./02_assignmne
-t_files/figure-latex/unnamed-chunk-24-1.pdf>]
-<02_assignmnet_files/figure-latex/unnamed-chunk-26-1.pdf, id=185, 453.695pt x 3
-07.1475pt>
+
+Underfull \hbox (badness 1412) in paragraph at lines 613--622
+\T1/lato-TLF/m/n/10 De-cay: The weight de-creases ex-po-nen-tially with dis-tan
+ce; the pro-cesses loses in-flu-ence more rapidly.
+ []
+
+[11 <./02_assignmnet_files/figure-latex/unnamed-chunk-23-1.pdf>] [12]
+<02_assignmnet_files/figure-latex/unnamed-chunk-26-1.pdf, id=183, 453.695pt x 2
+93.095pt>
 File: 02_assignmnet_files/figure-latex/unnamed-chunk-26-1.pdf Graphic file (typ
 e pdf)
 <use 02_assignmnet_files/figure-latex/unnamed-chunk-26-1.pdf>
 Package pdftex.def Info: 02_assignmnet_files/figure-latex/unnamed-chunk-26-1.pd
-f  used on input line 626.
-(pdftex.def)             Requested size: 453.6939pt x 307.14674pt.
+f  used on input line 623.
+(pdftex.def)             Requested size: 453.6939pt x 293.09427pt.
+<02_assignmnet_files/figure-latex/unnamed-chunk-27-1.pdf, id=184, 453.695pt x 3
+14.17375pt>
+File: 02_assignmnet_files/figure-latex/unnamed-chunk-27-1.pdf Graphic file (typ
+e pdf)
+<use 02_assignmnet_files/figure-latex/unnamed-chunk-27-1.pdf>
+Package pdftex.def Info: 02_assignmnet_files/figure-latex/unnamed-chunk-27-1.pd
+f  used on input line 625.
+(pdftex.def)             Requested size: 453.6939pt x 314.17297pt.
 [13 <./02_assignmnet_files/figure-latex/unnamed-chunk-25-1.pdf> <./02_assignmne
 t_files/figure-latex/unnamed-chunk-26-1.pdf>]
+<02_assignmnet_files/figure-latex/unnamed-chunk-28-1.pdf, id=201, 453.695pt x 2
+89.08pt>
+File: 02_assignmnet_files/figure-latex/unnamed-chunk-28-1.pdf Graphic file (typ
+e pdf)
+<use 02_assignmnet_files/figure-latex/unnamed-chunk-28-1.pdf>
+Package pdftex.def Info: 02_assignmnet_files/figure-latex/unnamed-chunk-28-1.pd
+f  used on input line 627.
+(pdftex.def)             Requested size: 453.6939pt x 289.07928pt.
+[14 <./02_assignmnet_files/figure-latex/unnamed-chunk-27-1.pdf> <./02_assignmne
+t_files/figure-latex/unnamed-chunk-28-1.pdf>] [15]
+LaTeX Font Info:    Trying to load font information for TS1+lmtt on input line 
+712.
+(/usr/local/texlive/2020/texmf-dist/tex/latex/lm/ts1lmtt.fd
+File: ts1lmtt.fd 2009/10/30 v1.6 Font defs for Latin Modern
+)
 LaTeX Font Info:    Trying to load font information for TS1+lato-TLF on input l
-ine 645.
+ine 722.
 (/usr/local/texlive/2020/texmf-dist/tex/latex/lato/TS1lato-TLF.fd
 File: TS1lato-TLF.fd 2019/06/24 Font definitions for TS1/lato-TLF.
 )
 LaTeX Font Info:    Font shape `TS1/lato-TLF/m/n' will be
-(Font)              scaled to size 10.0pt on input line 645.
-[14]
+(Font)              scaled to size 10.0pt on input line 722.
 LaTeX Font Info:    Font shape `T1/lato-TLF/m/n' will be
-(Font)              scaled to size 7.0pt on input line 745.
+(Font)              scaled to size 7.0pt on input line 761.
 LaTeX Font Info:    Font shape `T1/lato-TLF/m/n' will be
-(Font)              scaled to size 5.0pt on input line 745.
-[15] [16]
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 816.
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 816.
+(Font)              scaled to size 5.0pt on input line 761.
+[16] [17] [18]
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 908.
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 908.
 (./02_assignmnet.aux)
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 816.
-Package atveryend Info: Empty hook `AtEndAfterFileList' on input line 816.
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 908.
+Package atveryend Info: Empty hook `AtEndAfterFileList' on input line 908.
 
 LaTeX Warning: There were multiply-defined labels.
 
  ) 
 Here is how much of TeX's memory you used:
- 25918 strings out of 480608
- 456334 string characters out of 5903629
- 752080 words of memory out of 5000000
- 41196 multiletter control sequences out of 15000+600000
- 826685 words of font info for 88 fonts, out of 8000000 for 9000
+ 25968 strings out of 480608
+ 457663 string characters out of 5903629
+ 754743 words of memory out of 5000000
+ 41237 multiletter control sequences out of 15000+600000
+ 827081 words of font info for 89 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  59i,13n,75p,1727b,553s stack positions out of 5000i,500n,10000p,200000b,80000s
 {/usr/local/texlive/2020/texmf-dist/fonts/enc/dvips/lato/a_rt66h3.enc}{/usr/l
-ocal/texlive/2020/texmf-dist/fonts/enc/dvips/lm/lm-ec.enc}{/usr/local/texlive/2
-020/texmf-dist/fonts/enc/dvips/lm/lm-rm.enc}{/usr/local/texlive/2020/texmf-dist
-/fonts/enc/dvips/lm/lm-mathsy.enc}{/usr/local/texlive/2020/texmf-dist/fonts/enc
-/dvips/lm/lm-mathit.enc}{/usr/local/texlive/2020/texmf-dist/fonts/enc/dvips/lat
-o/a_cl4kdn.enc}</usr/local/texlive/2020/texmf-dist/fonts/type1/typoland/lato/La
-to-Bold.pfb></usr/local/texlive/2020/texmf-dist/fonts/type1/typoland/lato/Lato-
-Italic.pfb></usr/local/texlive/2020/texmf-dist/fonts/type1/typoland/lato/Lato-R
-egular.pfb></usr/local/texlive/2020/texmf-dist/fonts/type1/public/lm/lmmi10.pfb
-></usr/local/texlive/2020/texmf-dist/fonts/type1/public/lm/lmmi7.pfb></usr/loca
-l/texlive/2020/texmf-dist/fonts/type1/public/lm/lmr10.pfb></usr/local/texlive/2
-020/texmf-dist/fonts/type1/public/lm/lmr7.pfb></usr/local/texlive/2020/texmf-di
-st/fonts/type1/public/lm/lmsy10.pfb></usr/local/texlive/2020/texmf-dist/fonts/t
-ype1/public/lm/lmsy7.pfb></usr/local/texlive/2020/texmf-dist/fonts/type1/public
-/lm/lmtk10.pfb></usr/local/texlive/2020/texmf-dist/fonts/type1/public/lm/lmtko1
-0.pfb></usr/local/texlive/2020/texmf-dist/fonts/type1/public/lm/lmtt10.pfb></us
-r/local/texlive/2020/texmf-dist/fonts/type1/public/lm/lmtti10.pfb>
-Output written on 02_assignmnet.pdf (16 pages, 23162700 bytes).
+ocal/texlive/2020/texmf-dist/fonts/enc/dvips/lm/lm-ts1.enc}{/usr/local/texlive/
+2020/texmf-dist/fonts/enc/dvips/lm/lm-rm.enc}{/usr/local/texlive/2020/texmf-dis
+t/fonts/enc/dvips/lm/lm-mathsy.enc}{/usr/local/texlive/2020/texmf-dist/fonts/en
+c/dvips/lm/lm-mathit.enc}{/usr/local/texlive/2020/texmf-dist/fonts/enc/dvips/lm
+/lm-ec.enc}{/usr/local/texlive/2020/texmf-dist/fonts/enc/dvips/lato/a_cl4kdn.en
+c}</usr/local/texlive/2020/texmf-dist/fonts/type1/typoland/lato/Lato-Bold.pfb><
+/usr/local/texlive/2020/texmf-dist/fonts/type1/typoland/lato/Lato-Italic.pfb></
+usr/local/texlive/2020/texmf-dist/fonts/type1/typoland/lato/Lato-Regular.pfb></
+usr/local/texlive/2020/texmf-dist/fonts/type1/public/lm/lmmi10.pfb></usr/local/
+texlive/2020/texmf-dist/fonts/type1/public/lm/lmmi7.pfb></usr/local/texlive/202
+0/texmf-dist/fonts/type1/public/lm/lmr10.pfb></usr/local/texlive/2020/texmf-dis
+t/fonts/type1/public/lm/lmr7.pfb></usr/local/texlive/2020/texmf-dist/fonts/type
+1/public/lm/lmsy10.pfb></usr/local/texlive/2020/texmf-dist/fonts/type1/public/l
+m/lmsy7.pfb></usr/local/texlive/2020/texmf-dist/fonts/type1/public/lm/lmtk10.pf
+b></usr/local/texlive/2020/texmf-dist/fonts/type1/public/lm/lmtt10.pfb></usr/lo
+cal/texlive/2020/texmf-dist/fonts/type1/public/lm/lmtti10.pfb>
+Output written on 02_assignmnet.pdf (18 pages, 30279909 bytes).
 PDF statistics:
- 342 PDF objects out of 1000 (max. 8388607)
- 271 compressed objects within 3 object streams
- 65 named destinations out of 1000 (max. 500000)
- 6324 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 364 PDF objects out of 1000 (max. 8388607)
+ 286 compressed objects within 3 object streams
+ 68 named destinations out of 1000 (max. 500000)
+ 6334 words of extra memory for PDF output out of 10000 (max. 10000000)
 

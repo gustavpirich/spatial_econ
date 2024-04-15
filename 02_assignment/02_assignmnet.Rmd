@@ -350,6 +350,7 @@ moran.plot(sm$residuals, l_contig_w_matrix, xlab = "Residuals", ylab = "Spatiall
 # Exercise B
 
 ## Creating maps
+We create a map to visualize illiteracy and terrain ruggedness. 
 ```{r, echo = FALSE}
 literacy_Arg_Bra_Par <- read_dta("~/Desktop/GITHUB/spatial_econ/data/02_assignmnet/export/literacy_Arg-Bra-Par.dta", encoding = "ISO-8859-1")
 
@@ -443,8 +444,25 @@ map2 <- tm_shape(literacy_Arg_Bra_Par_2) +
 map2
 ```
 
+```{r, echo = FALSE}
 
-Below, we see each municipality and its proximity to its nearest Jesuit mission via color intensity.
+# roads
+map3 <- tm_shape(literacy_Arg_Bra_Par_2) +
+  tm_fill("rugg", palette = "viridis", title  = "ruggedness") +
+  tm_borders() +
+  tm_legend(legend.outside = TRUE, position = c("right", "bottom")) + 
+  tm_shape(dat0) + 
+  tm_borders(lwd = 3.5, col = "black") +
+  tm_shape(coords_sf) +
+  tm_text("country", size = 1.2, col = "red") +
+  #tm_compass(type = "8star", position = c("right", "top")) +
+  tm_layout(frame = FALSE) +
+  tm_scale_bar(position = c(0.9, 0.8)) + 
+  tm_shape(dat1) +
+  tm_borders(lty = 2)
+
+map3
+```
 
 ```{r, echo = FALSE, include = FALSE}
 setwd("/Users/gustavpirich/Library/Mobile Documents/com~apple~CloudDocs/Wirtschaftsuniversitaet/MASTER/summer_term_2024/spatial_economics/data/PlotsCode")
@@ -491,11 +509,12 @@ border_ARG <- st_read("./Data/gadm41_ARG_0.json")
 border_PRY <- st_read("./Data/gadm41_PRY_0.json")
 border_BRA <- st_read("./Data/gadm41_BRA_0.json")
 
-
 ```
+
+
 ## Reproducing Table 2 
 
-```{r}
+```{r, echo = FALSE}
 ####### Data Loading ####
 
 setwd("/Users/gustavpirich/Library/Mobile Documents/com~apple~CloudDocs/Wirtschaftsuniversitaet/MASTER/summer_term_2024/spatial_economics/data/TableCode")
@@ -504,7 +523,6 @@ argentina_brazil_paraguay <- read_dta("./Data/Tables/Argentina Brazil Paraguay S
 argentina_literacy <- read_dta("./Data/Tables/Argentina Literacy Spatial.dta")
 brazil_literacy <- read_dta("./Data/Tables/Brazil Literacy Spatial.dta")
 paraguay_literacy <- read_dta("./Data/Tables/Paraguay Literacy Spatial.dta")
-
 ```
 
 
@@ -626,7 +644,6 @@ for (i in 1:length(FEs)){
 }
 
 ```
-
 
 For the Conley SE's we duplicate latitude and longitude entries as apparently, they cannot be simultaneously taken as explanatory variables and as autocorrelation variables with the same name (unlike in Stata).
 
@@ -798,9 +815,10 @@ R$^{2}$ & 0.0419 & 0.0730 & 0.0562 & 0.0951 & 0.1651 & 0.6689 & 0.0039 & 0.2513 
 \end{sidewaystable} 
 
 ## Operationalizations of Distances
+Below, we see each municipality and its proximity to its nearest Jesuit mission via color intensity.
 
-Caceido uses the nominal ditance in km from each municipality's centroid to arrive at his distance measures.
-Alternative transformations to that could be log -transformations (i.e. \(log(d)+1\)) or methods for computing decay such as \(\frac{1}{x}\) or exponential decay. For the latter we used a beta of -0.5.
+@ValenciaCaicedo2018 uses the nominal ditance in km from each municipality's centroid to arrive at his distance measures.
+Alternative transformations to that could be log -transformations (i.e. \(log(d)\)) or methods for computing decay such as \(\frac{1}{x}\) or exponential decay. For the latter we used a beta of -0.01.
 
 
 ```{r, echo = FALSE}
@@ -877,15 +895,49 @@ final_plot_zoom
 
 plotdata<-rbind(rbind(m_ARG_plot, m_PRY_plot),m_BRA_plot)
 
-beta<- -0.5
+beta<- -0.01
+gamma<- 0.5
 
-plotdata$distmiss_log<- log(plotdata$distmiss)+1
+
+plotdata$distmiss_log <- -log(plotdata$distmiss)
 plotdata$distmiss_decay<- exp(beta*plotdata$distmiss)
-plotdata$distmiss_onex <-  1/(plotdata$distmiss) 
+plotdata$distmiss_onex <-  1/(plotdata$distmiss^gamma) 
 
 
 ```
 
+Linear Decay: This function shows a direct, proportional decrease in weight with distance.
+Exponential Decay: The weight decreases exponentially with distance; the processes loses influence more rapidly.
+Inverse Decay: This function decreases inversely with the square root of distance, representing a more gradual decrease than exponential.
+Logarithmic Decay: Logarithmic decay shows a decrease that slows as distance increases; the initial decay is rapid but significant influence still extends over longer distances.
+```{r, echo = FALSE}
+# Create a sequence of distances, avoiding zero for logarithmic calculations
+distances <- seq(1, 500, length.out = 100)
+
+# Calculate decay values for each function
+linear_decay <- -distances * 1  # Multiplied by one to emphasize this is a scaled version
+exponential_decay <- exp(-0.01 * distances)
+inverse_decay <- 1 / sqrt(distances)
+logarithmic_decay <- -log(distances)  # Adding logarithmic decay
+
+# Combine data into a data frame for plotting
+data <- data.frame(
+  Distance = rep(distances, 4),
+  Weight = c(linear_decay, exponential_decay, inverse_decay, logarithmic_decay),
+  Type = factor(rep(c("Linear", "Exponential", "Inverse", "Logarithmic"), each = 100))
+)
+
+# Plot using ggplot2
+ggplot(data, aes(x = Distance, y = Weight, color = Type)) +
+  geom_line() +
+  facet_wrap(~Type, scales = "free_y") +
+  theme_minimal() +
+  labs(title = "Distance Decay Functions",
+       x = "Distance",
+       y = "Weight",
+       color = "Decay Type") +
+  scale_color_manual(values = c("blue", "red", "green", "purple"))
+```
 
 ```{r, echo=FALSE}
   first <- ggplot(data = plotdata)+#[m_BRA$NAME_1=="Rio Grande do Sul" ,]) )+
@@ -912,10 +964,7 @@ plotdata$distmiss_onex <-  1/(plotdata$distmiss)
     annotate("text", x = 56.5, y = -27, label = 'atop(bold("PARAGUAY"))', size = 2.5, col='red', parse=T)
   
   third
-
-
 ```
-
 
 ```{r, echo=FALSE}
   first <- ggplot(data = plotdata)+#[m_BRA$NAME_1=="Rio Grande do Sul" ,]) )+
@@ -942,23 +991,21 @@ plotdata$distmiss_onex <-  1/(plotdata$distmiss)
     annotate("text", x = 56.5, y = -27, label = 'atop(bold("PARAGUAY"))', size = 2.5, col='red', parse=T)
   
   third
-
-
 ```
 
 
 
 
 ```{r, echo=FALSE}
-  first <- ggplot(data = plotdata)+#[m_BRA$NAME_1=="Rio Grande do Sul" ,]) )+
+first <- ggplot(data = plotdata)+#[m_BRA$NAME_1=="Rio Grande do Sul" ,]) )+
     geom_sf(aes(fill=distmiss_onex , geometry=geometry)) +
     theme_map() +
     theme(legend.position = 'left')+
     labs(x=NULL, y=NULL,
          title="Distance to next Jesuit Mission")+
-    labs(fill="1/Distance (km)")
+    labs(fill="1/Distance (km)^0.5")
   
-  second<- first +
+second<- first +
     geom_sf(data = border_BRA, color = "red", fill=NA) +
     theme_minimal()+
     geom_sf(data = border_ARG, color = "red", fill=NA) +
@@ -966,27 +1013,80 @@ plotdata$distmiss_onex <-  1/(plotdata$distmiss)
     geom_sf(data = border_PRY, color = "red", fill=NA) +
     theme_minimal()
   
-  third<- second +
+third<- second +
     xlim(xmin = 62, xmax = 48) +
     ylim(ymin = -35, ymax = -25)+
     annotate("text", x = 58, y = -29, label = 'atop(bold("ARGENTINA"))', size = 2.5, col='red', parse=T)+
     annotate("text", x = 54, y = -30, label = 'atop(bold("BRAZIL"))', size = 2.5, col='red', parse=T)+
     annotate("text", x = 56.5, y = -27, label = 'atop(bold("PARAGUAY"))', size = 2.5, col='red', parse=T)
   
-  third
+third
 
 
 ```
 
-
-We can see that distance operationalization can indeed change the notion of distance considerably and hence our results. Especially in the case of strong exponential decay, the propagation of effects over space may be understated and hence lead to a potential underestimation of the effects. That can be caused, e.g., by creating a perimeter of influence of Jesuit human capital effects that is too small, and affected units would not be included in the appropriate subset. In doing so, one would falsely assign units that were indeed "treated" into "untreated", which can reasonaby expected to worsen the efficiency of estimates.
-
+The choice of the distance decay function governs the propagation of treatment and spillover effects. We can see that different specifications of the distance parameters lead to significantly different treatment intensities. There is no objective criterion for the choice of the best distance decay function. Any deviation from the true underlying distance decay function will bias the results and reduce efficiency. @ValenciaCaicedo2018 baseline linear distance decay suggests that moving from 100 to 200 km has the same effect as moving from 400 to 500 kilometers. This seems somewhat unrealisitic. In any case, at best the results are robust to the choice of the distance decay function. As an additional robustness check we replicate the main specification for three different distance decay functions. 
 
 
+```{r}
+withindata<- list(argentina_brazil_paraguay,argentina_brazil_paraguay,
+                  brazil_literacy, brazil_literacy, argentina_literacy,
+                  argentina_literacy, paraguay_literacy,paraguay_literacy)
+
+fe2_lin <- lm(illiteracy ~ distmiss + lati + longi +
+               area+ tempe + alti + preci + rugg + river + coast +state , 
+              data = as.data.frame(withindata[[2]]))
+
+fe2_exp <- lm(illiteracy ~ I(exp(beta*distmiss)) + lati + longi +
+               area+ tempe + alti + preci + rugg + river + coast +state , 
+              data = as.data.frame(withindata[[2]]))
+
+fe2_log <- lm(illiteracy ~ I(log(distmiss)) + lati + longi +
+               area+ tempe + alti + preci + rugg + river + coast +state , 
+              data = as.data.frame(withindata[[2]]))
+
+fe2_inv <- lm(illiteracy ~ I(1/(sqrt(distmiss))) + lati + longi +
+               area+ tempe + alti + preci + rugg + river + coast +state , 
+              data = as.data.frame(withindata[[2]]))
+
+FEs<- list(fe2_lin, fe2_exp, fe2_log, fe2_inv)
 
 
+Withins<-c()
+
+for (i in 1:length(FEs)){
+  fereg<- FEs[[i]]
+  r2<-r2(fereg)
+  Withins[i]<- r2[6]
+}
 
 
+argentina_brazil_paraguay$linear_distmiss = argentina_brazil_paraguay$distmiss
+argentina_brazil_paraguay$exponential_distmiss = exp(-0.01 * argentina_brazil_paraguay$distmiss)
+argentina_brazil_paraguay$inverse_distmiss = 1 / sqrt(argentina_brazil_paraguay$distmiss)
+argentina_brazil_paraguay$logarithmic_distmiss = log(argentina_brazil_paraguay$distmiss)
+
+# Define the base formula, excluding the original distmiss variable for now
+base_formula <- illiteracy ~ lati + longi + corr + ita + mis + mis1 + one +
+  area + tempe + alti + preci + rugg + river + coast
+
+# Fit regression models with each distance decay variable
+model_linear <- lm(update(base_formula, . ~ . + linear_distmiss), data = argentina_brazil_paraguay)
+model_exponential <- lm(update(base_formula, . ~ . + exponential_distmiss), data = argentina_brazil_paraguay)
+model_inverse <- lm(update(base_formula, . ~ . + inverse_distmiss), data = argentina_brazil_paraguay)
+model_logarithmic <- lm(update(base_formula, . ~ . + logarithmic_distmiss), data = argentina_brazil_paraguay)
+
+# Define the decay variables explicitly
+variables_of_interest <- c("linear_distmiss", "exponential_distmiss", "inverse_distmiss", "logarithmic_distmiss")
+
+# Present the results in a regression table focusing only on the decay variables and excluding the constant term
+stargazer(model_linear, model_exponential, model_inverse, model_logarithmic, type = "text",
+          title = "Regression Results with Different Distance Decay Functions",
+          keep = variables_of_interest,  # Keep only the specified decay variables
+          omit = "constant",  # Correct way to omit the intercept
+          single.row = TRUE, omit.stat = c("f", "ser", "rsq", "adj.rsq"))
+
+```
 
 
 
@@ -998,42 +1098,52 @@ Recall ‘The perils of peer effects’ (Angrist, 2014). Write a short text (not
     \item Briefly explain how network dependence (spatial, social, etc.) may impact \emph{validity} and \emph{relevance} of a certain instrument. Consider weather instruments, the quarter of birth instrument by Angrist and Krueger (2001), or some instrument that yoiu are familiar with as an example.
     \end{itemize}
 
+\textbf{The perils of ignoring peer effects}
 
-In a sweeping review, @angrist_perils_2014 provides a critique of the economics literature estimating peer effects. He derives and demonstrates potential pitfalls by linking the behaviour of IV estimation with group-level dummies with OLS. In a linear-in-means model with exogenous effects, he shows that the ‚social multiplier‘ is equivalent to the \emph{ratio} between the IV 2SLS and OLS estimand. 
-$Y_{i} = W X_{i} \beta + \varepsilon{i}$
-$\phi_{1} = \frac{IV}{OLS}$
 
-For an endogenous effects model the \emph{difference} between the IV estimate and the OLS estimated is equivalent to the social multiplier.
-$Y_{i} = W Y_{i} \delta + \varepsilon{i}$
-$\phi_{2} = IV - OLS$
+%While empirical estimation is bedevilled by problems, better data can provide a way forward to empirically establish the impact of peer effects.
 
-Selection bias, omitted variables, and measurement error can inflate or deflate the IV estimate of the coefficient and thus Angrist cautions attributing the ratio (or difference) to peer effects. 
+For a long time, researchers have considered network dynamics as sources of potential contamination in a randomised experiment, or a violation of the stable unit treatment variable assumption [@Rubin1978]. Only recently economists have begun to explicitly model these network dependencies as ‚spillover effects’ [@bramoulle_peer_2020]. Ignoring peer effects threatens the internal validity of both experimental and non-experimental findings. Consider for example the effect of a program at an individual level (some sort of mentoring program) on grades. By employing class or school fixed effects, the estimated effect size of the treatment at the individual level might be affected, because of positive peer effects (the mental health improve the mental health of others). @miguel_worms_2004 study the effects of a deworming RCT in Kenya. They highlight that by not including peer effects and reduced network transmission, the reduction in school absenteeism of the intervention are doubly undercounted. The reduced disease transmission, which spilled over to control schools leads to an undercount of the positive benefits of the intervention. Thus, ignoring peer effects is equivalent to ignoring an externality.  
 
-Applied researchers might have considered network dynamics as sources of potential contamination in a randomised experiment or observational study with quasi experimental variation. Thus researchers conceptualised peer effects as a violation of the stable unit treatment variable assumption (Rubin, 1978). Only recently economists have begun to explicitly model these network dependencies as ‚spillover effects’. Ignoring peer effects threatens the internal validity of both experimental and non-experimental findings. Consider for example the effect of a program at an individual level (some sort of mentoring program) on grades. By employing class or school fixed effects, the estimated effect size of the treatment at the individual level might be affected, because of positive peer effects (the mental health improve the mental health of others). Miguel and Kremer (2004) study the effects of a deworming RCT in Kenya. They highlight that by not including peer effects and reduced network transmission, the reduction in school absenteeism of the intervention are doubly undercounted. The reduced disease transmission, which spilled over to control schools leads to an undercount of the positive benefits of the intervention. Thus, ignoring peer effects is equivalent to ignoring an externality.  
+\textbf{Estimating Peer Effects} 
 
-As peer effects and network dependency are everywhere and always present in the realm of social science research it is necessary to be explicit about their existence. While empirical estimation is bedevilled by problems, better data can provide a way forward to empirically establish the impact of peer effects.
+In a sweeping review, @angrist_perils_2014 provides a critique of the economics literature on peer effects. He derives and demonstrates potential pitfalls by linking the behaviour of IV estimation with group-level dummies with OLS. 
+In a linear-in-means model with exogenous effects (e.g. $Y_{i} = W X_{i} \beta + \varepsilon{i}$), he shows that the ‚social multiplier‘ is equivalent to the \emph{ratio} between the IV 2SLS and OLS estimand. 
 
-\textbf{The External Validity Tradeoff} 
+$\phi_{1} = \frac{\text{IV}}{\text{OLS}}$
 
-Randomisation of peers in experimental settings might allow researchers to draw internally valid inference, the problem is that these research strategies might lack external validity. Network structure emerge endogenously, making the randomisation of peers in studies infeasible. In the real-world friends are not being randomly assigned, but people sort into groups and networks (often based on homophile). In many settings, it is practically infeasible to vary the structure of peers exogenously. For example, when trying to estimate the long-run effect of peers it is hard to imagine a practically feasible experiment where the network structure was determined exogenously and evolved so over time. 
+For an endogenous effects ($Y_{i} = W Y_{i} \delta + \varepsilon{i}$) model the \emph{difference} between the IV estimate and the OLS estimated is equivalent to the social multiplier.
+
+$\phi_{2} = \text{IV} - \text{OLS}$
+
+However, Angrist cautions to interpret any obtained difference as the causal effect of peers. Selection bias, omitted variables, nonlinearities, and measurement error can inflate or deflate the IV estimate of the coefficient. Thus, the estimated is highly prone to misinterpretation.
+
+Randomisation of peers in experimental settings might allow researchers to draw internally valid inference about exogenous peer effects. However, these research strategies can lack external validity, and are often practically infeasible. Network structure emerges endogenously. In the real-world friends are not being randomly assigned, but people sort into groups and networks (often based on homophily). In many settings, it is practically infeasible to vary the structure of peers exogenously. For example, when trying to estimate the long-run effect of peers it is hard to imagine a practically feasible experiment where the network structure was determined and evolves exogenously. 
 
 \textbf{Policy Relevance and Peer Effects} 
 
-How then can we learn something about peer effect and the importance of social networks? An innovative methodological contribution that sheds light on peer effects is Chetty et al. (2022). The researchers demonstrate that economic connectedness and social mobility demonstrates importance of social networks for economic outcomes. Chetty et al. (2022) do not rely on random assignment, nor do they estimate the impact of a certain policy. Thus the relationship between economic connectedness and economic mobility is fraught by a set of issues, but the incredible rich data allows to demonstrate that even broad based correlations can give us societally (and policy) relevant insights into the dynamics of social networks. This data-driven approach and correlational evidence coupled with extremely granular data can preclude concerns over threats to identification like reverse causality.
+How then can we learn something about peer effect and the importance of social networks? An innovative methodological contribution that sheds light on peer effects is @chetty_social_2022 The researchers demonstrate that economic connectedness and social mobility demonstrates importance of social networks for economic outcomes.  @chetty_social_2022 do not rely on random assignment, nor do they estimate the impact of a certain policy. Thus the relationship between economic connectedness and economic mobility is fraught by a set of issues, but the incredible rich data allows to demonstrate that even broad based correlations can give us policy relevant insights into the dynamics of social networks. This data-driven approach and correlational evidence coupled with extremely granular data can preclude concerns over threats to identification like reverse causality.
 
 \textbf{Network Dependence and Instruments} 
 
-To consider how network dependence might affect the \textit{relevance} and \textit{validity} of an instrument let us consider the paper by Ramsay (2011). The author studies the relationship between natural resource wealth and a countries level of political freedom. More specifically, he is interested in the causal effect of a countries annual oil income per capita on the level of democracy as measured by the polity IV score. Let us consider the simplified equation: 
-$Democracy_{i,t} = \mu + OilIncomepercapita_{i,t} + \delta X_{i,t} + \varepsilon_{i,t}$ 
+Network dependence can affect and impair the \textit{relevance} and \textit{validity} of an instrument variable. Consider the paper by Ramsay (2011) who studies the relationship between natural resource wealth and political freedom. More specifically, he is interested in the causal effect of a countries annual oil income per capita on the level of democracy as measured by the polity IV score. The author estimates: 
+
+$\text{Democracy}_{i,t} = \mu + \text{OilIncomepercapita}_{i,t} + \delta X_{i,t} + \varepsilon_{i,t}$ 
+
 where X is a vector of controls and for country i in year t. 
 
-However, this relationship likely suffers from reverse causality, as a countries political institutions will determine its oil income, while concurrently oil income determines democracy (the effect we are interested in). Ramsay (2011) proposes the out-of-region natural disaster as an IV for annual oil income. He splits the world into five regions and uses natural disasters, which impact the global oil price in other regions as an IV for annual oil income. Thus, Ramsay (2011) identifies the variation in annual oil income of a country in lets say Africa that is caused by a natural disaster in Colombia. 
-$Oilincomepercapita_{i,t} = \mu + \theta OutofRegionNaturalDisaster_{i,t} + \delta X_{i,t} + \varepsilon_{i,t}$
+However, this relationship likely suffers from reverse causality, as a countries political institutions will determine its oil income, while concurrently oil income determines democracy. @ramsay_revisiting_2011 proposes the ‚out-of-region natural disaster‘ as an IV for annual oil income. He splits the world into five supposedly unconnected regions and uses natural disasters in other regions, which impact the global oil price as an IV for annual oil income. @ramsay_revisiting_2011 identifies the variation in annual oil income of a country in lets say Africa that is caused by a natural disaster in Colombia.
+
+$\text{Oilincomepercapita}_{i,t} = \mu + \theta \text{OutofRegionNaturalDisaster}_{i,t} + \delta X_{i,t} + \varepsilon_{i,t}$
 
 Now how might spatial dependence in networks impact the validity (i.e. the exclusion restriction) of the instrument. 
-$Cov(\text{OutofRegionNaturalDisaster}_{i,t}, \varepsilon_{i,t} / \delta X_{i,t}) = 0$
-Network dependence through spatial interdependence can lead to a violation of the instruments validity of the exclusion restriction. Changes and levels of countries political institutions are correlated and clustered in space. Take for example the recent wave of military coups in Africa propagated through Africa and is likely to afflict political stability in other regions as well. The coarse aggregation of the world into five regions is creating spatial dependence. Additionally, the shocks induced by natural disasters is affecting other channels. Consider maybe a natural disaster in South America which might induce changes in the US foreign aid network, by redirecting resources away from one country to another. A reduction in foreign aid in Africa might then concurrently impact political freedom in Africa. Another obvious candidate for violations of the assumptions is that natural disasters will affect shock trade networks which will have a direct impact on countries political institutions. Thus the effects of shocks induced by natural disasters are clustered in space through countless channels. The authors assumption that, by dividing the world into five regions and that the shocks in those regions do not spill over in systematic ways seems implausible. 
-The \textit{relevance} of the instrument, however, is not directly impaired by network dependence as the first stage F-test still demonstrates that the instrument is highly correlated with oil income per capita.
+
+$\text{Cov}(\text{OutofRegionNaturalDisaster}_{i,t}, \varepsilon_{i,t} / \delta X_{i,t}) = 0$
+
+Network dependence through spatial interdependence can lead to a violation of the exclusion restriction. The changes and levels of countries political institutions are correlated and clustered in space. Take for example the recent wave of military coups in Africa which likely afflicts the political institutions in other regions through (for example) increased migration, as well. Secondly, the coarse aggregation of the world into five regions is creating spatial dependence. The shocks induced by natural disasters might itself be spatially correlated in a systematic manner with other shocks.  Consider a natural disaster in South America which might induce changes in the US foreign aid network, by redirecting resources away from one country to another. A reduction in foreign aid in Africa might then concurrently impact political freedom in Africa. Another obvious candidate for violations of the assumptions is that natural disasters will affect shock trade networks which will have a direct impact on countries political institutions. Thus the effects of shocks induced by natural disasters are clustered in space through countless channels. The authors assumption that, by dividing the world into five regions and that the shocks in those regions are systematically unrelated seems implausible. 
+The \textit{relevance} of the instrument, however, is not directly impaired by network dependence as the first stage F-test still demonstrates that the instrument is correlated with oil income per capita.
+
+
 
 \newpage
 
