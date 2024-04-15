@@ -897,7 +897,7 @@ p <- ggplot(data = rbind(rbind(m_ARG_plot, m_PRY_plot),m_BRA_plot))+#[m_BRA$NAME
   theme_map() +
   theme(legend.position = 'left')+
   labs(x=NULL, y=NULL,
-       title="Distance to next Jesuit Mission")+
+       title="Distance to next Jesuit Mission - Logarithmic Decay")+
   labs(fill="Distance (km)")
 
 
@@ -981,7 +981,7 @@ ggplot(data, aes(x = Distance, y = Weight, color = Type)) +
     theme_map() +
     theme(legend.position = 'left')+
     labs(x=NULL, y=NULL,
-         title="Distance to next Jesuit Mission")+
+         title="Distance to next Jesuit Mission - logarithmic decay")+
     labs(fill="Log(Distance (km))")
   
   second<- first +
@@ -992,14 +992,13 @@ ggplot(data, aes(x = Distance, y = Weight, color = Type)) +
     geom_sf(data = border_PRY, color = "red", fill=NA) +
     theme_minimal()
   
-  third<- second +
+  third_log<- second +
     xlim(xmin = 62, xmax = 48) +
     ylim(ymin = -35, ymax = -25)+
     annotate("text", x = 58, y = -29, label = 'atop(bold("ARGENTINA"))', size = 2.5, col='red', parse=T)+
     annotate("text", x = 54, y = -30, label = 'atop(bold("BRAZIL"))', size = 2.5, col='red', parse=T)+
     annotate("text", x = 56.5, y = -27, label = 'atop(bold("PARAGUAY"))', size = 2.5, col='red', parse=T)
   
-  third
 ```
 
 ```{r, echo=FALSE}
@@ -1019,14 +1018,14 @@ ggplot(data, aes(x = Distance, y = Weight, color = Type)) +
     geom_sf(data = border_PRY, color = "red", fill=NA) +
     theme_minimal()
   
-  third<- second +
+  third_exp <- second +
     xlim(xmin = 62, xmax = 48) +
     ylim(ymin = -35, ymax = -25)+
     annotate("text", x = 58, y = -29, label = 'atop(bold("ARGENTINA"))', size = 2.5, col='red', parse=T)+
     annotate("text", x = 54, y = -30, label = 'atop(bold("BRAZIL"))', size = 2.5, col='red', parse=T)+
     annotate("text", x = 56.5, y = -27, label = 'atop(bold("PARAGUAY"))', size = 2.5, col='red', parse=T)
   
-  third
+  third_exp
 ```
 
 
@@ -1038,7 +1037,7 @@ first <- ggplot(data = plotdata)+#[m_BRA$NAME_1=="Rio Grande do Sul" ,]) )+
     theme_map() +
     theme(legend.position = 'left')+
     labs(x=NULL, y=NULL,
-         title="Distance to next Jesuit Mission")+
+         title="Distance to next Jesuit Mission - Inverse Distance Decay")+
     labs(fill="1/Distance (km)^0.5")
   
 second<- first +
@@ -1049,7 +1048,7 @@ second<- first +
     geom_sf(data = border_PRY, color = "red", fill=NA) +
     theme_minimal()
   
-third<- second +
+third_ <- second +
     xlim(xmin = 62, xmax = 48) +
     ylim(ymin = -35, ymax = -25)+
     annotate("text", x = 58, y = -29, label = 'atop(bold("ARGENTINA"))', size = 2.5, col='red', parse=T)+
@@ -1146,11 +1145,11 @@ Recall ‘The perils of peer effects’ (Angrist, 2014). Write a short text (not
 
 \textbf{The perils of ignoring peer effects}
 
-For a long time, researchers have considered network dynamics as sources of potential contamination in a randomised experiment, or a violation of the stable unit treatment variable assumption [@Rubin1978]. Only recently economists have begun to explicitly model these network dependencies as ‚spillover effects’ [@bramoulle_peer_2020]. Ignoring peer effects threatens the internal validity of both experimental and non-experimental findings. Consider for example the effect of a program at an individual level (some sort of mentoring program) on grades. By employing class or school fixed effects, the estimated effect size of the treatment at the individual level might be affected, because of positive peer effects (the mental health improve the mental health of others). @miguel_worms_2004 study the effects of a deworming RCT in Kenya. They highlight that by not including peer effects and reduced network transmission, the reduction in school absenteeism of the intervention are doubly undercounted. The reduced disease transmission, which spilled over to control schools leads to an undercount of the positive benefits of the intervention. Thus, ignoring peer effects is equivalent to ignoring an externality.  
+For a long time, researchers have considered network dynamics as sources of potential contamination in randomized experiments, or a violation of the stable unit treatment variable assumption [@Rubin1978]. Only recently economists have begun to explicitly model these network dependencies as ‚spillover effects’ [@bramoulle_peer_2020]. Ignoring peer effects threatens the internal validity of both experimental and non-experimental findings. Consider for example the effect of a program assigned at an individual level (some sort of mentoring program) on grades. To estimate the effect reasearchers typically employ class or school fixed effects. However, the presence of peer effects (i.e. the mental health improvement might improve the mental health of other students), can bias the estimated coefficients. To give a concrete example, @miguel_worms_2004 study the effects of a deworming RCT in Kenya. They highlight that by not including peer effects through reduced network transmission, the reduction in school absenteeism of the intervention are doubly undercounted. The reduced disease transmission, which spilled over to control schools leads to an undercount of the positive benefits of the intervention. Thus, ignoring peer effects is equivalent to ignoring an externality.  
 
 \textbf{Estimating Peer Effects} 
 
-In a sweeping review, @angrist_perils_2014 provides a critique of the economics literature on peer effects. He derives and demonstrates potential pitfalls by linking the behaviour of IV estimation with group-level dummies with OLS. 
+In a sweeping review, @angrist_perils_2014 provides a critique of the economics literature on peer effects. He derives and demonstrates potential pitfalls by linking the behavior of IV estimation with group-level dummies with OLS. 
 In a linear-in-means model with exogenous effects (e.g. $Y_{i} = W X_{i} \beta + \varepsilon{i}$), he shows that the ‚social multiplier‘ is equivalent to the \emph{ratio} between the IV 2SLS and OLS estimand. 
 
 $\phi_{1} = \frac{\text{IV}}{\text{OLS}}$
@@ -1159,17 +1158,17 @@ For an endogenous effects ($Y_{i} = W Y_{i} \delta + \varepsilon{i}$) model the 
 
 $\phi_{2} = \text{IV} - \text{OLS}$
 
-However, Angrist cautions to interpret any obtained difference as the causal effect of peers. Selection bias, omitted variables, nonlinearities, and measurement error can inflate or deflate the IV estimate of the coefficient. Thus, the estimated is highly prone to misinterpretation.
+However, @angrist_perils_2014 cautions to interpret any obtained difference as the causal effect of peers. Selection bias, omitted variables, nonlinearities, and measurement error can inflate or deflate the IV estimate of the coefficient. Thus, any such study according to @angrist_perils_2014 is prone to misinterpretation.
 
-Randomisation of peers in experimental settings might allow researchers to draw internally valid inference about exogenous peer effects. However, these research strategies can lack external validity, and are often practically infeasible. Network structure emerges endogenously. In the real-world friends are not being randomly assigned, but people sort into groups and networks (often based on homophily). In many settings, it is practically infeasible to vary the structure of peers exogenously. For example, when trying to estimate the long-run effect of peers it is hard to imagine a practically feasible experiment where the network structure was determined and evolves exogenously. 
+To uncover peer effects, randomization of peers into different environments allows researchers to draw internally valid inferences about exogenous peer effects. However, these research strategies can lack external validity, and are often practically infeasible. The reason is that networks structure emerges endogenously. In the real-world friends are not being randomly assigned, but people sort into groups and networks (often based on homophily). Especially when it comes to long-run effects, it is hard to imagine that truly assigns peers characteristics in a manner that is orthogonal to individual characteristics. 
 
-\textbf{Policy Relevance and Peer Effects} 
+\textbf{The predicitve value of Peer Effect Studies} 
 
-How then can we learn something about peer effect and the importance of social networks? An innovative methodological contribution that sheds light on peer effects is @chetty_social_2022 The researchers demonstrate that economic connectedness and social mobility demonstrates importance of social networks for economic outcomes.  @chetty_social_2022 do not rely on random assignment, nor do they estimate the impact of a certain policy. Thus the relationship between economic connectedness and economic mobility is fraught by a set of issues, but the incredible rich data allows to demonstrate that even broad based correlations can give us policy relevant insights into the dynamics of social networks. This data-driven approach and correlational evidence coupled with extremely granular data can preclude concerns over threats to identification like reverse causality.
+How then can we learn something about peer effect and the importance of social networks? An innovative methodological contribution that sheds light on peer effects is @chetty_social_2022. The researchers demonstrate that economic connectedness is connected to social mobility.  @chetty_social_2022 do not rely on random assignment, nor do they estimate the impact of a specific policy experiment. The incredible rich data allows the alleciation of potential issues and demonstrates that even broad based correlations can give us policy relevant insights into the dynamics of social networks. The extremely granular data can preclude concerns over threats to identification like reverse causality. While there are hurdles to causal interpretation of the effects, those kind of studies might still generate more credible insights than most recent studies.
 
 \textbf{Network Dependence and Instruments} 
 
-Network dependence can affect and impair the \textit{relevance} and \textit{validity} of an instrument variable. Consider the paper by Ramsay (2011) who studies the relationship between natural resource wealth and political freedom. More specifically, he is interested in the causal effect of a countries annual oil income per capita on the level of democracy as measured by the polity IV score. The author estimates: 
+Network dependence can affect and impair the \textit{relevance} and \textit{validity} of an instrument variable. Consider the paper by @ramsay_revisiting_2011 who studies the relationship between natural resource wealth and political freedom. More specifically, he is interested in the causal effect of a countries annual oil income per capita on the level of democracy as measured by the polity IV score. The author estimates: 
 
 $\text{Democracy}_{i,t} = \mu + \text{OilIncomepercapita}_{i,t} + \delta X_{i,t} + \varepsilon_{i,t}$ 
 
