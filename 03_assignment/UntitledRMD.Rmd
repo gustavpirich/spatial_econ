@@ -1,0 +1,46 @@
+---
+title: "Spatial Economics -- Assignment 2"
+author:
+  - "Gustav Pirich (h11910449)"
+  - "Gabriel Konzceny (h11776041)"
+  - "Filip Lukijanovic (h11776896)"
+date: "April 2, 2024"
+output:
+  pdf_document:
+    toc: true
+    includes:
+      in_header: !expr file.path("~/Desktop/GITHUB/spatial_econ/helper/wraper_code.tex")
+bibliography: references.bib
+nocite: '@*'
+header-includes:
+  - \usepackage{tcolorbox}
+  - \usepackage[default]{lato}
+  - \usepackage{rotating}
+papersize: a4
+geometry: margin=2cm
+urlcolor: DarkOrchid!65!black
+---
+
+
+```{r, setup, include = FALSE}
+knitr::opts_knit$set(root.dir = rprojroot::find_rstudio_root_file())
+knitr::opts_chunk$set(tidy.opts = list(width.cutoff = 80), tidy = TRUE)
+knitr::opts_chunk$set(warning = FALSE, message = FALSE) 
+library(showtext)
+showtext_auto()
+
+pacman::p_load(stringi, stringr, stringdist, haven, sf, dplyr, fuzzyjoin, 
+               comparator, digest, zoomerjoin, ggplot2, tidyr, ggthemes, viridis, 
+               fixest, conleyreg, plm, stargazer, magrittr, tidyverse, tmap, spdep, 
+               igraph, generics, knitr, kableExtra, formatR)
+```
+
+\vspace{2em}
+
+\begin{tcolorbox}
+\centering \itshape The code that was used in compiling the assignment is available on GitHub at \url{https://github.com/gustavpirich/spatial_econ/blob/main/02_assignment/02_assignmnet.Rmd}.
+\end{tcolorbox}
+
+\newpage
+
+# Exercise A

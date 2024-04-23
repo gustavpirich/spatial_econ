@@ -2,8 +2,7 @@
 title: "Spatial Economics -- Assignment 2"
 author:
   - "Gustav Pirich (h11910449)"
-  - "Peter Prlleshi (h11776041)"
-  - "Filip Lukijanovic (h11776896)"
+  - "Gabriel Konecny (h11775903)"
 date: "April 2, 2024"
 output:
   pdf_document:
