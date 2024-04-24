@@ -52,6 +52,10 @@ intersect_coord <- read_dta("./data/03_assignment/dataset/intersect_coord.dta")
 ```
 
 ```{r}
-knitr::kable(summary(st_area(raster_Africa)))
-```
+area <- st_area(raster_Africa)
 
+data <- c(min(area), mean(area), median(area), max(area))
+
+kable(data)
+```
+The unit of observation are cells. The cells are based on a raster. At the equator the raster has a side length of 110 kilometers.  
