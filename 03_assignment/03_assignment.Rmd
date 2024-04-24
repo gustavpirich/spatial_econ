@@ -43,19 +43,27 @@ pacman::p_load(stringi, stringr, stringdist, haven, sf, dplyr, fuzzyjoin,
 \newpage
 
 # Exercise B
-```{r}
+```{r, echo = FALSE}
 raster_Africa <- read_sf("./data/03_assignment/dataset/raster_Africa.shp")
 
 geoconflict_main <- read_dta("./data/03_assignment/dataset/geoconflict_main.dta")
 
 intersect_coord <- read_dta("./data/03_assignment/dataset/intersect_coord.dta")
 ```
-
-```{r}
+## Unit of Observation
+```{r, echo = FALSE}
 area <- st_area(raster_Africa)
 
-data <- c(min(area), mean(area), median(area), max(area))
+raster_Africa %>%
+  mutate(area = st_area(geometry))
+
+data <- data.frame(Cells = c("Min", "Mean", "Median", "Max"), Stats = c(min(area), mean(area), median(area), max(area)))
 
 kable(data)
 ```
-The unit of observation are cells. The cells are based on a raster. At the equator the raster has a side length of 110 kilometers.  
+The unit of observation are 'subnational' cells in a raster grid of 1 degree of latitude × 1 degree longitude. At the equator this corresponds to a side length of 110 km. The areal extension of the cells varies with the latitude. If you go forther away from the equator, the area of a cell decreases. 
+The table shows the area of the cells. The smallest cell has an area of about 97 857 $km^{2}$, the largest 12 364 $km^{2}$. On average the size of the cells is 11 900 $km^{2}$.  Thus the smalles cell is about 20 percent smaller than the largest cell. 
+They differ because of the distortions induced by the projection of the surface of the earth, onto a 2 dimensional raster grid. 
+
+## Interpretation of Coefficients
+
