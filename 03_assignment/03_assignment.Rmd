@@ -2,7 +2,7 @@
 title: "Spatial Economics -- Assignment 3"
 author:
   - "Gustav Pirich (h11910449)"
-  - "Gabriel Konzceny (h11776041)"
+  - "Gabriel Konecny (h11775903)"
 date: "April 2, 2024"
 output:
   pdf_document:
@@ -31,7 +31,7 @@ showtext_auto()
 pacman::p_load(stringi, stringr, stringdist, haven, sf, dplyr, fuzzyjoin, 
                comparator, digest, zoomerjoin, ggplot2, tidyr, ggthemes, viridis, 
                fixest, conleyreg, plm, stargazer, magrittr, tidyverse, tmap, spdep, 
-               igraph, generics, knitr, kableExtra, formatR)
+               igraph, generics, knitr, kableExtra, formatR,readxl)
 ```
 
 \vspace{2em}
@@ -42,14 +42,34 @@ pacman::p_load(stringi, stringr, stringdist, haven, sf, dplyr, fuzzyjoin,
 
 \newpage
 
+
+# Exercise A
+```{r, echo=FALSE}
+cigar_states <- readxl::read_excel(file.path("data","cigarettes","cigar_states.xls"))
+cigarette_2var <- readxl::read_excel(file.path("data","cigarettes","cigarette+2var.xls")) %>%
+                        fastDummies::dummy_cols(select_columns = "year") %>%
+                        fastDummies::dummy_cols(select_columns = "state")
+W <- as.matrix(readxl::read_excel(file.path("data","cigarettes","Spat-Sym-US.xls"), col_names=FALSE), dimnames=FALSE)
+```
+
+ Estimate the demand model, and test for spatial dependence using the procedures discussed in class, and the provided weights matrix. Suppress any theoretical considerations
+— which model would the classical specification search prefer?
+
+```{r}
+data.OLS <- select(cigarette_2var, c(logc, logp,logy, starts_with("year_")|starts_with("state_")))
+summary(lm(logc ~ ., data.OLS))
+```
+
+
 # Exercise B
-```{r, echo = FALSE}
+```{r, eval=FALSE}
 raster_Africa <- read_sf("./data/03_assignment/dataset/raster_Africa.shp")
 
 geoconflict_main <- read_dta("./data/03_assignment/dataset/geoconflict_main.dta")
 
 intersect_coord <- read_dta("./data/03_assignment/dataset/intersect_coord.dta")
 ```
+
 ## Unit of Observation
 ```{r, echo = FALSE}
 area <- st_area(raster_Africa)
