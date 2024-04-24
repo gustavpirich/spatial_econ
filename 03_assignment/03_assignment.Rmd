@@ -43,3 +43,15 @@ pacman::p_load(stringi, stringr, stringdist, haven, sf, dplyr, fuzzyjoin,
 \newpage
 
 # Exercise B
+```{r}
+raster_Africa <- read_sf("./data/03_assignment/dataset/raster_Africa.shp")
+
+geoconflict_main <- read_dta("./data/03_assignment/dataset/geoconflict_main.dta")
+
+intersect_coord <- read_dta("./data/03_assignment/dataset/intersect_coord.dta")
+```
+
+```{r}
+knitr::kable(summary(st_area(raster_Africa)))
+```
+
