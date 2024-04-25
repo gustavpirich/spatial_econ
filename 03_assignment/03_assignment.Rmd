@@ -56,8 +56,17 @@ W <- as.matrix(readxl::read_excel(file.path("data","cigarettes","Spat-Sym-US.xls
 — which model would the classical specification search prefer?
 
 ```{r}
-data.OLS <- select(cigarette_2var, c(logc, logp,logy, starts_with("year_")|starts_with("state_")))
-summary(lm(logc ~ ., data.OLS))
+data_OLS <- select(cigarette_2var, c(logc, logp,logy, starts_with("year_")|starts_with("state_")))
+OLS <- lm(logc ~ ., data_OLS)
+```
+
+```{r}
+W_tilde <- kronecker(diag(nrow(unique(cigarette_2var[,"year"]))), W)
+W_list <- mat2listw(W_tilde)
+```
+
+```{r}
+lm.morantest(OLS, listw = W.list,alternative = "greater", zero.policy=TRUE)
 ```
 
 
