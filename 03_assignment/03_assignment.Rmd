@@ -128,11 +128,37 @@ binary_matrix <- ifelse(contiguity_matrix, 1, 0)
 # Remove diagonal elements to avoid self-neighboring
 diag(binary_matrix) <- 0
 
+# Dynamic spatial panel model using maximum likelihood
+model <- spml(ANY_EVENT_ACLED ~ SPEI4pg + GSmain_ext_SPEI4pg +W_L2_GSmain_ext_SPEI4pg, 
+              data = geoconflict_main, 
+              index = c("cell", "year"), 
+              listw = binary_matrix, 
+              model = "lag", 
+              effect = "within", 
+              method = "ML")
+summary(model)
+
+
+
+
+
+
+
+
+# Convert DataFrame to pdata.frame for plm package
+pdata <- pdata.frame(df, index = c("id", "time"))
+
+# Create a spatial weights matrix (W)
+# For example, using queen contiguity:
+coordinates <- as.matrix(df[, c("longitude", "latitude")])
+nb <- poly2nb(coordinates, queen = TRUE)
+W <- nb2listw(nb, style = "W", zero.policy = TRUE)
+
 
 listw <- mat2listw(binary_matrix, style = "W", zero.policy = TRUE)
 
 
-blmpSDPD(ANY_EVENT_ACLED ~ SPEI4pg + L1_SPEI4pg + L2_SPEI4pg, model = list("sdm"), index = c("cell", "year"), dynamic = TRUE, W = listw, data = geoconflict_main)
+blmpSDPD(ANY_EVENT_ACLED ~ SPEI4pg + L1_SPEI4pg + L2_SPEI4pg, index = c("cell", "year"), dynamic = TRUE, W = listw, data = geoconflict_main)
 
 
 reg6 <- lagsarlm(ANY_EVENT_ACLED ~ SPEI4pg + GSmain_ext_SPEI4pg, data = geoconflict_main, zero.policy = TRUE, weightmatrix, type="mixed")
