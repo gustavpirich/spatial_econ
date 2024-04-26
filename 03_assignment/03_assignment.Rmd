@@ -28,10 +28,10 @@ knitr::opts_chunk$set(warning = FALSE, message = FALSE)
 library(showtext)
 showtext_auto()
 
-pacman::p_load(stringi, stringr, stringdist, haven, sf, dplyr, fuzzyjoin, 
+pacman::p_load(spatialreg, splm, stringi, stringr, stringdist, haven, sf, dplyr, fuzzyjoin, 
                comparator, digest, zoomerjoin, ggplot2, tidyr, ggthemes, viridis, 
-               fixest, conleyreg, plm, stargazer, magrittr, tidyverse, tmap, spdep, 
-               igraph, generics, knitr, kableExtra, formatR,readxl)
+               fixest, conleyreg, plm, stargazer, magrittr, tidyverse, tmap, spdep, SDPDmod,
+               igraph, generics, knitr, kableExtra, formatR,readxl, haven)
 ```
 
 \vspace{2em}
@@ -52,7 +52,7 @@ cigarette_2var <- readxl::read_excel(file.path("data","cigarettes","cigarette+2v
 W <- as.matrix(readxl::read_excel(file.path("data","cigarettes","Spat-Sym-US.xls"), col_names=FALSE), dimnames=FALSE)
 ```
 
- Estimate the demand model, and test for spatial dependence using the procedures discussed in class, and the provided weights matrix. Suppress any theoretical considerations
+ Estimate the demand model, and test for spatial dependence using the procedures discussed in class, and the provided weights matrix. Suppress any theoretical considerations
 — which model would the classical specification search prefer?
 
 ```{r}
@@ -72,11 +72,13 @@ lm.morantest(OLS, listw = W.list,alternative = "greater", zero.policy=TRUE)
 
 # Exercise B
 ```{r, eval=FALSE}
-raster_Africa <- read_sf("./data/03_assignment/dataset/raster_Africa.shp")
+setwd("~/Desktop/GITHUB/spatial_econ/data/03_assignment/dataset")
 
-geoconflict_main <- read_dta("./data/03_assignment/dataset/geoconflict_main.dta")
+raster_Africa <- read_sf("~/Desktop/GITHUB/spatial_econ/data/03_assignment/dataset/raster_Africa.shp")
 
-intersect_coord <- read_dta("./data/03_assignment/dataset/intersect_coord.dta")
+geoconflict_main <- read_dta("~/Desktop/GITHUB/spatial_econ/data/03_assignment/dataset/geoconflict_main.dta")
+
+intersect_coord <- read_dta("~/Desktop/GITHUB/spatial_econ/data/03_assignment/dataset/intersect_coord.dta")
 ```
 
 ## Unit of Observation
@@ -90,9 +92,51 @@ data <- data.frame(Cells = c("Min", "Mean", "Median", "Max"), Stats = c(min(area
 
 kable(data)
 ```
-The unit of observation are 'subnational' cells in a raster grid of 1 degree of latitude × 1 degree longitude. At the equator this corresponds to a side length of 110 km. The areal extension of the cells varies with the latitude. If you go forther away from the equator, the area of a cell decreases. 
-The table shows the area of the cells. The smallest cell has an area of about 97 857 $km^{2}$, the largest 12 364 $km^{2}$. On average the size of the cells is 11 900 $km^{2}$.  Thus the smalles cell is about 20 percent smaller than the largest cell. 
+The unit of observation are cells in a raster representing a 1×1 degree latitude longitude grid cover. At the equator this corresponds to a side length of 110 km. The areal extension of the cells varies with latitude. Further away from the equator, the area of a cell decreases. 
+The table shows the area of the cells. The smallest cell has an area of about 97 857 $km^{2}$, the largest 12 364 $km^{2}$. On average the size of the cells is 11 900 $km^{2}$.  Thus the gap between the smallest and largest cell amounts to about 20%.
 They differ because of the distortions induced by the projection of the surface of the earth, onto a 2 dimensional raster grid. 
 
 ## Interpretation of Coefficients
 
+## Replication
+
+```{r}
+nblist <- poly2nb(raster_Africa, queen = TRUE)
+
+
+nb.dist.band <- dnearneigh(raster_Africa, 0, 180)
+
+#nblist <- dnearneigh(x = st_centroid(raster_Africa), d1 = 0, d2 = 180)
+
+nbw <- nb2listw(nblist, style = "B", zero.policy = TRUE)
+
+weightmatrix <- listw2mat(nbw)
+
+
+# Defining hte bianry contiguity matrix with a distance cutoff of 180km
+
+library(units)
+
+# Setting a 180 km cutoff
+dist_matrix <- st_distance(raster_Africa)
+
+distance_threshold <- set_units(180000, "m")  # 180,000 meters
+
+contiguity_matrix <- as.matrix(dist_matrix) <= distance_threshold  # distance in meters
+binary_matrix <- ifelse(contiguity_matrix, 1, 0)
+
+# Remove diagonal elements to avoid self-neighboring
+diag(binary_matrix) <- 0
+
+
+listw <- mat2listw(binary_matrix, style = "W", zero.policy = TRUE)
+
+
+blmpSDPD(ANY_EVENT_ACLED ~ SPEI4pg + L1_SPEI4pg + L2_SPEI4pg, model = list("sdm"), index = c("cell", "year"), dynamic = TRUE, W = listw, data = geoconflict_main)
+
+
+reg6 <- lagsarlm(ANY_EVENT_ACLED ~ SPEI4pg + GSmain_ext_SPEI4pg, data = geoconflict_main, zero.policy = TRUE, weightmatrix, type="mixed")
+summary(reg6)
+
+summary(impacts(COL.SLX))
+```
