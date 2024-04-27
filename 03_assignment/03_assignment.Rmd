@@ -28,7 +28,7 @@ knitr::opts_chunk$set(warning = FALSE, message = FALSE)
 library(showtext)
 showtext_auto()
 
-pacman::p_load(spatialreg, splm, stringi, stringr, stringdist, haven, sf, dplyr, fuzzyjoin, 
+pacman::p_load(spatialreg, fixest, splm, stringi, stringr, stringdist, haven, sf, dplyr, fuzzyjoin, 
                comparator, digest, zoomerjoin, ggplot2, tidyr, ggthemes, viridis, 
                fixest, conleyreg, plm, stargazer, magrittr, tidyverse, tmap, spdep, SDPDmod,
                igraph, generics, knitr, kableExtra, formatR,readxl, haven)
@@ -106,7 +106,7 @@ nblist <- poly2nb(raster_Africa, queen = TRUE)
 
 nb.dist.band <- dnearneigh(raster_Africa, 0, 180)
 
-#nblist <- dnearneigh(x = st_centroid(raster_Africa), d1 = 0, d2 = 180)
+nblist <- dnearneigh(x = st_centroid(raster_Africa), d1 = 0, d2 = 180, longlat = TRUE)
 
 nbw <- nb2listw(nblist, style = "B", zero.policy = TRUE)
 
@@ -132,18 +132,20 @@ diag(binary_matrix) <- 0
 model <- spml(ANY_EVENT_ACLED ~ SPEI4pg + GSmain_ext_SPEI4pg +W_L2_GSmain_ext_SPEI4pg, 
               data = geoconflict_main, 
               index = c("cell", "year"), 
-              listw = binary_matrix, 
+              listw = nbw, 
               model = "lag", 
-              effect = "within", 
+              effect = "random", 
               method = "ML")
 summary(model)
 
-
-
-
-
-
-
+res2  <- blmpSDPD(formula = "ANY_EVENT_ACLED ~ SPEI4pg + GSmain_ext_SPEI4pg",
+                 data = geoconflict_main,
+                 W = binary_matrix,
+                 model = list("sar", "sdm", "sem", "sdem"),
+                 index = c("cell","year"),
+                 model = list("sdm"),
+                 effect = "twoways", dynamic = TRUE)
+res2
 
 # Convert DataFrame to pdata.frame for plm package
 pdata <- pdata.frame(df, index = c("id", "time"))
