@@ -336,7 +336,7 @@ etable(mod1)
 
 mod2 <- feols(ANY_EVENT_ACLED ~ 1 + SPEI4pg + L1_SPEI4pg + L2_SPEI4pg + GSmain_ext_SPEI4pg + L1_GSmain_ext_SPEI4pg + L2_GSmain_ext_SPEI4pg + elevation_cell + rough_cell + area_cell + use_primary + 
                 dis_river_cell + as.factor(shared) +  as.factor(border) + as.factor(any_mineral)+ ELF + i(country_largest_share, as.numeric(year)) + 
-                W_elevation_cell + W_rough_cell + W_area_cell + W_ELF + W_any_mineral + 
+                W_elevation_cell + W_rough_cell + W_area_cell + W_ELF + W_any_mineral + W_shared + W_dis_river_cell + as.factor(W_use_primary) + 
                 W_L1_GSmain_ext_SPEI4pg + W_L2_GSmain_ext_SPEI4pg + W_SPEI4pg + W_L1_SPEI4pg + W_L2_SPEI4pg | as.factor(year), 
               data = geoconflict_main, 
               panel.id=c('cell', 'year'))
