@@ -47,26 +47,131 @@ pacman::p_load(spatialreg, fixest, splm, stringi, stringr, stringdist, haven, sf
 ```{r, echo=FALSE}
 cigar_states <- readxl::read_excel(file.path("data","cigarettes","cigar_states.xls"))
 cigarette_2var <- readxl::read_excel(file.path("data","cigarettes","cigarette+2var.xls")) %>%
-                        fastDummies::dummy_cols(select_columns = "year") %>%
-                        fastDummies::dummy_cols(select_columns = "state")
-W <- as.matrix(readxl::read_excel(file.path("data","cigarettes","Spat-Sym-US.xls"), col_names=FALSE), dimnames=FALSE)
+                        relocate(state, .before=year) 
+
+test <- cbind(cigar_states, cigarette_2var[,"state"])[,"Name"]
+
+data <- cigarette_2var[c("state", "year", "logc", "logp","logy")] %>%
+        mutate(state = cbind(cigar_states, cigarette_2var[,"state"])[,"Name"])
+
+
+W.adj <- as.matrix(readxl::read_excel(file.path("data","cigarettes","Spat-Sym-US.xls"), col_names=FALSE), dimnames=FALSE)
+# <- nb2listw(W.adj,style="W")
+
+scale <- function(x){
+  x/sum(x)
+}
+W <- t(apply(W.adj,1,scale))
+lW <- mat2listw(W, style="W")
+#lW <- mat2listw(W.adj)
 ```
 
  Estimate the demand model, and test for spatial dependence using the procedures discussed in class, and the provided weights matrix. Suppress any theoretical considerations
+ 
+The demand model without spatial effects can by estimated by using the package plm:
+```{r}
+model1 <- plm(logc~logp+logy, data=data, model="within", effect="twoways")
+summary(model1)
+```
+
+This could be also done by hand by including the dummies for both fixed effects and running OLS:
+```{r}
+data_big <- cigarette_2var %>%
+            fastDummies::dummy_cols(select_columns = "year") %>%
+            fastDummies::dummy_cols(select_columns = "state") %>%
+            select(c(logc, logp,logy, starts_with("year_")|starts_with("state_")))
+OLS <- lm(logc ~ ., cigar)
+OLS
+```
+
+Where the point estimates of logp and logy are numerically identical to that of plm(). Thus we can see that using plm with "within" model and "twoways" effect is the way to go.
+
 — which model would the classical specification search prefer?
 
+
 ```{r}
-data_OLS <- select(cigarette_2var, c(logc, logp,logy, starts_with("year_")|starts_with("state_")))
-OLS <- lm(logc ~ ., data_OLS)
+fm1 <- logc ~ logp + logy
+
+# Spatial lag structure?
+slmtest(fm1, data=data, listw=lW, test="lml", model="within", effect="twoways")
+
+# Spatial error structure?
+slmtest(fm1, data=data, listw=lW, test="lme", model="within", effect="twoways")
+
+# Robust versions:
+# Spatial lag allowing for spatial error?
+slmtest(fm1, data=data, listw=lW, test="rlml", model="within", effect="twoways")
+
+# Spatial error allowing for spatial lag?
+slmtest(fm1, data=data, listw=lW, test="rlme", model="within", effect="twoways")
+```
+
+Allowing for spatial error, the spatial lag dependence is not significant. Thus this classical specification search suggests estimating SEM model. 
+
+- Estimate the model implied by the specification search and contrast the effect estimates
+with a SLX model specification:
+
+Thus using the spml function from class, we can estimate sem model by setting the spatial lag of dependent variable to false (lag=FALSE):
+```{r}
+data <- data.frame(data)
+sem <- spml(fm1, data, listw=lW, lag=FALSE, spatial.error = "b", 
+                    model="within", effect="twoways") 
+summary(sem)
 ```
 
 ```{r}
-W_tilde <- kronecker(diag(nrow(unique(cigarette_2var[,"year"]))), W)
-W_list <- mat2listw(W_tilde)
+# For newer versions of splm, there is `impacts()` for panel models. 
+# Make sure that your weights (`usalw`) are row-standardized (`style="W"`). 
+imp <- splm::impacts(sem, listw=lW,time=29)
+summary(imp, zstats=TRUE, short=TRUE)
+
+# `effects()` extracts the individual FE, which are not visible in the `summary()`  
+eff <- effects(sem)
+eff
+```
+
+SLX model can be estimated by using OLS, i.e. by using plm() function from before where we include the spatially lagged values of explanatory variables:
+```{r}
+W_ <- kronecker(diag(nrow(unique(cigarette_2var[,"year"]))), W)
+W_logp <- W_ %*% data[,"logp"]
+W_logy <- W_ %*% data[,"logy"]
+data_slx <- cbind(data, W_logp, W_logy)
+slx <- plm(logc~logp+logy+W_logp+W_logy, data=data_slx, model="within", effect="twoways")
+summary(slx)
+```
+
+Again, we get results identical to those reported in Vega and Elhorst 2015.
+
+– What could be the rationale to use the SLX model as opposed to other spatial
+specifications?
+
+The choice of the model should be based on theory. If we expect spillovers of exogenous variables and spillovers of endogenous variables or correlation of error terms is expected to be less pronounced or absent, it might be good idea to consider SLX. However, there are also reasons to consider SLX as a point of departure even if the theory is not clear about which model to choose. First, when using the SLX model, the estimation and interpretation of spillover effects is more straightforward. In contrast to endogenous models, SLX allows us to parametrize W and its parameters can be estimated. Strong limitation of SAR and SAC models is that the ratio between the spillover and direct effects of is same for every explanatory variable, which is unlikely to be true in many empirical studies. This is not the case for SLX model, where we get estimates of both by construction. Thus SLX can be considered more flexible in this perspective.
+
+– Which type(s) of spillover(s) would you expect in the model for cigarette demand?
+
+We would expect no endogenous spillover effects, since we dont believe that demand for cigarettes in a country should determine demand for cigarettes in neighboring country if there are no shortages. If however, the price of cigarettes in neighboring country is lower, people living near the border could be buying cigarettes in the neighboring country. This is called bootlegging effect. On other hand, if the income in our country increases, the opportunity costs of time of our citizens increase and they might then prefer to buy the more expensive cigarettes in home country instead. Thus we would expect spatially lagged exogenous variables to be relevant: An increase in price of cigarettes in neighboring country should have positive effect on the demand for cigarettes in home country. Increase in income of neighboring country should have negative effect on the demand for cigarettes in home. 
+
+Re-run the analysis using a SLX model with a distance decay specification (between centers) for the weights matrix, i.e. wij = 1/dγ ij following Halleck Vega and Elhorst (2015). Use a distance decay parameter of γ = 3.
+
+```{r}
+cigar_states <- st_read(file.path("data","cigarettes","cigar_states.xls")) %>%
+                mutate(longitude = -1*longitude)
+coords <- cigar_states[,2:3]
+#distw <- mat2listw(W, style="W",row.names=cigar_states$Name)$neighbours
+distw <- dnearneigh(coords, 0, 40075, row.names=cigar_states$Name, longlat=TRUE)
+dists <- nbdists(distw, coords, longlat=TRUE)
+ids <- lapply(dists, function(x) lapply(x, function(y) 1/y^3))
+lWd <- nb2listw(distw, glist = ids, style = "W",zero.policy=TRUE)
+Wd <- listw2mat(lWd)
 ```
 
 ```{r}
-lm.morantest(OLS, listw = W.list,alternative = "greater", zero.policy=TRUE)
+Wd_ <- kronecker(diag(nrow(unique(cigarette_2var[,"year"]))), Wd)
+Wd_logp <- Wd_ %*% data[,"logp"]
+Wd_logy <- Wd_ %*% data[,"logy"]
+data_slxd <- cbind(data, Wd_logp, Wd_logy)
+slxd <- plm(logc~logp+logy+Wd_logp+Wd_logy, data=data_slxd, model="within", effect="twoways")
+summary(slxd)
 ```
 
 
