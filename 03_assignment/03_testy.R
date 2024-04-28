@@ -321,24 +321,48 @@ geoconflict_main <- read_dta("~/Desktop/GITHUB/spatial_econ/data/03_assignment/d
 
 intersect_coord <- read_dta("~/Desktop/GITHUB/spatial_econ/data/03_assignment/dataset/intersect_coord.dta")
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 library(fixest)
 
-geoconflict_main$year <- as.factor(geoconflict_main$year)
-geoconflict_main$cell <- as.factor(geoconflict_main$cell)
+geoconflict_main_if <- geoconflict_main %>% 
+  filter(!year == 1997)
+
+geoconflict_main_if$year <- as.factor(geoconflict_main_if$year)
+geoconflict_main_if$cell <- as.factor(geoconflict_main_if$cell)
 
 mod1 <- feols(ANY_EVENT_ACLED ~ SPEI4pg + L1_SPEI4pg + L2_SPEI4pg + GSmain_ext_SPEI4pg + L1_GSmain_ext_SPEI4pg + L2_GSmain_ext_SPEI4pg + elevation_cell + rough_cell + area_cell + as.factor(use_primary) + 
         dis_river_cell + as.factor(shared) +  as.factor(border) + as.factor(any_mineral) + (ELF) + i((country_largest_share), as.numeric(year)) | as.factor(year), 
-      data = geoconflict_main, 
+      data = geoconflict_main_if, 
       panel.id=c('cell', 'year'))
 
 etable(mod1)
 
 
-mod2 <- feols(ANY_EVENT_ACLED ~ 1 + SPEI4pg + L1_SPEI4pg + L2_SPEI4pg + GSmain_ext_SPEI4pg + L1_GSmain_ext_SPEI4pg + L2_GSmain_ext_SPEI4pg + elevation_cell + rough_cell + area_cell + use_primary + 
+mod2 <- feols(ANY_EVENT_ACLED ~ SPEI4pg + L1_SPEI4pg + L2_SPEI4pg + GSmain_ext_SPEI4pg + L1_GSmain_ext_SPEI4pg + L2_GSmain_ext_SPEI4pg + elevation_cell + rough_cell + area_cell + as.factor(use_primary) + 
                 dis_river_cell + as.factor(shared) +  as.factor(border) + as.factor(any_mineral)+ ELF + i(country_largest_share, as.numeric(year)) + 
-                W_elevation_cell + W_rough_cell + W_area_cell + W_ELF + W_any_mineral + W_shared + W_dis_river_cell + as.factor(W_use_primary) + 
-                W_L1_GSmain_ext_SPEI4pg + W_L2_GSmain_ext_SPEI4pg + W_SPEI4pg + W_L1_SPEI4pg + W_L2_SPEI4pg | as.factor(year), 
-              data = geoconflict_main, 
+                W_elevation_cell + W_rough_cell + W_area_cell + W_ELF + (W_any_mineral) + (W_shared)  + W_dis_river_cell + (W_use_primary) + 
+                W_GSmain_ext_SPEI4pg  + W_L1_GSmain_ext_SPEI4pg + W_L2_GSmain_ext_SPEI4pg + W_SPEI4pg + W_L1_SPEI4pg + W_L2_SPEI4pg | as.factor(year), 
+              data = geoconflict_main_if, 
               panel.id=c('cell', 'year'))
 
 etable(mod2)
+
+
+mod3 <- lm(ANY_EVENT_ACLED ~ as.factor(year) + SPEI4pg + L1_SPEI4pg + L2_SPEI4pg + GSmain_ext_SPEI4pg + L1_GSmain_ext_SPEI4pg + L2_GSmain_ext_SPEI4pg + elevation_cell + rough_cell + area_cell + as.factor(use_primary) + 
+             dis_river_cell + as.factor(shared) +  as.factor(border) + as.factor(any_mineral) + (ELF) + as.factor(country_largest_share):as.numeric(year), data =geoconflict_main)
+summary(mod3)
