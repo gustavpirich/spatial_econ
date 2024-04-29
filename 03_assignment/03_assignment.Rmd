@@ -208,7 +208,6 @@ They differ because of the distortions induced by the projection of the surface 
 ```{r}
 nblist <- poly2nb(raster_Africa, queen = TRUE)
 
-
 nb.dist.band <- dnearneigh(raster_Africa, 0, 180)
 
 nblist <- dnearneigh(x = st_centroid(raster_Africa), d1 = 0, d2 = 180, longlat = TRUE)
@@ -218,7 +217,7 @@ nbw <- nb2listw(nblist, style = "B", zero.policy = TRUE)
 weightmatrix <- listw2mat(nbw)
 
 
-# Defining hte bianry contiguity matrix with a distance cutoff of 180km
+# Defining the binary contiguity matrix with a distance cutoff of 180km
 
 library(units)
 
