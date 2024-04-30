@@ -174,7 +174,7 @@ We would expect no endogenous spillover effects, since we dont believe that dema
 
 - Re-run the analysis using a SLX model with a distance decay specification (between centers) for the weights matrix, i.e. wij = 1/dγ ij following Halleck Vega and Elhorst (2015). Use a distance decay parameter of γ = 3.
 
-For this we first create list, where all regions are neighbors by setting distance threshold to big enough value and then compute distances using nbdists. They are then transformed as suggested above and scaled by maximum eigenvalue as in the paper.
+For this we first create a neighbour list, where all regions are neighbors by setting the distance threshold to big enough value and then compute distances using nbdists. They are then transformed as suggested above and scaled by maximum eigenvalue as in the paper.
 
 ```{r}
 coords <- cigar_states[,2:3]
@@ -188,16 +188,49 @@ Wd1 <- listw2mat(lWd)
 Wd <- Wd1 / max(abs(eigen(Wd1)$values))
 return(Wd)
 }
-Wd <- decay(3)
+Wd <- decay(3) 
+colnames(Wd) <- rownames(Wd)
 ```
 
-– Describe the network recovered by Halleck Vega and Elhorst (2015).
-
-Using gamma similar to the paper, we get coefficient estimates which are very close to the paper.
-
+Using gamma similar to the paper, we get coefficient estimates which are very close to thsoe in the paper.
 ```{r}
 summary(slx_OLS(Wd))
 ```
+
+
+– Describe the network recovered by Halleck Vega and Elhorst (2015):
+```{r}
+distw
+46*46-46
+(46*46-46)/46*46
+```
+
+In this network all agents are connected, only the weights differ - which are given by the distance decay formula above. This corresponds to average number of links being 45 i.e. all regions except the region itself. Thus the percentage of nonzero weights simply gives the share of diagonal elements of  a 46*46 matrix.
+
+We could define the most central agent as one, which minimizes the distance to other agents. In our specification this would rather correspond to maximizing the nonlinear transformation of distance which we are using. Thus an agent is most central, if the sum of its weights to other agents is highest. 
+
+```{r, echo=FALSE}
+head(arrange(data.frame(value = rowSums(Wd)), desc(value)))
+```
+
+Maryland is most central agent. It could be that since multiple small regions from around Maryland are included, Maryland has very small distance to them and thus its inverse is large, contributing a lot to maximization of criterion made up above. Thus most central agent is one which has many close neighbors. From the table above we see that other important agents are District of Columbia, Massachusetts and Rhode Island.
+
+We get similar results when using eigenvector centrality:
+```{r, echo=FALSE}
+G <- graph_from_adjacency_matrix(
+  Wd,
+  mode = c("undirected"),
+  weighted = TRUE,
+)
+
+ec <- data.frame(state=cigar_states$Name, ec=eigen_centrality(G)$vector) %>%
+      arrange(desc(ec))
+
+knitr::kable(ec, caption = "Eigenvector Centrality")
+
+```
+
+
 
 
 
