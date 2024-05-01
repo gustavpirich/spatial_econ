@@ -66,15 +66,16 @@ lW <- mat2listw(W, style="W")
 #lW <- mat2listw(W.adj)
 ```
 
- Estimate the demand model, and test for spatial dependence using the procedures discussed in class, and the provided weights matrix. Suppress any theoretical considerations
+- Estimate the demand model, and test for spatial dependence using the procedures discussed in class, and the provided weights matrix. Suppress any theoretical considerations
  
 The demand model without spatial effects can by estimated by using the package plm:
 ```{r}
 model1 <- plm(logc~logp+logy, data=data, model="within", effect="twoways")
 summary(model1)
 ```
+The demand for cigarettes depends negatively on the price of the cigarettes and positively on the real disposable income. 
 
-This could be also done by hand by including the dummies for both fixed effects and running OLS:
+Alternatively, this could be also done by hand by including the dummies for both fixed effects and running OLS:
 ```{r}
 data_big <- cigarette_2var %>%
             fastDummies::dummy_cols(select_columns = "year") %>%
@@ -83,15 +84,17 @@ data_big <- cigarette_2var %>%
 OLS <- lm(logc ~ ., data_big)
 OLS
 ```
-
 Where the point estimates of logp and logy are numerically identical to that of plm(). Thus we can see that using plm with "within" model and "twoways" effect is the way to go.
 
 — which model would the classical specification search prefer?
 
-
+We run all tests including individual and time fixed effects:
 ```{r}
 fm1 <- logc ~ logp + logy
+```
 
+
+```{r, echo=FALSE}
 # Spatial lag structure?
 slmtest(fm1, data=data, listw=lW, test="lml", model="within", effect="twoways")
 
@@ -111,12 +114,11 @@ Allowing for spatial error, the spatial lag dependence is not significant. Thus 
 - Estimate the model implied by the specification search and contrast the effect estimates
 with a SLX model specification:
 
-Thus using the spml function from class, we can estimate sem model by setting the spatial lag of dependent variable to false (lag=FALSE):
-```{r}
+Using the spml function, we can estimate SEM model by setting the spatial lag of dependent variable to false (lag=FALSE):
+```{r, echo=FALSE}
 data <- data.frame(data)
 sem <- spml(fm1, data, listw=lW, lag=FALSE, spatial.error = "b", 
                     model="within", effect="twoways") 
-summary(sem)
 ```
 
 ```{r}
@@ -138,30 +140,14 @@ return((slx))
 
 ```
 
+Now, to compare both:
 ```{r}
-slx_OLS(W)
+summary(sem)
+print("SLX Model")
+summary(slx_OLS(W))
 ```
 
-```{r, eval=FALSE}
-# xy <- read_excel(file.path("data","cigarettes","cigar_states.xls"), col_names = TRUE)
-# n_time <- nrow(unique(cigarette_2var[,"year"]))
-# 
-# dist <- as.matrix(dist(xy))
-# diag(dist) <- Inf # Diagonal elements will be 0
-# Psi <- function(delta) {
-# W_dist <- dist ^ (-delta) # Build
-# W_dist <- W_dist / max(eigen(W_dist, symmetric = TRUE)$values) # Scale
-# kronecker <- kronecker(diag(n_time), W_dist)
-# return (W_dist)
-# }
-# W_dist <- Psi(3)
-# 
-
-```
-
-
-
-Again, we get results identical to those reported in Vega and Elhorst 2015.
+The coefficient estimates above correspond to those reported in table 2 of Vega and Elhorst 2015. Both the SEM and SLX suggest on average a decrease in domestic demand for cigarettes of around 1% following an increase in domestic prices by 1%, ceteris paribus. Similarly both models suggest an increase in demand for cigarettes given an increase in domestic income. SLX coefficient estimate for this is higher. Additionally SLX model provides effects of lagged independ variables of cigarette demand. The SEM model does not provide any additional meaningful parameters since its parameter for spatial autocorrelation of errors is a nuisance parameter.
 
 – What could be the rationale to use the SLX model as opposed to other spatial
 specifications?
@@ -180,7 +166,7 @@ For this we first create a neighbour list, where all regions are neighbors by se
 coords <- cigar_states[,2:3]
 
 decay <- function(gamma){
-distw <- dnearneigh(coords, 0, 999999, row.names=cigar_states$Name, longlat=FALSE)
+distw <<- dnearneigh(coords, 0, 999999, row.names=cigar_states$Name, longlat=FALSE)
 dists <- nbdists(distw, coords, longlat=FALSE)
 ids <- lapply(dists, function(x) lapply(x, function(y) 1/(y^gamma)))
 lWd <- nb2listw(distw, glist = ids, style = "B",zero.policy=TRUE)
@@ -192,11 +178,11 @@ Wd <- decay(3)
 colnames(Wd) <- rownames(Wd)
 ```
 
-Using gamma similar to the paper, we get coefficient estimates which are very close to thsoe in the paper.
+Using gamma similar to the paper, we get coefficient estimates which are very close to those in the paper:
 ```{r}
 summary(slx_OLS(Wd))
 ```
-
+While the interpretation is non-lagged independent variables is similar as in regressions above, we might want to focus on spatiall lagged variables. The model suggests that increase in price of cigarettes in neighboring regions increases demand for cigarettes in home region, ceteris paribus. This is consistent with the bootlegging behavior discussed in the paper, which predicts that some people might buy cigarettes in/from other regions if the price there is lower. The coefficient estimate for income in neighboring regions suggest lower demand for cigarettes if the real income in neighboring regions  increases. This suggests that if people have higher income their opportunity cost of time is higher and they might prefer the convenience of buying cigarettes in their home region. 
 
 – Describe the network recovered by Halleck Vega and Elhorst (2015):
 ```{r}
@@ -207,7 +193,17 @@ distw
 
 In this network all agents are connected, only the weights differ - which are given by the distance decay formula above. This corresponds to average number of links being 45 i.e. all regions except the region itself. Thus the percentage of nonzero weights simply gives the share of diagonal elements of  a 46*46 matrix.
 
-We could define the most central agent as one, which minimizes the distance to other agents. In our specification this would rather correspond to maximizing the nonlinear transformation of distance which we are using. Thus an agent is most central, if the sum of its weights to other agents is highest. 
+Below we visualize the spatial weights matrix:
+```{r, echo=FALSE}
+lattice::levelplot((Wd), main="Distance Decay Spatial Weights Matrix",
+scales = list(x=list(cex=0.45,rot=90),y=list(cex=.45)))
+```
+ 
+Reminding ourself that all regions except the diagonal are neighbors, we can see that the definition of distance decay parameter used results in few strongly connected neighbors and many weaker connections. 
+
+– Who are the central agents and where do spillover effects occur?
+
+We could define the most central agent as one, which has strongest connection to other regions overall. This could correspond to maximizing the nonlinear transformation of distance which we are using. Thus an agent is most central,if the sum of its weights to other agents is highest, i.e. if the sum of its row is highest. 
 
 ```{r, echo=FALSE}
 head(arrange(data.frame(value = rowSums(Wd)), desc(value)))
@@ -216,6 +212,7 @@ head(arrange(data.frame(value = rowSums(Wd)), desc(value)))
 Maryland is most central agent. It could be that since multiple small regions from around Maryland are included, Maryland has very small distance to them and thus its inverse is large, contributing a lot to maximization of criterion made up above. Thus most central agent is one which has many close neighbors. From the table above we see that other important agents are District of Columbia, Massachusetts and Rhode Island.
 
 We get similar results when using eigenvector centrality:
+
 ```{r, echo=FALSE}
 G <- graph_from_adjacency_matrix(
   Wd,
@@ -230,6 +227,7 @@ knitr::kable(ec, caption = "Eigenvector Centrality")
 
 ```
 
+– What is the average partial effect of increasing income?
 
 
 
