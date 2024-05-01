@@ -228,8 +228,16 @@ knitr::kable(ec, caption = "Eigenvector Centrality")
 ```
 
 – What is the average partial effect of increasing income?
-
-
+We compute APE as follows:
+$\beta_{logy} + \theta_{logy} \frac{1}{N} \sum_{j}^{J}   \sum_{i}^{I}  w_{ij} $
+where I is number of rows of W and J number of columns. 
+```{r}
+beta <- coef(slx_OLS(Wd))[["logy"]]
+theta <- coef(slx_OLS(Wd))[["W_logy"]]
+N <- nrow(Wd)*ncol(Wd)
+beta + theta*sum(Wd)/N
+```
+Thus, the average partial effect of increasing income of is very close to the effect of increasing income in home only. This is because using the specification of distance decay above, the links between the agents are mostly weak.
 
 
 # Exercise B
