@@ -539,8 +539,9 @@ modelvertical4 <- spml(ANY_EVENT_ACLED ~ lag(ANY_EVENT_ACLED) + SPEI4pg + L1_SPE
 
 ## Summarize and visualize the weights matrixes and briefly explain what they imply
 
-The horizontal
+The horizontal contiguity matrix means that only cells which share the same latitude are considered to be adjacent. Vertical contiguity means that only cells which share the same longitude are considered adjacent. It is hard to make a coherent case for why this should be that way in the real world. There is no inherent reason to assume that effects only propagate in one 'direction'. 
 
+The horizontal contiguity matrix has an average number of paths 
 
 ```{r}
 adj_matrix_horizontal
@@ -581,8 +582,7 @@ summarize_graph <- function(g) {
 
 summarize_graph(graph_dist)
 
-lattice::levelplot((adj_matrix_horizontal), main="Distance Threshold Spatial Weights Matrix")
 
-lattice::levelplot((adj_matrix_vertical), main="Smooth Distance-Decay Spatial Weights Matrix")
+raster::image((adj_matrix_vertical), main="Smooth Distance-Decay Spatial Weights Matrix")
 
 ```
