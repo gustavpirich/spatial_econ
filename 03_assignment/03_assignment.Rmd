@@ -3,7 +3,7 @@ title: "Spatial Economics -- Assignment 3"
 author:
   - "Gustav Pirich (h11910449)"
   - "Gabriel Konecny (h11775903)"
-date: "April 2, 2024"
+date: "May 4, 2024"
 output:
   pdf_document:
     toc: true
@@ -31,7 +31,7 @@ showtext_auto()
 pacman::p_load(spatialreg, fixest, splm, stringi, stringr, stringdist, haven, sf, dplyr, fuzzyjoin, 
                comparator, digest, zoomerjoin, ggplot2, tidyr, ggthemes, viridis, 
                fixest, conleyreg, plm, stargazer, magrittr, tidyverse, tmap, spdep, SDPDmod,
-               igraph, generics, knitr, kableExtra, formatR,readxl, haven)
+               igraph, generics, knitr, kableExtra, formatR,readxl, haven, flextable, broom)
 ```
 
 \vspace{2em}
@@ -241,7 +241,7 @@ Thus, the average partial effect of increasing income of is very close to the ef
 
 
 # Exercise B
-```{r, eval=FALSE}
+```{r, echo = FALSE}
 setwd("~/Desktop/GITHUB/spatial_econ/data/03_assignment/dataset")
 
 raster_Africa <- read_sf("~/Desktop/GITHUB/spatial_econ/data/03_assignment/dataset/raster_Africa.shp")
@@ -253,9 +253,11 @@ intersect_coord <- read_dta("~/Desktop/GITHUB/spatial_econ/data/03_assignment/da
 
 ## Unit of Observation
 ```{r, echo = FALSE}
+raster_Africa <- read_sf("~/Desktop/GITHUB/spatial_econ/data/03_assignment/dataset/raster_Africa.shp")
+
 area <- st_area(raster_Africa)
 
-raster_Africa %>%
+raster_Africa %<>%
   mutate(area = st_area(geometry))
 
 data <- data.frame(Cells = c("Min", "Mean", "Median", "Max"), Stats = c(min(area), mean(area), median(area), max(area)))
@@ -271,69 +273,307 @@ They differ because of the distortions induced by the projection of the surface 
 ## Replication
 
 ```{r}
-nblist <- poly2nb(raster_Africa, queen = TRUE)
+# preparation of dataset --------------------------------------------------
 
-nb.dist.band <- dnearneigh(raster_Africa, 0, 180)
+# exclude year 1997 to obtain same number of observations
+geoconflict_main_if <- geoconflict_main %>% 
+  filter(!year == 1997)
 
-nblist <- dnearneigh(x = st_centroid(raster_Africa), d1 = 0, d2 = 180, longlat = TRUE)
-
-nbw <- nb2listw(nblist, style = "B", zero.policy = TRUE)
-
-weightmatrix <- listw2mat(nbw)
-
-
-# Defining the binary contiguity matrix with a distance cutoff of 180km
-
-library(units)
-
-# Setting a 180 km cutoff
-dist_matrix <- st_distance(raster_Africa)
-
-distance_threshold <- set_units(180000, "m")  # 180,000 meters
-
-contiguity_matrix <- as.matrix(dist_matrix) <= distance_threshold  # distance in meters
-binary_matrix <- ifelse(contiguity_matrix, 1, 0)
-
-# Remove diagonal elements to avoid self-neighboring
-diag(binary_matrix) <- 0
-
-# Dynamic spatial panel model using maximum likelihood
-model <- spml(ANY_EVENT_ACLED ~ SPEI4pg + GSmain_ext_SPEI4pg +W_L2_GSmain_ext_SPEI4pg, 
-              data = geoconflict_main, 
-              index = c("cell", "year"), 
-              listw = nbw, 
-              model = "lag", 
-              effect = "random", 
-              method = "ML")
-summary(model)
-
-res2  <- blmpSDPD(formula = "ANY_EVENT_ACLED ~ SPEI4pg + GSmain_ext_SPEI4pg",
-                 data = geoconflict_main,
-                 W = binary_matrix,
-                 model = list("sar", "sdm", "sem", "sdem"),
-                 index = c("cell","year"),
-                 model = list("sdm"),
-                 effect = "twoways", dynamic = TRUE)
-res2
-
-# Convert DataFrame to pdata.frame for plm package
-pdata <- pdata.frame(df, index = c("id", "time"))
-
-# Create a spatial weights matrix (W)
-# For example, using queen contiguity:
-coordinates <- as.matrix(df[, c("longitude", "latitude")])
-nb <- poly2nb(coordinates, queen = TRUE)
-W <- nb2listw(nb, style = "W", zero.policy = TRUE)
+# format as factor 
+geoconflict_main_if$year <- as.factor(geoconflict_main_if$year)
+geoconflict_main_if$cell <- as.factor(geoconflict_main_if$cell)
 
 
-listw <- mat2listw(binary_matrix, style = "W", zero.policy = TRUE)
+################
+# 1st Column OLS
+
+fml1 = ANY_EVENT_ACLED ~ SPEI4pg + L1_SPEI4pg + L2_SPEI4pg + GSmain_ext_SPEI4pg + L1_GSmain_ext_SPEI4pg + L2_GSmain_ext_SPEI4pg + elevation_cell + rough_cell + area_cell + as.factor(use_primary) + 
+  dis_river_cell + as.factor(shared) +  as.factor(border) + as.factor(any_mineral) + ELF + i(country_largest_share, as.numeric(year), ref = "Zimbabwe") | as.factor(year)
+
+mod1 <- feols(fml1, 
+              data = geoconflict_main_if, 
+              panel.id = c('cell', 'year'))
+
+################
 
 
-blmpSDPD(ANY_EVENT_ACLED ~ SPEI4pg + L1_SPEI4pg + L2_SPEI4pg, index = c("cell", "year"), dynamic = TRUE, W = listw, data = geoconflict_main)
+################
+# 2nd Column OLS - missing spatially lagged linear time trends - also column 2 in the table looks like there are some coefficients/standard errors missing? 
+
+fml2 = ANY_EVENT_ACLED ~ SPEI4pg + L1_SPEI4pg + L2_SPEI4pg + GSmain_ext_SPEI4pg + L1_GSmain_ext_SPEI4pg + L2_GSmain_ext_SPEI4pg + W_L2_GSmain_ext_SPEI4pg + W_L1_GSmain_ext_SPEI4pg + W_GSmain_ext_SPEI4pg + W_SPEI4pg + W_L1_SPEI4pg + W_L2_SPEI4pg + elevation_cell + 
+  rough_cell + area_cell + as.factor(use_primary) + 
+  dis_river_cell + as.factor(shared) +  as.factor(border) + as.factor(any_mineral)+ ELF + W_elevation_cell + W_rough_cell + W_area_cell + W_ELF + as.factor(W_any_mineral) + as.factor(W_shared)  + 
+  W_dis_river_cell + as.factor(W_use_primary) + i(as.factor(country_largest_share), as.numeric(year), ref = "Zimbabwe") | as.factor(year)
+
+mod2 <- feols(fml2, 
+              data = geoconflict_main_if, 
+              panel.id = c('cell', 'year'))
+
+################
+
+etable(mod1, mod2, 
+       keep = c("SPEI4pg", "L1_SPEI4pg", "L2_SPEI4pg", "GSmain_ext_SPEI4pg", "L1_GSmain_ext_SPEI4pg", "L2_GSmain_ext_SPEI4pg", "W_SPEI4pg",  "W_L1_SPEI4pg", "W_L2_SPEI4pg", "W_GSmain_ext_SPEI4pg", "W_L1_GSmain_ext_SPEI4pg", "W_L2_GSmain_ext_SPEI4pg"), tex = TRUE)
+```
 
 
-reg6 <- lagsarlm(ANY_EVENT_ACLED ~ SPEI4pg + GSmain_ext_SPEI4pg, data = geoconflict_main, zero.policy = TRUE, weightmatrix, type="mixed")
-summary(reg6)
+```{r}
+################
+# 3rd Column  -----------------------------------------------------
 
-summary(impacts(COL.SLX))
+# generate spatial weights matrix -----------------------------------------
+geoconflict_main_weights <- geoconflict_main_if %>%
+  st_as_sf(coords = c("lat", "lon"), crs = "WGS84") %>%
+  filter(year == 2011) # could be any year
+
+# setting the distance threshold to 180 kilometers
+neighboors <- dnearneigh(st_centroid(geoconflict_main_weights), d1 = 0, d2 = 180, use_s2 = TRUE)
+
+# create binary spatial weights matrix
+listwmat <- nb2listw(neighboors, style ="B", zero.policy = TRUE)
+
+# specification 3 - we might be missing the country specific linear time trends of the neighbors 
+mod3 <- spml(ANY_EVENT_ACLED ~ lag(ANY_EVENT_ACLED) + SPEI4pg + L1_SPEI4pg + L2_SPEI4pg + GSmain_ext_SPEI4pg + L1_GSmain_ext_SPEI4pg + L2_GSmain_ext_SPEI4pg + W_GSmain_ext_SPEI4pg +
+                               W_L1_GSmain_ext_SPEI4pg + W_L2_GSmain_ext_SPEI4pg + W_SPEI4pg + W_L1_SPEI4pg + W_L2_SPEI4pg + elevation_cell + 
+                               rough_cell + area_cell + as.factor(use_primary) + dis_river_cell + as.factor(shared) +  as.factor(border) + as.factor(any_mineral) +
+                               ELF + W_elevation_cell + W_rough_cell + W_area_cell + W_ELF + as.factor(W_any_mineral) + as.factor(W_shared)  + 
+                               W_dis_river_cell + as.factor(W_use_primary) + as.factor(country_largest_share):as.numeric(year), # country specific linear time trends
+                             data = as.data.frame(geoconflict_main_if), 
+                             index=c("cell","year"),
+                             listw = listwmat,
+                             model="pooling",
+                             effect = "time",  
+                             dynamic = TRUE,
+                             spatial.error="none",
+                             zero.policy = TRUE, 
+                             lag=TRUE)
+
+################
+
+
+
+################
+# 4th column 
+
+# Preparation adding column for country x year fixed effects (country_year_fe)
+geoconflict_main_fe <- geoconflict_main_if %>% 
+  mutate(country_year_fe = paste0(country_largest_share, year))
+
+mod4 <- spml(ANY_EVENT_ACLED ~ lag(ANY_EVENT_ACLED) + SPEI4pg + L1_SPEI4pg + L2_SPEI4pg + GSmain_ext_SPEI4pg + L1_GSmain_ext_SPEI4pg + L2_GSmain_ext_SPEI4pg + W_GSmain_ext_SPEI4pg + W_L1_GSmain_ext_SPEI4pg + W_L2_GSmain_ext_SPEI4pg + W_SPEI4pg + W_L1_SPEI4pg + W_L2_SPEI4pg + elevation_cell + rough_cell + area_cell + as.factor(use_primary) + dis_river_cell + as.factor(shared) +  as.factor(border) + as.factor(any_mineral) +
+                              ELF + W_elevation_cell + W_rough_cell + W_area_cell + W_ELF + as.factor(W_any_mineral) + as.factor(W_shared)  + 
+                              W_dis_river_cell + as.factor(W_use_primary) + as.factor(country_year_fe), # country x year FE
+                             data = as.data.frame(geoconflict_main_fe), 
+                             index= c("cell","year"),
+                             listw = listwmat,
+                             model = "pooling",  # no fixed effects
+                             effect = "individual", 
+                             spatial.error="none",
+                             zero.policy = TRUE, 
+                             dynamic = TRUE,
+                             lag = TRUE, 
+                             Hess = TRUE,
+                             local=list( parallel = T)) # makes it faster
+
+summary(mod3)
+summary(mod4)
+
+```
+
+We now create a horizontal adjacency matrix based on horizontal contiguity.
+
+```{r}
+### Lets first create teh bianry contiguity matrix based on horizontal contiguity 
+# Extract centroids of the polygons if not already point data
+geoconflict_main_weights
+
+# Calculate distances and filter horizontally contiguous points
+# Define a function to find neighbors based on conditions
+find_neighbors_horizontal <- function(centroids, max_distance = 150000, lat_tolerance = 0.01) {
+  # Create a matrix to store distances
+  distances <- st_distance(centroids)
+  latitudes <- st_coordinates(centroids)[,2] # Extract latitudes
+  
+  # Initialize neighbors list
+  neighbors_list <- vector("list", nrow(centroids))
+  
+  for (i in seq_len(nrow(centroids))) {
+    # Find points within the same latitude band and within distance
+    lat_condition <- abs(latitudes - latitudes[i]) < lat_tolerance
+    dist_condition <- distances[i,] < set_units(max_distance, "meters")
+    
+    # Combine conditions
+    neighbor_ids <- which(lat_condition & dist_condition)
+    
+    # Exclude the point itself from its list of neighbors
+    neighbor_ids <- neighbor_ids[neighbor_ids != i]
+    
+    # Store neighbor ids
+    neighbors_list[[i]] <- as.integer(neighbor_ids)
+  }
+  
+  return(neighbors_list)
+}
+
+find_neighbors_vertical <- function(centroids, max_distance = 150000, lon_tolerance = 0.01) {
+  # Create a matrix to store distances
+  distances <- st_distance(centroids)
+  longitudes <- st_coordinates(centroids)[,1] # Extract longitudes
+  
+  # Initialize neighbors list
+  neighbors_list <- vector("list", nrow(centroids))
+  
+  for (i in seq_len(nrow(centroids))) {
+    # Find points within the same longitude band and within distance
+    lon_condition <- abs(longitudes - longitudes[i]) < lon_tolerance
+    dist_condition <- distances[i,] < set_units(max_distance, "meters")
+    
+    # Combine conditions
+    neighbor_ids <- which(lon_condition & dist_condition)
+    
+    # Exclude the point itself from its list of neighbors
+    neighbor_ids <- neighbor_ids[neighbor_ids != i]
+    
+    # Store neighbor ids
+    neighbors_list[[i]] <- as.integer(neighbor_ids)
+  }
+  
+  return(neighbors_list)
+}
+
+# Apply the function
+neighbors_vertical <- find_neighbors_vertical(geoconflict_main_weights)
+
+neighbors_horizontal <- find_neighbors_horizontal(geoconflict_main_weights)
+
+
+
+# Number of elements
+n <- length(neighbors_vertical)
+
+# Initialize an adjacency matrix with 0s
+adj_matrix_vertical <- matrix(0, nrow = n, ncol = n)
+adj_matrix_horizontal <- matrix(0, nrow = n, ncol = n)
+
+# Populate the adjacency matrix
+for (i in seq_len(n)) {
+  # Ensure indices are within the valid range
+  valid_indices_vertical <- neighbors_vertical[[i]][neighbors_vertical[[i]] <= n]
+  valid_indices_horizontal <- neighbors_vertical[[i]][neighbors_vertical[[i]] <= n]
+
+  # Set matrix elements to 1
+  adj_matrix_vertical[i, valid_indices_vertical] <- 1
+  adj_matrix_horizontal[i, valid_indices_horizontal] <- 1
+}
+
+# Turn the matrices into listw objects
+vertical_listw <- mat2listw(adj_matrix_vertical, style = "B", zero.policy=TRUE)
+horizontal_listw <-mat2listw(adj_matrix_horizontal, style = "B", zero.policy=TRUE)
+```
+[[677]]
+Simple feature collection with 3 features and 166 fields
+Geometry type: POINT
+We can now rerun our analysis
+```{r, echo = FALSE}
+modvertical3 <- spml(ANY_EVENT_ACLED ~ lag(ANY_EVENT_ACLED) + SPEI4pg + L1_SPEI4pg + L2_SPEI4pg + GSmain_ext_SPEI4pg + L1_GSmain_ext_SPEI4pg + L2_GSmain_ext_SPEI4pg + W_GSmain_ext_SPEI4pg + W_L1_GSmain_ext_SPEI4pg + W_L2_GSmain_ext_SPEI4pg + W_SPEI4pg + W_L1_SPEI4pg + W_L2_SPEI4pg + elevation_cell + rough_cell + area_cell + as.factor(use_primary) + dis_river_cell + as.factor(shared) +  as.factor(border) + as.factor(any_mineral) + ELF + W_elevation_cell + W_rough_cell + W_area_cell + W_ELF + as.factor(W_any_mineral) + as.factor(W_shared)  + W_dis_river_cell + as.factor(W_use_primary) + as.factor(country_largest_share):as.numeric(year), # country specific linear time trends
+                             data = as.data.frame(geoconflict_main_if), 
+                             index=c("cell","year"),
+                             listw = vertical_listw,
+                             model="pooling",
+                             effect = "time",  
+                             dynamic = TRUE,
+                             spatial.error="none",
+                             zero.policy = TRUE, 
+                             lag=TRUE,
+                             local=list( parallel = T))
+
+modelhorizontal3 <- spml(ANY_EVENT_ACLED ~ lag(ANY_EVENT_ACLED) + SPEI4pg + L1_SPEI4pg + L2_SPEI4pg + GSmain_ext_SPEI4pg + L1_GSmain_ext_SPEI4pg + L2_GSmain_ext_SPEI4pg + W_GSmain_ext_SPEI4pg + W_L1_GSmain_ext_SPEI4pg + W_L2_GSmain_ext_SPEI4pg + W_SPEI4pg + W_L1_SPEI4pg + W_L2_SPEI4pg + elevation_cell + rough_cell + area_cell + as.factor(use_primary) + dis_river_cell + as.factor(shared) +  as.factor(border) + as.factor(any_mineral) + ELF + W_elevation_cell + W_rough_cell + W_area_cell + W_ELF + as.factor(W_any_mineral) + as.factor(W_shared)  + W_dis_river_cell + as.factor(W_use_primary) + as.factor(country_largest_share):as.numeric(year), # country specific linear time trends
+                             data = as.data.frame(geoconflict_main_if), 
+                             index=c("cell","year"),
+                             listw = horizontal_listw,
+                             model="pooling",
+                             effect = "time",  
+                             dynamic = TRUE,
+                             spatial.error="none",
+                             zero.policy = TRUE, 
+                             lag=TRUE,
+                             local=list(parallel = T))
+
+modelhorizontal4 <- spml(ANY_EVENT_ACLED ~ lag(ANY_EVENT_ACLED) + SPEI4pg + L1_SPEI4pg + L2_SPEI4pg + GSmain_ext_SPEI4pg + L1_GSmain_ext_SPEI4pg + L2_GSmain_ext_SPEI4pg + W_GSmain_ext_SPEI4pg + W_L1_GSmain_ext_SPEI4pg + W_L2_GSmain_ext_SPEI4pg + W_SPEI4pg + W_L1_SPEI4pg + W_L2_SPEI4pg + elevation_cell + rough_cell + area_cell + as.factor(use_primary) + dis_river_cell + as.factor(shared) +  as.factor(border) + as.factor(any_mineral) +
+                              ELF + W_elevation_cell + W_rough_cell + W_area_cell + W_ELF + as.factor(W_any_mineral) + as.factor(W_shared)  + 
+                              W_dis_river_cell + as.factor(W_use_primary) + as.factor(country_year_fe), # country x year FE
+                             data = as.data.frame(geoconflict_main_fe), 
+                             index= c("cell","year"),
+                             listw = horizontal_listw,
+                             model = "pooling",  # no fixed effects
+                             effect = "individual", 
+                             spatial.error="none",
+                             zero.policy = TRUE, 
+                             dynamic = TRUE,
+                             lag = TRUE, 
+                             Hess = TRUE,
+                             local=list( parallel = T)) # makes it faster
+
+modelvertical4 <- spml(ANY_EVENT_ACLED ~ lag(ANY_EVENT_ACLED) + SPEI4pg + L1_SPEI4pg + L2_SPEI4pg + GSmain_ext_SPEI4pg + L1_GSmain_ext_SPEI4pg + L2_GSmain_ext_SPEI4pg + W_GSmain_ext_SPEI4pg + W_L1_GSmain_ext_SPEI4pg + W_L2_GSmain_ext_SPEI4pg + W_SPEI4pg + W_L1_SPEI4pg + W_L2_SPEI4pg + elevation_cell + rough_cell + area_cell + as.factor(use_primary) + dis_river_cell + as.factor(shared) +  as.factor(border) + as.factor(any_mineral) +
+                              ELF + W_elevation_cell + W_rough_cell + W_area_cell + W_ELF + as.factor(W_any_mineral) + as.factor(W_shared)  + 
+                              W_dis_river_cell + as.factor(W_use_primary) + as.factor(country_year_fe), # country x year FE
+                             data = as.data.frame(geoconflict_main_fe), 
+                             index= c("cell","year"),
+                             listw = vertical_listw,
+                             model = "pooling",  # no fixed effects
+                             effect = "individual", 
+                             spatial.error="none",
+                             zero.policy = TRUE, 
+                             dynamic = TRUE,
+                             lag = TRUE, 
+                             Hess = TRUE,
+                             local=list( parallel = T)) # makes it faster
+
+```
+
+
+
+
+
+
+
+
+
+## Summarize and visualize the weights matrixes and briefly explain what they imply
+```{r}
+adj_matrix_horizontal
+adj_matrix_vertical
+
+graph_dist <- graph_from_adjacency_matrix(adj_matrix_vertical, mode = "undirected")
+
+# Function to summarize graph properties and return as a data frame
+summarize_graph <- function(g) {
+  # Function to format the number based on its value
+  format_number <- function(x) {
+    if (floor(x) == x) {  # If the number is an integer
+      return(as.character(x))  # Return without decimal places
+    } else {
+      return(format(x, nsmall = 2))  # Return with two decimal places
+    }
+  }
+  
+  # Apply the format_number function to each relevant graph property
+  graph_summary <- data.frame(
+    Property = c("Number of vertices", "Number of edges", "Average path length", 
+                 "Graph density", "Average degree", "Max Eigenvector Centrality", 
+                 "Min Eigenvector Centrality", "Average Eigenvector Centrality", 
+                 "Most Central Unit (Vertex ID)"),
+    Value = sapply(c(vcount(g), ecount(g), 
+              average.path.length(g, directed = FALSE), 
+              edge_density(g), 
+              mean(degree(g)),
+              max(eigen_centrality(g)$vector),
+              min(eigen_centrality(g)$vector),
+              mean(eigen_centrality(g)$vector),
+              as.numeric(V(g)[which.max(eigen_centrality(g)$vector)])), format_number)
+  )
+  
+  return(graph_summary)
+}
+
+
+summarize_graph(graph_dist)
 ```

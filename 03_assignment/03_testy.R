@@ -252,4 +252,120 @@ dat <- panel_data((geoconflict_main_fe), id = cell, wave = year)
 
 
 
+data <- data.frame(
+  id = 1:2757,
+  latitude = st_coordinates(raster_Africa)[,"X"],  # Example exact latitudes
+  longitude = st_coordinates(raster_Africa)[,"Y"]                # Random longitudes for demonstration
+)
+
+# Convert the data frame to an sf object
+data_sf <- st_as_sf(data, coords = c("longitude", "latitude"), crs = 4326)
+
+# Function to calculate neighbors
+calculate_neighbors <- function(data_sf, max_distance_km = 180) {
+  # Create a list to store neighbors
+  neighbors_list <- vector("list", nrow(data_sf))
+  
+  # Calculate distances only for points with the exact same latitude
+  for (i in 1:nrow(data_sf)) {
+    # Filter points with the exact same latitude
+    same_lat_points <- data_sf[data_sf$latitude == data_sf$latitude[i], ]
+    
+    # Ensure there are other points with the same latitude and not including itself
+    if (nrow(same_lat_points) > 1) {
+      # Calculate distances, exclude itself by removing the current index
+      valid_points <- same_lat_points[-which(same_lat_points$id == data_sf$id[i]), ]
+      distances <- st_distance(valid_points, data_sf[i, ], by_element = TRUE)
+      
+      # Find points within the specified distance
+      neighbors <- which(distances <= max_distance_km * 1000) # converting km to meters
+      
+      # Store in list
+      neighbors_list[[i]] <- valid_points$id[neighbors]
+    } else {
+      # No neighbors found
+      neighbors_list[[i]] <- integer(0)
+    }
+  }
+  
+  return(neighbors_list)
+}
+
+# Calculate neighbors
+neighbors <- calculate_neighbors(data_sf)
+
+# Print the neighbors for the first few points
+print(neighbors[1:10])
+
+
+
+
+geodata <- geoconflict_main_weights %>% 
+  st_join(raster_Africa) %>%
+  select(cell, geometry) %>%
+  mutate(latitude = st_coordinates(geoconflict_main_weights)[,"X"]) %>%
+  mutate(longitude = st_coordinates(geoconflict_main_weights)[,"Y"]) 
+
+geodata %>%
+  mutate(neighborhoodindex = ifelse(longitude == longitude, st_distance, 0))
+
+
+
+
+# Ensure it's using a CRS with meters as units (e.g., UTM)
+# If not, you may need to transform it, here I assume WGS 84 / UTM zone appropriate for Africa
+# grid_sf <- st_transform(grid_sf, 32632) # You need to change the CRS code according to your specific region
+
+# Extract centroids of the polygons if not already point data
+centroids <- (geoconflict_main_weights)
+
+# Calculate distances and filter horizontally contiguous points
+# Define a function to find neighbors based on conditions
+find_neighbors <- function(centroids, max_distance = 150000, lat_tolerance = 0.01) {
+  # Create a matrix to store distances
+  distances <- st_distance(centroids)
+  latitudes <- st_coordinates(centroids)[,2] # Extract latitudes
+  
+  # Initialize neighbors list
+  neighbors_list <- vector("list", nrow(centroids))
+  
+  for (i in seq_len(nrow(centroids))) {
+    # Find points within the same latitude band and within distance
+    lat_condition <- abs(latitudes - latitudes[i]) < lat_tolerance
+    dist_condition <- distances[i,] < set_units(max_distance, "meters")
+    
+    # Combine conditions
+    neighbor_ids <- which(lat_condition & dist_condition)
+    
+    # Exclude the point itself from its list of neighbors
+    neighbor_ids <- neighbor_ids[neighbor_ids != i]
+    
+    # Store neighbor ids
+    neighbors_list[[i]] <- as.integer(neighbor_ids)
+  }
+  
+  return(neighbors_list)
+}
+
+# Apply the function
+neighbors <- find_neighbors(centroids_sf)
+
+
+
+# Number of elements
+n <- length(neighbors)
+
+# Initialize an adjacency matrix with 0s
+adj_matrix <- matrix(0, nrow = n, ncol = n)
+
+# Populate the adjacency matrix
+for (i in seq_len(n)) {
+  # Ensure indices are within the valid range
+  valid_indices <- neighbors[[i]][neighbors[[i]] <= n]
+  # Set matrix elements to 1
+  adj_matrix[i, valid_indices] <- 1
+}
+
+# Print the adjacency matrix
+mat2listw(adj_matrix, style = "B", zero.policy=TRUE)
 
