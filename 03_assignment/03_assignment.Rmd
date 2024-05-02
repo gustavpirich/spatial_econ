@@ -538,6 +538,10 @@ modelvertical4 <- spml(ANY_EVENT_ACLED ~ lag(ANY_EVENT_ACLED) + SPEI4pg + L1_SPE
 
 
 ## Summarize and visualize the weights matrixes and briefly explain what they imply
+
+The horizontal
+
+
 ```{r}
 adj_matrix_horizontal
 adj_matrix_vertical
@@ -576,4 +580,9 @@ summarize_graph <- function(g) {
 
 
 summarize_graph(graph_dist)
+
+lattice::levelplot((adj_matrix_horizontal), main="Distance Threshold Spatial Weights Matrix")
+
+lattice::levelplot((adj_matrix_vertical), main="Smooth Distance-Decay Spatial Weights Matrix")
+
 ```
