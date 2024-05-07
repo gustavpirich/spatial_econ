@@ -470,7 +470,9 @@ risk_cell_2_1 <- risk_cell_1_1*mod4$coefficients["lag(ANY_EVENT_ACLED)"] + risk_
 risk_cell_2_2 <- -1*mod4$coefficients["W_L2_GSmain_ext_SPEI4pg"]*mod4$coefficients["W_L2_GSmain_ext_SPEI4pg"]*sd(geoconflict_main_weights$GSmain_ext_SPEI4pg) + mod4$arcoef*risk_cell_2_1 +  mod4$arcoef*mod4$arcoef*risk_cell_2_0 + risk_cell_2_1*mod4$arcoef +risk_cell_2_0*mod4$arcoef*mod4$arcoef
 
 
-grid <- matrix(NA, nrow = 5, ncol = 5)
+grid1 <- matrix(NA, nrow = 5, ncol = 5)
+grid2 <- matrix(NA, nrow = 5, ncol = 5)
+grid3 <- matrix(NA, nrow = 5, ncol = 5)
 
 # Define the values for each cell
 risk_cell_0_0 
@@ -478,41 +480,133 @@ risk_cell_0_1
 risk_cell_0_2 
 
 # Fill the outer cells with risk_cell_0_2
-grid[, c(1, 5)] <- risk_cell_0_2
-grid[c(1, 5), ] <- risk_cell_0_2
+grid1[, c(1, 5)] <- risk_cell_0_2
+grid1[c(1, 5), ] <- risk_cell_0_2
 
 # Fill the inner cells with risk_cell_0_1
-grid[-c(1, 5), -c(1, 5)] <- risk_cell_0_1
+grid1[-c(1, 5), -c(1, 5)] <- risk_cell_0_1
 
 # Fill the central cell with risk_cell_0_0
-grid[3, 3] <- risk_cell_0_0
+grid1[3, 3] <- risk_cell_0_0
 
-# Print the grid
-print(grid)
+# Convert the data to a data frame
+df <- expand.grid(x = 1:5, y = 1:5)
+df$z <-  as.vector(grid1)   # Replace with your own values
 
-# Load required library
-library(gplots)
+# Plot the grid with ggplot2
+s1 <- ggplot(df, aes(x = x, y = y, fill = z)) +
+  geom_tile() +
+  scale_fill_gradient(low = "white", high = "red") +  # Adjust colors as needed
+  theme_void() +
+  labs(title = "Shock Growing Season SEPI for central cell at time 0")
 
-# Load required library
-library(gplots)
-library(viridis)
 
-# Create a color palette using viridis
-colors <- viridis(3)
 
-# Plot the heatmap
-heatmap((grid), col = colors, main = "Grid Visualization")
+# Define the values for each cell
+risk_cell_1_0 
+risk_cell_1_1 
+risk_cell_1_2 
 
-# Load required library
+# Fill the outer cells with risk_cell_0_2
+grid2[, c(1, 5)] <- risk_cell_1_2
+grid2[c(1, 5), ] <- risk_cell_1_2
+
+# Fill the inner cells with risk_cell_0_1
+grid2[-c(1, 5), -c(1, 5)] <- risk_cell_1_1
+
+# Fill the central cell with risk_cell_0_0
+grid2[3, 3] <- risk_cell_1_0
+
+# Convert the data to a data frame
+df <- expand.grid(x = 1:5, y = 1:5)
+df$z <- as.vector(grid2)   # Replace with your own values
+
+# Plot the grid with ggplot2
+s2 <- ggplot(df, aes(x = x, y = y, fill = z)) +
+  geom_tile() +
+  scale_fill_gradient(low = "white", high = "red") +  # Adjust colors as needed
+  theme_void() +
+  labs(title = "Standard Deviation Growing Season SEPI Shock after 1 year")
+
+
+
+# Define the values for each cell
+risk_cell_2_0 
+risk_cell_2_1 
+risk_cell_2_2 
+
+# Fill the outer cells with risk_cell_0_2
+grid3[, c(1, 5)] <- risk_cell_2_2
+grid3[c(1, 5), ] <- risk_cell_2_2
+
+# Fill the inner cells with risk_cell_0_1
+grid3[-c(1, 5), -c(1, 5)] <- risk_cell_2_1
+
+# Fill the central cell with risk_cell_0_0
+grid3[3, 3] <- risk_cell_2_0
+
+# Convert the data to a data frame
+df <- expand.grid(x = 1:5, y = 1:5)
+df$z <- as.vector(grid3)   # Replace with your own values
+
+# Plot the grid with ggplot2
+s3 <- ggplot(df, aes(x = x, y = y, fill = z)) +
+  geom_tile() +
+  scale_fill_gradient(low = "white", high = "red") +  # Adjust colors as needed
+  theme_void() +
+  labs(title = "Shock Growing Season SEPI after two years")
+
+
+
+
+
+
 library(ggplot2)
+library(gridExtra)
 
-# Convert the grid into a data frame
-# Your grid data
-grid <- matrix(c(3.741641e-05, 3.741641e-05, 3.741641e-05, 3.741641e-05, 3.741641e-05,
-                 3.741641e-05, 1.270487e-03, 1.270487e-03, 1.270487e-03, 3.741641e-05,
-                 3.741641e-05, 1.270487e-03, -1.985328e-04, 1.270487e-03, 3.741641e-05,
-                 3.741641e-05, 1.270487e-03, 1.270487e-03, 1.270487e-03, 3.741641e-05,
-                 3.741641e-05, 3.741641e-05, 3.741641e-05, 3.741641e-05, 3.741641e-05), nrow = 5, byrow = TRUE)
 
-# Visualize the grid
-image(1:5, 1:5, grid, col = heat.colors(20), xlab = "Column", ylab = "Row", main = "Grid Visualization")
+# Combine all three grids into one list
+all_grids <- list(grid1, grid2, grid3)
+
+# Calculate the overall range of values across all grids
+overall_range <- range(unlist(all_grids))
+
+# Convert data for each grid to data frames
+df1 <- expand.grid(x = 1:5, y = 1:5)
+df1$Prob <- as.vector(grid1)
+
+df2 <- expand.grid(x = 1:5, y = 1:5)
+df2$Prob <- as.vector(grid2)
+
+df3 <- expand.grid(x = 1:5, y = 1:5)
+df3$Prob <- as.vector(grid3)
+
+# Plot grids next to each other with a consistent color scale using viridis palette
+grid.arrange(
+  ggplot(df1, aes(x = x, y = y, fill = Prob)) +
+    geom_tile() +
+    scale_fill_viridis_c(option = "magma", limits = overall_range) +
+    theme_void() +
+    theme(legend.position = "none") +
+    labs(title = "SEPI Growing Season Shock at t = 0"),
+  
+  ggplot(df2, aes(x = x, y = y, fill = Prob)) +
+    geom_tile() +
+    scale_fill_viridis_c(option = "magma", limits = overall_range) +
+    theme_void() +
+    theme(legend.position = "none") +
+    labs(title = "t = 1"),
+  
+  ggplot(df3, aes(x = x, y = y, fill = Prob)) +
+    geom_tile() +
+    scale_fill_viridis_c(option = "magma", limits = overall_range) +
+    theme_void() +
+    labs(title = "t = 2", fill = "Pr(Conflict)"),
+  nrow = 1
+)
+
+
+
+
+
+

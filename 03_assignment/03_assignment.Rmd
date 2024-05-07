@@ -28,7 +28,7 @@ knitr::opts_chunk$set(warning = FALSE, message = FALSE)
 library(showtext)
 showtext_auto()
 
-pacman::p_load(spatialreg, fixest, splm, stringi, stringr, stringdist, haven, sf, dplyr, fuzzyjoin, 
+pacman::p_load(spatialreg, patchwork, gridExtra, fixest, splm, stringi, stringr, stringdist, haven, sf, dplyr, fuzzyjoin, 
                comparator, digest, zoomerjoin, ggplot2, tidyr, ggthemes, viridis, 
                fixest, conleyreg, plm, stargazer, magrittr, tidyverse, tmap, spdep, SDPDmod,
                igraph, generics, knitr, kableExtra, formatR,readxl, haven, flextable, broom, units)
@@ -663,12 +663,9 @@ More generally, the horizontal/vertical contiguity matrix implies that only cell
 Still due to the nature of dynamic multipliers in the form of the spatial autoregressive terms, even if the network appears relatively sparse and two cells are not directly linked the cells are still connected. However, the restriction of horizontal and vertical contiguity significantly restricts the dynamic propagation of the effects in this context.
 
 ```{r, echo = FALSE, eval = FALSE}
-adj_matrix_horizontal
-adj_matrix_vertical
+#graph_dist_horizontal <- graph_from_adjacency_matrix(adj_matrix_horizontal, mode = "undirected")
 
-graph_dist_horizontal <- graph_from_adjacency_matrix(adj_matrix_horizontal, mode = "undirected")
-
-graph_dist_vertical <- graph_from_adjacency_matrix(adj_matrix_vertical, mode = "undirected")
+#graph_dist_vertical <- graph_from_adjacency_matrix(adj_matrix_vertical, mode = "undirected")
 
 # Function to summarize graph properties and return as a data frame
 summarize_graph <- function(g) {
@@ -711,3 +708,131 @@ summarize_graph <- function(g) {
 #image(adj_matrix_vertical, col = c("white", "black"), main = "Adjacency Matrix")
 
 ```
+
+
+
+```{r}
+
+# COMPUTATION OF SHOCKS
+
+#first number denotes period second number denotes neighboor
+# shock in period 0 of standard deviation in growing season SEPI (without contemporanously affecting SEPI over the year)
+risk_cell_0_0 <- -1*mod4$coefficients["GSmain_ext_SPEI4pg"]*sd(geoconflict_main_weights$GSmain_ext_SPEI4pg)
+
+risk_cell_0_1 <- -1*mod4$coefficients["W_GSmain_ext_SPEI4pg"]*sd(geoconflict_main_weights$GSmain_ext_SPEI4pg) + risk_cell_0_0*mod4$arcoef 
+
+risk_cell_0_2 <- -1*mod4$coefficients["W_GSmain_ext_SPEI4pg"]*mod4$coefficients["W_GSmain_ext_SPEI4pg"]*sd(geoconflict_main_weights$GSmain_ext_SPEI4pg) + mod4$arcoef*risk_cell_0_1 + mod4$arcoef*mod4$arcoef*risk_cell_0_0
+
+
+risk_cell_1_0 <- risk_cell_0_0*mod4$coefficients["lag(ANY_EVENT_ACLED)"] + -1*mod4$coefficients["L1_GSmain_ext_SPEI4pg"]*sd(geoconflict_main_weights$GSmain_ext_SPEI4pg) 
+
+risk_cell_1_1 <- risk_cell_0_1*mod4$coefficients["lag(ANY_EVENT_ACLED)"] + -1*mod4$coefficients["W_L1_GSmain_ext_SPEI4pg"]*sd(geoconflict_main_weights$GSmain_ext_SPEI4pg) + risk_cell_1_0*mod4$arcoef 
+
+risk_cell_1_2 <- risk_cell_0_2*mod4$coefficients["lag(ANY_EVENT_ACLED)"] + -1*mod4$coefficients["W_L1_GSmain_ext_SPEI4pg"]*mod4$coefficients["W_L1_GSmain_ext_SPEI4pg"]*sd(geoconflict_main_weights$GSmain_ext_SPEI4pg) + mod4$arcoef*risk_cell_1_1 + mod4$arcoef*mod4$arcoef*risk_cell_1_0
+
+
+risk_cell_2_0 <- risk_cell_1_0*mod4$coefficients["lag(ANY_EVENT_ACLED)"] + risk_cell_0_0 * mod4$coefficients["lag(ANY_EVENT_ACLED)"] *mod4$coefficients["lag(ANY_EVENT_ACLED)"]  + -1*mod4$coefficients["L2_GSmain_ext_SPEI4pg"]*sd(geoconflict_main_weights$GSmain_ext_SPEI4pg)
+
+risk_cell_2_1 <- risk_cell_1_1*mod4$coefficients["lag(ANY_EVENT_ACLED)"] + risk_cell_0_1 * mod4$coefficients["lag(ANY_EVENT_ACLED)"] *mod4$coefficients["lag(ANY_EVENT_ACLED)"]  + -1*mod4$coefficients["W_L2_GSmain_ext_SPEI4pg"]*sd(geoconflict_main_weights$GSmain_ext_SPEI4pg) + risk_cell_2_0*mod4$arcoef 
+
+risk_cell_2_2 <- -1*mod4$coefficients["W_L2_GSmain_ext_SPEI4pg"]*mod4$coefficients["W_L2_GSmain_ext_SPEI4pg"]*sd(geoconflict_main_weights$GSmain_ext_SPEI4pg) + mod4$arcoef*risk_cell_2_1 +  mod4$arcoef*mod4$arcoef*risk_cell_2_0 + risk_cell_2_1*mod4$arcoef +risk_cell_2_0*mod4$arcoef*mod4$arcoef
+
+```
+
+```{r, echo = FALSE}
+grid1 <- matrix(NA, nrow = 5, ncol = 5)
+grid2 <- matrix(NA, nrow = 5, ncol = 5)
+grid3 <- matrix(NA, nrow = 5, ncol = 5)
+
+
+# Fill the outer cells with risk_cell_0_2
+grid1[, c(1, 5)] <- risk_cell_0_2
+grid1[c(1, 5), ] <- risk_cell_0_2
+
+# Fill the inner cells with risk_cell_0_1
+grid1[-c(1, 5), -c(1, 5)] <- risk_cell_0_1
+
+# Fill the central cell with risk_cell_0_0
+grid1[3, 3] <- risk_cell_0_0
+
+# Convert the data to a data frame
+df <- expand.grid(x = 1:5, y = 1:5)
+df$z <-  as.vector(grid1)   # Replace with your own values
+
+
+
+# Fill the outer cells with risk_cell_0_2
+grid2[, c(1, 5)] <- risk_cell_1_2
+grid2[c(1, 5), ] <- risk_cell_1_2
+
+# Fill the inner cells with risk_cell_0_1
+grid2[-c(1, 5), -c(1, 5)] <- risk_cell_1_1
+
+# Fill the central cell with risk_cell_0_0
+grid2[3, 3] <- risk_cell_1_0
+
+# Convert the data to a data frame
+df <- expand.grid(x = 1:5, y = 1:5)
+df$z <- as.vector(grid2)   # Replace with your own values
+
+
+# Fill the outer cells with risk_cell_0_2
+grid3[, c(1, 5)] <- risk_cell_2_2
+grid3[c(1, 5), ] <- risk_cell_2_2
+
+# Fill the inner cells with risk_cell_0_1
+grid3[-c(1, 5), -c(1, 5)] <- risk_cell_2_1
+
+# Fill the central cell with risk_cell_0_0
+grid3[3, 3] <- risk_cell_2_0
+
+# Convert the data to a data frame
+df <- expand.grid(x = 1:5, y = 1:5)
+df$z <- as.vector(grid3)   # Replace with your own values
+```
+
+```{r, figure.height = 3, figure.width = 2}
+# Combine all three grids into one list
+all_grids <- list(grid1, grid2, grid3)
+
+# Calculate the overall range of values across all grids
+overall_range <- range(unlist(all_grids))
+
+# Convert data for each grid to data frames
+df1 <- expand.grid(x = 1:5, y = 1:5)
+df1$Prob <- as.vector(grid1)
+
+df2 <- expand.grid(x = 1:5, y = 1:5)
+df2$Prob <- as.vector(grid2)
+
+df3 <- expand.grid(x = 1:5, y = 1:5)
+df3$Prob <- as.vector(grid3)
+
+# Create plots
+plot1 <- ggplot(df1, aes(x = x, y = y, fill = Prob)) +
+  geom_tile() +
+  scale_fill_viridis_c(option = "magma", limits = overall_range) +
+  theme_void() +
+  theme(legend.position = "none") +
+  labs(title = "SEPI Growing Season Shock at t = 0")
+
+plot2 <- ggplot(df2, aes(x = x, y = y, fill = Prob)) +
+  geom_tile() +
+  scale_fill_viridis_c(option = "magma", limits = overall_range) +
+  theme_void() +
+  theme(legend.position = "none") +
+  labs(title = "t = 1")
+
+plot3 <- ggplot(df3, aes(x = x, y = y, fill = Prob)) +
+  geom_tile() +
+  scale_fill_viridis_c(option = "magma", limits = overall_range) +
+  theme_void() +
+  labs(title = "t = 2", fill = "Pr(Conflict)")
+
+# Arrange plots with equal size
+combined_plots <- plot1 + plot2 + plot3 + plot_layout(ncol = 1, width = 0.5, guides='collect')
+
+# Display the combined plots
+combined_plots
+```
+

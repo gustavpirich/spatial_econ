@@ -369,3 +369,57 @@ for (i in seq_len(n)) {
 # Print the adjacency matrix
 mat2listw(adj_matrix, style = "B", zero.policy=TRUE)
 
+
+
+#
+
+
+
+
+
+library(ggplot2)
+library(viridis)
+library(patchwork)
+
+# Combine all three grids into one list
+all_grids <- list(grid1, grid2, grid3)
+
+# Calculate the overall range of values across all grids
+overall_range <- range(unlist(all_grids))
+
+# Convert data for each grid to data frames
+df1 <- expand.grid(x = 1:5, y = 1:5)
+df1$Prob <- as.vector(grid1)
+
+df2 <- expand.grid(x = 1:5, y = 1:5)
+df2$Prob <- as.vector(grid2)
+
+df3 <- expand.grid(x = 1:5, y = 1:5)
+df3$Prob <- as.vector(grid3)
+
+# Create plots
+plot1 <- ggplot(df1, aes(x = x, y = y, fill = Prob)) +
+  geom_tile() +
+  scale_fill_viridis_c(option = "magma", limits = overall_range) +
+  theme_void() +
+  theme(legend.position = "none") +
+  labs(title = "SEPI Growing Season Shock at t = 0")
+
+plot2 <- ggplot(df2, aes(x = x, y = y, fill = Prob)) +
+  geom_tile() +
+  scale_fill_viridis_c(option = "magma", limits = overall_range) +
+  theme_void() +
+  theme(legend.position = "none") +
+  labs(title = "t = 1")
+
+plot3 <- ggplot(df3, aes(x = x, y = y, fill = Prob)) +
+  geom_tile() +
+  scale_fill_viridis_c(option = "magma", limits = overall_range) +
+  theme_void() +
+  labs(title = "t = 2", fill = "Pr(Conflict)")
+
+# Arrange plots with equal size
+combined_plots <- plot1 + plot2 + plot3 + plot_layout(ncol = 1)
+
+# Display the combined plots
+combined_plots
