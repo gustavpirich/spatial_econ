@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.21 (TeX Live 2020) (preloaded format=pdflatex 2020.10.12)  2 MAY 2024 11:42
+This is pdfTeX, Version 3.14159265-2.6-1.40.21 (TeX Live 2020) (preloaded format=pdflatex 2020.10.12)  7 MAY 2024 14:09
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1012,24 +1012,33 @@ LaTeX Font Info:    Font shape `TS1/lato-TLF/m/n' will be
 (Font)              scaled to size 10.0pt on input line 166.
 LaTeX Font Info:    Font shape `T1/lmtt/bx/n' in size <10> not available
 (Font)              Font shape `T1/lmtt/b/n' tried instead on input line 176.
-[2] [3] [4]
+[2] [3] [4] [5]
+<03_assignment_files/figure-latex/unnamed-chunk-13-1.pdf, id=46, 326.21875pt x 
+303.1325pt>
+File: 03_assignment_files/figure-latex/unnamed-chunk-13-1.pdf Graphic file (typ
+e pdf)
+<use 03_assignment_files/figure-latex/unnamed-chunk-13-1.pdf>
+Package pdftex.def Info: 03_assignment_files/figure-latex/unnamed-chunk-13-1.pd
+f  used on input line 599.
+(pdftex.def)             Requested size: 326.22292pt x 303.13638pt.
 
-! Package inputenc Error: Unicode character γ (U+03B3)
-(inputenc)                not set up for use with LaTeX.
+Overfull \hbox (39.69815pt too wide) in paragraph at lines 598--600
+[]\T1/lato-TLF/m/n/10 Below we vi-su-al-ize the spa-tial weights ma-trix: [] 
+ []
 
-See the inputenc package documentation for explanation.
-Type  H <return>  for immediate help.
- ...                                              
-                                                  
-l.478   1/dγ
-              ij following Halleck Vega and Elhorst (2015). Use a distance 
+[6]
+! Missing $ inserted.
+<inserted text> 
+                $
+l.737 APE as follows: \$\beta
+                             \emph{\{logy\} + \theta}\{logy\} \frac{1}{N} 
 Here is how much of TeX's memory you used:
- 25698 strings out of 480608
- 449604 string characters out of 5903629
- 747277 words of memory out of 5000000
- 41051 multiletter control sequences out of 15000+600000
+ 25708 strings out of 480608
+ 449818 string characters out of 5903629
+ 748275 words of memory out of 5000000
+ 41058 multiletter control sequences out of 15000+600000
  738795 words of font info for 83 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 59i,7n,75p,812b,551s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 59i,9n,75p,812b,551s stack positions out of 5000i,500n,10000p,200000b,80000s
 
 !  ==> Fatal error occurred, no output PDF file produced!
