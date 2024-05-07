@@ -229,7 +229,7 @@ knitr::kable(ec, caption = "Eigenvector Centrality")
 
 – What is the average partial effect of increasing income?
 We compute APE as follows:
-$\beta_{logy} + \theta_{logy} \frac{1}{N} \sum_{j}^{J}   \sum_{i}^{I}  w_{ij} $
+$\beta_{logy} + \theta_{logy}\frac{1}{N}\sum_{j}^{J}\sum_{i}^{I}  w_{ij}$
 where I is number of rows of W and J number of columns. 
 ```{r}
 beta <- coef(slx_OLS(Wd))[["logy"]]
@@ -666,7 +666,7 @@ More generally, the horizontal/vertical contiguity matrix implies that only cell
 
 Still due to the nature of dynamic multipliers in the form of the spaital autoregressive terms, even if the network appears relatively sparse and two cells are not directly linked the cells are still connected. However, the restriction of horizontal and verticalcontiguity signifcantly restricts the dynamic propragation of the effects in this context.
 
-```{r, echo = FALSE}
+```{r, echo = FALSE, eval = FALSE}
 adj_matrix_horizontal
 adj_matrix_vertical
 
@@ -705,13 +705,13 @@ summarize_graph <- function(g) {
 }
 
 
-summarize_graph(graph_dist_horizontal)
-summarize_graph(graph_dist_vertical)
+#summarize_graph(graph_dist_horizontal)
+#summarize_graph(graph_dist_vertical)
 
 
-raster::image((adj_matrix_vertical), main="Smooth Distance-Decay Spatial Weights Matrix")
-plot((adj_matrix_horizontal), main="Smooth Distance-Decay Spatial Weights Matrix")
+#raster::image((adj_matrix_vertical), main="Smooth Distance-Decay Spatial Weights Matrix")
+#plot((adj_matrix_horizontal), main="Smooth Distance-Decay Spatial Weights Matrix")
 # Plot adjacency matrix
-image(adj_matrix_vertical, col = c("white", "black"), main = "Adjacency Matrix")
+#image(adj_matrix_vertical, col = c("white", "black"), main = "Adjacency Matrix")
 
 ```
