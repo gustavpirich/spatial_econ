@@ -378,4 +378,141 @@ plot_2b <- do.call(gridExtra::grid.arrange, plots)
 ggsave("Figure2b.pdf", plot_2b)
 
 
+mod3 <- readRDS("./models/mod3.rds")
 
+mod4 <- readRDS("./models/mod4.rds")
+# how can we visualize the spatial spillover effects
+listwmat <- nb2listw(neighboors, style ="B", zero.policy = TRUE)
+
+imp <- splm::impacts(mod4, listw=listwmat, time = "year")
+summary(imp, zstats=TRUE, short=TRUE)
+mod4
+
+w_sparse <- as(as_dgRMatrix_listw(lw), "CsparseMatrix")
+
+# Let's do the calculation of impacts by hand to see where they come from
+lambda <- as.numeric(mod4$arcoef)
+beta.hat <- coefficients(mod4)[-1]
+N <- nrow(geoconflict_main)
+I <- diag(N)
+ones <- as.matrix(rep(1, N))
+t_ones <- t(ones)
+w_sparse <- as(as_dgRMatrix_listw(listwmat), "CsparseMatrix")
+
+S_inv <- solve(I - lambda * w_sparse) # inverse of spatial filter
+
+
+# Using the inversion, we can build the matrix of partial derivatives dy/dx
+# Using the example of the estimated parameter for income estimate, we scale its 
+# marginal effect beta by the spatial structure given by (I-lambda W)⁻¹ (S_inv)
+S_W <-  S_inv %*% (I * beta.hat["INC"])
+
+# The direct effect is the sum of the diagonal scaled by `N`
+S_W_income_direct <- sum(diag(S_W)) / N
+S_W_income_direct
+
+# Total effects are the sum of all derivatives (`sum(S_W)`) or in matrix notation:  
+S_W_income_tot <- (t_ones %*% (S_W) %*% ones) / N
+S_W_income_tot
+
+# The indirect effect is their difference (sum of all off-diagonal elements).  
+S_W_income_indirect <- S_W_income_tot - S_W_income_direct
+S_W_income_indirect
+
+
+
+# Alternative with traces (better for large W)
+W <- as(listwmat, "CsparseMatrix")
+trMatc <- trW(W, type = "mult",
+              m = 30) # number of powers
+mod_1.sar.imp2 <- impacts(mod4, 
+                          tr = trMatc, # trace instead of listw
+                          R = 300, 
+                          Q = 30) # number of power series used for approximation
+summary(mod_1.sar.imp2, zstats = TRUE, short = TRUE)
+
+# Number of years
+T <- length(unique(geoconflict_main$year))
+
+# impacts
+sarre.mod.imp <- impacts(mod4,
+                         listw = listwmat,
+                         time = T)
+summary(sarre.mod.imp)                         
+
+
+
+
+
+
+# DERIVATION OF SHOCKS
+
+#first number denotes period second number denotes neighboor
+# shock in period 0 of standard deviation in growing season SEPI (without contemporanously affecting SEPI over the year)
+risk_cell_0_0 <- -1*mod4$coefficients["GSmain_ext_SPEI4pg"]*sd(geoconflict_main_weights$GSmain_ext_SPEI4pg)
+
+risk_cell_0_1 <- -1*mod4$coefficients["W_GSmain_ext_SPEI4pg"]*sd(geoconflict_main_weights$GSmain_ext_SPEI4pg) + risk_cell_0_0*mod4$arcoef 
+
+risk_cell_0_2 <- -1*mod4$coefficients["W_GSmain_ext_SPEI4pg"]*mod4$coefficients["W_GSmain_ext_SPEI4pg"]*sd(geoconflict_main_weights$GSmain_ext_SPEI4pg) + mod4$arcoef*risk_cell_0_1 + mod4$arcoef*mod4$arcoef*risk_cell_0_0
+
+
+risk_cell_1_0 <- risk_cell_0_0*mod4$coefficients["lag(ANY_EVENT_ACLED)"] + -1*mod4$coefficients["L1_GSmain_ext_SPEI4pg"]*sd(geoconflict_main_weights$GSmain_ext_SPEI4pg) 
+
+risk_cell_1_1 <- risk_cell_0_1*mod4$coefficients["lag(ANY_EVENT_ACLED)"] + -1*mod4$coefficients["W_L1_GSmain_ext_SPEI4pg"]*sd(geoconflict_main_weights$GSmain_ext_SPEI4pg) + risk_cell_1_0*mod4$arcoef 
+
+risk_cell_1_2 <- risk_cell_0_2*mod4$coefficients["lag(ANY_EVENT_ACLED)"] + -1*mod4$coefficients["W_L1_GSmain_ext_SPEI4pg"]*mod4$coefficients["W_L1_GSmain_ext_SPEI4pg"]*sd(geoconflict_main_weights$GSmain_ext_SPEI4pg) + mod4$arcoef*risk_cell_1_1 + mod4$arcoef*mod4$arcoef*risk_cell_1_0
+
+
+risk_cell_2_0 <- risk_cell_1_0*mod4$coefficients["lag(ANY_EVENT_ACLED)"] + risk_cell_0_0 * mod4$coefficients["lag(ANY_EVENT_ACLED)"] *mod4$coefficients["lag(ANY_EVENT_ACLED)"]  + -1*mod4$coefficients["L2_GSmain_ext_SPEI4pg"]*sd(geoconflict_main_weights$GSmain_ext_SPEI4pg)
+
+risk_cell_2_1 <- risk_cell_1_1*mod4$coefficients["lag(ANY_EVENT_ACLED)"] + risk_cell_0_1 * mod4$coefficients["lag(ANY_EVENT_ACLED)"] *mod4$coefficients["lag(ANY_EVENT_ACLED)"]  + -1*mod4$coefficients["W_L2_GSmain_ext_SPEI4pg"]*sd(geoconflict_main_weights$GSmain_ext_SPEI4pg) + risk_cell_2_0*mod4$arcoef 
+
+risk_cell_2_2 <- -1*mod4$coefficients["W_L2_GSmain_ext_SPEI4pg"]*mod4$coefficients["W_L2_GSmain_ext_SPEI4pg"]*sd(geoconflict_main_weights$GSmain_ext_SPEI4pg) + mod4$arcoef*risk_cell_2_1 +  mod4$arcoef*mod4$arcoef*risk_cell_2_0 + risk_cell_2_1*mod4$arcoef +risk_cell_2_0*mod4$arcoef*mod4$arcoef
+
+
+grid <- matrix(NA, nrow = 5, ncol = 5)
+
+# Define the values for each cell
+risk_cell_0_0 
+risk_cell_0_1 
+risk_cell_0_2 
+
+# Fill the outer cells with risk_cell_0_2
+grid[, c(1, 5)] <- risk_cell_0_2
+grid[c(1, 5), ] <- risk_cell_0_2
+
+# Fill the inner cells with risk_cell_0_1
+grid[-c(1, 5), -c(1, 5)] <- risk_cell_0_1
+
+# Fill the central cell with risk_cell_0_0
+grid[3, 3] <- risk_cell_0_0
+
+# Print the grid
+print(grid)
+
+# Load required library
+library(gplots)
+
+# Load required library
+library(gplots)
+library(viridis)
+
+# Create a color palette using viridis
+colors <- viridis(3)
+
+# Plot the heatmap
+heatmap((grid), col = colors, main = "Grid Visualization")
+
+# Load required library
+library(ggplot2)
+
+# Convert the grid into a data frame
+# Your grid data
+grid <- matrix(c(3.741641e-05, 3.741641e-05, 3.741641e-05, 3.741641e-05, 3.741641e-05,
+                 3.741641e-05, 1.270487e-03, 1.270487e-03, 1.270487e-03, 3.741641e-05,
+                 3.741641e-05, 1.270487e-03, -1.985328e-04, 1.270487e-03, 3.741641e-05,
+                 3.741641e-05, 1.270487e-03, 1.270487e-03, 1.270487e-03, 3.741641e-05,
+                 3.741641e-05, 3.741641e-05, 3.741641e-05, 3.741641e-05, 3.741641e-05), nrow = 5, byrow = TRUE)
+
+# Visualize the grid
+image(1:5, 1:5, grid, col = heat.colors(20), xlab = "Column", ylab = "Row", main = "Grid Visualization")

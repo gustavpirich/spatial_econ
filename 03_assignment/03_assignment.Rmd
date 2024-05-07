@@ -269,7 +269,7 @@ The table shows the area of the cells. The smallest cell has an area of about 97
 They differ because of the distortions induced by the projection of the surface of the earth, onto a 2 dimensional raster grid. 
 
 ## Interpretation of Coefficients
-The binary contiguity matrix is \textit{not} row normalized. This implies that the coefficients for the spatially lagged dependent and independent variables need to be interpreted as marginal changes in only \textit{one} of the neighboring cells. 
+The binary contiguity matrix is \textit{not} row normalized. This implies that the coefficients for the spatially lagged dependent and independent variables need to be interpreted as the direct impact of marginal changes in only \textit{one} of the neighboring cells. 
 
 
 ## Replication
@@ -313,8 +313,8 @@ mod2 <- feols(fml2,
 
 ################
 
-etable(mod1, mod2, 
-       keep = c("SPEI4pg", "L1_SPEI4pg", "L2_SPEI4pg", "GSmain_ext_SPEI4pg", "L1_GSmain_ext_SPEI4pg", "L2_GSmain_ext_SPEI4pg", "W_SPEI4pg",  "W_L1_SPEI4pg", "W_L2_SPEI4pg", "W_GSmain_ext_SPEI4pg", "W_L1_GSmain_ext_SPEI4pg", "W_L2_GSmain_ext_SPEI4pg"), tex = TRUE)
+etable(mod1, mod2,
+       keep = c("SPEI4pg", "L1_SPEI4pg", "L2_SPEI4pg", "GSmain_ext_SPEI4pg", "L1_GSmain_ext_SPEI4pg", "L2_GSmain_ext_SPEI4pg", "W_SPEI4pg",  "W_L1_SPEI4pg", "W_L2_SPEI4pg", "W_GSmain_ext_SPEI4pg", "W_L1_GSmain_ext_SPEI4pg", "W_L2_GSmain_ext_SPEI4pg"))
 ```
 
 ```{r, echo = FALSE}
@@ -414,9 +414,9 @@ coef_table_4 <- summary_mod4$CoefTable[selected_coefficients, ]
 ar_coef_table_4 <- summary_mod4$ARCoefTable
 
 # Print formatted regression table
-stargazer(rbind(ar_coef_table_3, coef_table_3), type = "text", align = TRUE, digits = 4, title = " Replication Model 3")
+stargazer(rbind(ar_coef_table_3, coef_table_3), align = TRUE, digits = 4, title = " Replication Model 3")
 
-stargazer(rbind(ar_coef_table_4, coef_table_4), type = "text", align = TRUE, digits = 4, title = "Replication Model 4")
+stargazer(rbind(ar_coef_table_4, coef_table_4), align = TRUE, digits = 4, title = "Replication Model 4")
 
 ```
 
@@ -623,7 +623,6 @@ ar_coef_table_4_horizontal <- tables_horizontal4[[2]]
 
 stargazer(
   rbind(ar_coef_table_3_vertical, coef_table_3_vertical), 
-  type = "text", 
   align = TRUE, 
   digits = 4, 
   title = "Model 3 Vertical"
@@ -631,7 +630,6 @@ stargazer(
 
 stargazer(
   rbind(ar_coef_table_3_horizontal, coef_table_3_horizontal), 
-  type = "text", 
   align = TRUE, 
   digits = 4, 
   title = "Model 3 Horizontal"
@@ -639,7 +637,6 @@ stargazer(
 
 stargazer(
   rbind(ar_coef_table_4_vertical, coef_table_4_vertical), 
-  type = "text", 
   align = TRUE, 
   digits = 4, 
   title = "Model 4 Vertical"
@@ -647,7 +644,6 @@ stargazer(
 
 stargazer(
   rbind(ar_coef_table_4_horizontal, coef_table_4_horizontal), 
-  type = "text", 
   align = TRUE, 
   digits = 4, 
   title = "Model 4 Horizontal"
@@ -660,11 +656,11 @@ stargazer(
 
 
 ## Summarize and visualize the weights matrixes and briefly explain what they imply
-In both the horizontal and the vertical contiguity matrix the average degree is about 1.86 and 1.9. Thus most cells have (as expected) two neighboors but some cells , at the edge, have only one neighboors. This implies that the networks are sparser and less dense than the adjacency matrix used by the authors. This is also reflected in lower 'graph density' for the horizontal and vertical contiguity matrix as compared to the baseline adjacency matrix. Visualizing the spatial weight matrices further corroborates the sparser strucutre. 
+In both the horizontal and the vertical contiguity matrix the average degree is about 1.86 and 1.9. Thus most cells have (as expected) two neighbors but some cells , at the edge, have only one neighbors. This implies that the networks are sparser and less dense than the adjacency matrix used by the authors. This is also reflected in lower 'graph density' for the horizontal and vertical contiguity matrix as compared to the baseline adjacency matrix. Visualizing the spatial weight matrices further corroborates the sparser structure 
 
 More generally, the horizontal/vertical contiguity matrix implies that only cells which share the same latitude/longitude and are directly adjacent are considered to be affecting each other directly. It is hard to make a coherent case for why this should be that way in the real world. There is no inherent reason to assume that effects only propagate in one 'direction'. 
 
-Still due to the nature of dynamic multipliers in the form of the spaital autoregressive terms, even if the network appears relatively sparse and two cells are not directly linked the cells are still connected. However, the restriction of horizontal and verticalcontiguity signifcantly restricts the dynamic propragation of the effects in this context.
+Still due to the nature of dynamic multipliers in the form of the spatial autoregressive terms, even if the network appears relatively sparse and two cells are not directly linked the cells are still connected. However, the restriction of horizontal and vertical contiguity significantly restricts the dynamic propagation of the effects in this context.
 
 ```{r, echo = FALSE, eval = FALSE}
 adj_matrix_horizontal
