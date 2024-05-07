@@ -317,11 +317,7 @@ etable(mod1, mod2,
        keep = c("SPEI4pg", "L1_SPEI4pg", "L2_SPEI4pg", "GSmain_ext_SPEI4pg", "L1_GSmain_ext_SPEI4pg", "L2_GSmain_ext_SPEI4pg", "W_SPEI4pg",  "W_L1_SPEI4pg", "W_L2_SPEI4pg", "W_GSmain_ext_SPEI4pg", "W_L1_GSmain_ext_SPEI4pg", "W_L2_GSmain_ext_SPEI4pg"), tex = TRUE)
 ```
 
-
-```{r, include = FALSE}
-################
-# 3rd Column  -----------------------------------------------------
-
+```{r, echo = FALSE}
 # generate spatial weights matrix -----------------------------------------
 geoconflict_main_weights <- geoconflict_main_if %>%
   st_as_sf(coords = c("lat", "lon"), crs = "WGS84") %>%
@@ -332,6 +328,12 @@ neighboors <- dnearneigh(st_centroid(geoconflict_main_weights), d1 = 0, d2 = 180
 
 # create binary spatial weights matrix
 listwmat <- nb2listw(neighboors, style ="B", zero.policy = TRUE)
+```
+
+
+```{r, include = FALSE, eval = FALSE}
+################
+# 3rd Column  -----------------------------------------------------
 
 # specification 3 - we might be missing the country specific linear time trends of the neighbors 
 mod3 <- spml(ANY_EVENT_ACLED ~ lag(ANY_EVENT_ACLED) + SPEI4pg + L1_SPEI4pg + L2_SPEI4pg + GSmain_ext_SPEI4pg + L1_GSmain_ext_SPEI4pg + L2_GSmain_ext_SPEI4pg + W_GSmain_ext_SPEI4pg +
@@ -511,7 +513,7 @@ horizontal_listw <-mat2listw(adj_matrix_horizontal, style = "B", zero.policy=TRU
 Simple feature collection with 3 features and 166 fields
 Geometry type: POINT
 We can now rerun our analysis
-```{r, include = FALSE}
+```{r, include = FALSE, eval = FALSE}
 modvertical3 <- spml(ANY_EVENT_ACLED ~ lag(ANY_EVENT_ACLED) + SPEI4pg + L1_SPEI4pg + L2_SPEI4pg + GSmain_ext_SPEI4pg + L1_GSmain_ext_SPEI4pg + L2_GSmain_ext_SPEI4pg + W_GSmain_ext_SPEI4pg + W_L1_GSmain_ext_SPEI4pg + W_L2_GSmain_ext_SPEI4pg + W_SPEI4pg + W_L1_SPEI4pg + W_L2_SPEI4pg + elevation_cell + rough_cell + area_cell + as.factor(use_primary) + dis_river_cell + as.factor(shared) +  as.factor(border) + as.factor(any_mineral) + ELF + W_elevation_cell + W_rough_cell + W_area_cell + W_ELF + as.factor(W_any_mineral) + as.factor(W_shared)  + W_dis_river_cell + as.factor(W_use_primary) + as.factor(country_largest_share):as.numeric(year), # country specific linear time trends
                              data = as.data.frame(geoconflict_main_if), 
                              index=c("cell","year"),
