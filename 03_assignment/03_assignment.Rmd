@@ -15,6 +15,8 @@ header-includes:
   - \usepackage{tcolorbox}
   - \usepackage[default]{lato}
   - \usepackage{rotating}
+  - \usepackage{dcolumn}
+  - \usepackage{booktabs}
 papersize: a4
 geometry: margin=2cm
 urlcolor: DarkOrchid!65!black
@@ -82,8 +84,267 @@ data_big <- cigarette_2var %>%
             fastDummies::dummy_cols(select_columns = "state") %>%
             select(c(logc, logp,logy, starts_with("year_")|starts_with("state_")))
 OLS <- lm(logc ~ ., data_big)
-OLS
+stargazer(OLS)
 ```
+\begin{table}[!htbp] \centering 
+  \caption{} 
+  \label{} 
+\begin{tabular}{@{\extracolsep{5pt}}lc} 
+\\[-1.8ex]\hline 
+\hline \\[-1.8ex] 
+ & \multicolumn{1}{c}{\textit{Dependent variable:}} \\ 
+\cline{2-2} 
+\\[-1.8ex] & logc \\ 
+\hline \\[-1.8ex] 
+ logp & $-$1.035$^{***}$ \\ 
+  & (0.042) \\ 
+  & \\ 
+ logy & 0.529$^{***}$ \\ 
+  & (0.047) \\ 
+  & \\ 
+ year\_0 & 0.194$^{***}$ \\ 
+  & (0.035) \\ 
+  & \\ 
+ year\_1 & 0.156$^{***}$ \\ 
+  & (0.033) \\ 
+  & \\ 
+ year\_2 & 0.133$^{***}$ \\ 
+  & (0.031) \\ 
+  & \\ 
+ year\_3 & 0.133$^{***}$ \\ 
+  & (0.029) \\ 
+  & \\ 
+ year\_4 & 0.121$^{***}$ \\ 
+  & (0.029) \\ 
+  & \\ 
+ year\_5 & 0.121$^{***}$ \\ 
+  & (0.027) \\ 
+  & \\ 
+ year\_6 & 0.083$^{***}$ \\ 
+  & (0.027) \\ 
+  & \\ 
+ year\_7 & 0.082$^{***}$ \\ 
+  & (0.026) \\ 
+  & \\ 
+ year\_8 & 0.104$^{***}$ \\ 
+  & (0.025) \\ 
+  & \\ 
+ year\_9 & 0.116$^{***}$ \\ 
+  & (0.023) \\ 
+  & \\ 
+ year\_10 & 0.045$^{**}$ \\ 
+  & (0.023) \\ 
+  & \\ 
+ year\_11 & 0.010 \\ 
+  & (0.026) \\ 
+  & \\ 
+ year\_12 & 0.005 \\ 
+  & (0.026) \\ 
+  & \\ 
+ year\_13 & 0.035 \\ 
+  & (0.025) \\ 
+  & \\ 
+ year\_14 & $-$0.017 \\ 
+  & (0.026) \\ 
+  & \\ 
+ year\_15 & $-$0.002 \\ 
+  & (0.024) \\ 
+  & \\ 
+ year\_16 & $-$0.079$^{***}$ \\ 
+  & (0.026) \\ 
+  & \\ 
+ year\_17 & $-$0.127$^{***}$ \\ 
+  & (0.030) \\ 
+  & \\ 
+ year\_18 & $-$0.174$^{***}$ \\ 
+  & (0.031) \\ 
+  & \\ 
+ year\_19 & $-$0.141$^{***}$ \\ 
+  & (0.030) \\ 
+  & \\ 
+ year\_20 & $-$0.068$^{***}$ \\ 
+  & (0.026) \\ 
+  & \\ 
+ year\_21 & $-$0.044$^{**}$ \\ 
+  & (0.022) \\ 
+  & \\ 
+ year\_22 & $-$0.042$^{*}$ \\ 
+  & (0.021) \\ 
+  & \\ 
+ year\_23 & $-$0.030 \\ 
+  & (0.020) \\ 
+  & \\ 
+ year\_24 & $-$0.038$^{**}$ \\ 
+  & (0.019) \\ 
+  & \\ 
+ year\_25 & $-$0.051$^{***}$ \\ 
+  & (0.018) \\ 
+  & \\ 
+ year\_26 & $-$0.058$^{***}$ \\ 
+  & (0.017) \\ 
+  & \\ 
+ year\_27 & $-$0.065$^{***}$ \\ 
+  & (0.016) \\ 
+  & \\ 
+ year\_28 & $-$0.068$^{***}$ \\ 
+  & (0.016) \\ 
+  & \\ 
+ year\_29 &  \\ 
+  &  \\ 
+  & \\ 
+ state\_1 & 0.025 \\ 
+  & (0.023) \\ 
+  & \\ 
+ state\_2 & $-$0.069$^{***}$ \\ 
+  & (0.020) \\ 
+  & \\ 
+ state\_3 & 0.095$^{***}$ \\ 
+  & (0.023) \\ 
+  & \\ 
+ state\_4 & $-$0.163$^{***}$ \\ 
+  & (0.022) \\ 
+  & \\ 
+ state\_5 & $-$0.066$^{**}$ \\ 
+  & (0.026) \\ 
+  & \\ 
+ state\_6 & 0.220$^{***}$ \\ 
+  & (0.020) \\ 
+  & \\ 
+ state\_7 & 0.050$^{**}$ \\ 
+  & (0.023) \\ 
+  & \\ 
+ state\_8 & 0.135$^{***}$ \\ 
+  & (0.021) \\ 
+  & \\ 
+ state\_9 & 0.018 \\ 
+  & (0.020) \\ 
+  & \\ 
+ state\_10 & $-$0.143$^{***}$ \\ 
+  & (0.020) \\ 
+  & \\ 
+ state\_11 & $-$0.040$^{*}$ \\ 
+  & (0.021) \\ 
+  & \\ 
+ state\_12 & 0.045$^{**}$ \\ 
+  & (0.019) \\ 
+  & \\ 
+ state\_13 & $-$0.056$^{***}$ \\ 
+  & (0.020) \\ 
+  & \\ 
+ state\_14 & $-$0.121$^{***}$ \\ 
+  & (0.020) \\ 
+  & \\ 
+ state\_15 & 0.236$^{***}$ \\ 
+  & (0.022) \\ 
+  & \\ 
+ state\_16 & 0.123$^{***}$ \\ 
+  & (0.021) \\ 
+  & \\ 
+ state\_17 & 0.162$^{***}$ \\ 
+  & (0.020) \\ 
+  & \\ 
+ state\_18 & $-$0.112$^{***}$ \\ 
+  & (0.020) \\ 
+  & \\ 
+ state\_19 & $-$0.009 \\ 
+  & (0.022) \\ 
+  & \\ 
+ state\_20 & 0.046$^{**}$ \\ 
+  & (0.020) \\ 
+  & \\ 
+ state\_21 & $-$0.039$^{*}$ \\ 
+  & (0.021) \\ 
+  & \\ 
+ state\_22 & 0.070$^{***}$ \\ 
+  & (0.026) \\ 
+  & \\ 
+ state\_23 & 0.011 \\ 
+  & (0.019) \\ 
+  & \\ 
+ state\_24 & $-$0.069$^{***}$ \\ 
+  & (0.020) \\ 
+  & \\ 
+ state\_25 & $-$0.121$^{***}$ \\ 
+  & (0.020) \\ 
+  & \\ 
+ state\_26 & 0.298$^{***}$ \\ 
+  & (0.022) \\ 
+  & \\ 
+ state\_27 & 0.497$^{***}$ \\ 
+  & (0.020) \\ 
+  & \\ 
+ state\_28 & $-$0.059$^{**}$ \\ 
+  & (0.025) \\ 
+  & \\ 
+ state\_29 & $-$0.172$^{***}$ \\ 
+  & (0.021) \\ 
+  & \\ 
+ state\_30 & $-$0.026 \\ 
+  & (0.022) \\ 
+  & \\ 
+ state\_31 & $-$0.120$^{***}$ \\ 
+  & (0.020) \\ 
+  & \\ 
+ state\_32 & $-$0.008 \\ 
+  & (0.019) \\ 
+  & \\ 
+ state\_33 & 0.057$^{***}$ \\ 
+  & (0.021) \\ 
+  & \\ 
+ state\_34 & $-$0.033$^{*}$ \\ 
+  & (0.020) \\ 
+  & \\ 
+ state\_35 & 0.121$^{***}$ \\ 
+  & (0.020) \\ 
+  & \\ 
+ state\_36 & $-$0.040$^{*}$ \\ 
+  & (0.022) \\ 
+  & \\ 
+ state\_37 & $-$0.109$^{***}$ \\ 
+  & (0.021) \\ 
+  & \\ 
+ state\_38 & 0.043$^{**}$ \\ 
+  & (0.021) \\ 
+  & \\ 
+ state\_39 & 0.002 \\ 
+  & (0.021) \\ 
+  & \\ 
+ state\_40 & $-$0.527$^{***}$ \\ 
+  & (0.021) \\ 
+  & \\ 
+ state\_41 & 0.155$^{***}$ \\ 
+  & (0.020) \\ 
+  & \\ 
+ state\_42 & $-$0.109$^{***}$ \\ 
+  & (0.020) \\ 
+  & \\ 
+ state\_43 & $-$0.171$^{***}$ \\ 
+  & (0.022) \\ 
+  & \\ 
+ state\_44 & 0.075$^{***}$ \\ 
+  & (0.023) \\ 
+  & \\ 
+ state\_45 & $-$0.058$^{***}$ \\ 
+  & (0.020) \\ 
+  & \\ 
+ state\_46 &  \\ 
+  &  \\ 
+  & \\ 
+ Constant & 2.269$^{***}$ \\ 
+  & (0.225) \\ 
+  & \\ 
+\hline \\[-1.8ex] 
+Observations & 1,380 \\ 
+R$^{2}$ & 0.895 \\ 
+Adjusted R$^{2}$ & 0.889 \\ 
+Residual Std. Error & 0.075 (df = 1303) \\ 
+F Statistic & 146.915$^{***}$ (df = 76; 1303) \\ 
+\hline 
+\hline \\[-1.8ex] 
+\textit{Note:}  & \multicolumn{1}{r}{$^{*}$p$<$0.1; $^{**}$p$<$0.05; $^{***}$p$<$0.01} \\ 
+\end{tabular} 
+\end{table} 
+
 Where the point estimates of logp and logy are numerically identical to that of plm(). Thus we can see that using plm with "within" model and "twoways" effect is the way to go.
 
 — which model would the classical specification search prefer?
@@ -274,7 +535,7 @@ The binary contiguity matrix is \textit{not} row normalized. This implies that t
 
 ## Replication
 
-```{r}
+```{r, echo = FALSE, include = FALSE}
 # preparation of dataset --------------------------------------------------
 
 # exclude year 1997 to obtain same number of observations
@@ -313,9 +574,54 @@ mod2 <- feols(fml2,
 
 ################
 
-etable(mod1, mod2,
+etable(mod1, mod2, tex = TRUE,
        keep = c("SPEI4pg", "L1_SPEI4pg", "L2_SPEI4pg", "GSmain_ext_SPEI4pg", "L1_GSmain_ext_SPEI4pg", "L2_GSmain_ext_SPEI4pg", "W_SPEI4pg",  "W_L1_SPEI4pg", "W_L2_SPEI4pg", "W_GSmain_ext_SPEI4pg", "W_L1_GSmain_ext_SPEI4pg", "W_L2_GSmain_ext_SPEI4pg"))
 ```
+\begingroup
+\centering
+\begin{tabular}{lcc}
+   \tabularnewline \midrule \midrule
+   Dependent Variable: & \multicolumn{2}{c}{ANY\_EVENT\_ACLED}\\
+   Model:                          & (1)             & (2)\\  
+   \midrule
+   \emph{Variables}\\
+   SPEI4pg                         & 0.0346$^{***}$  & 0.0101\\   
+                                   & (0.0053)        & (0.0149)\\   
+   L1\_SPEI4pg                     & 0.0026          & 0.0127\\   
+                                   & (0.0049)        & (0.0135)\\   
+   L2\_SPEI4pg                     & 0.0104$^{**}$   & -0.0096\\   
+                                   & (0.0049)        & (0.0140)\\   
+   GSmain\_ext\_SPEI4pg            & -0.0338$^{***}$ & -0.0052\\   
+                                   & (0.0088)        & (0.0158)\\   
+   L1\_GSmain\_ext\_SPEI4pg        & -0.0321$^{***}$ & -0.0429$^{***}$\\   
+                                   & (0.0081)        & (0.0158)\\   
+   L2\_GSmain\_ext\_SPEI4pg        & -0.0348$^{***}$ & -0.0239\\   
+                                   & (0.0085)        & (0.0156)\\   
+   W\_L2\_GSmain\_ext\_SPEI4pg     &                 & -0.0027\\   
+                                   &                 & (0.0026)\\   
+   W\_L1\_GSmain\_ext\_SPEI4pg     &                 & 0.0020\\   
+                                   &                 & (0.0026)\\   
+   W\_GSmain\_ext\_SPEI4pg         &                 & -0.0058$^{**}$\\   
+                                   &                 & (0.0027)\\   
+   W\_SPEI4pg                      &                 & 0.0044$^{*}$\\   
+                                   &                 & (0.0023)\\   
+   W\_L1\_SPEI4pg                  &                 & -0.0017\\   
+                                   &                 & (0.0021)\\   
+   W\_L2\_SPEI4pg                  &                 & 0.0036$^{*}$\\   
+                                   &                 & (0.0021)\\   
+   \midrule
+   \emph{Fixed-effects}\\
+   as.factor(year)                 & Yes             & Yes\\  
+   \midrule
+   \emph{Fit statistics}\\
+   Observations                    & 35,042          & 35,042\\  
+   R$^2$                           & 0.18918         & 0.19568\\  
+   Within R$^2$                    & 0.18655         & 0.19307\\  
+   \midrule \midrule
+   \multicolumn{3}{l}{\emph{Clustered (cell) standard-errors in parentheses}}\\
+   \multicolumn{3}{l}{\emph{Signif. Codes: ***: 0.01, **: 0.05, *: 0.1}}\\
+\end{tabular}
+\par\endgroup
 
 ```{r, echo = FALSE}
 # generate spatial weights matrix -----------------------------------------
@@ -414,12 +720,62 @@ coef_table_4 <- summary_mod4$CoefTable[selected_coefficients, ]
 ar_coef_table_4 <- summary_mod4$ARCoefTable
 
 # Print formatted regression table
-stargazer(rbind(ar_coef_table_3, coef_table_3), align = TRUE, digits = 4, title = " Replication Model 3")
-
-stargazer(rbind(ar_coef_table_4, coef_table_4), align = TRUE, digits = 4, title = "Replication Model 4")
-
+#stargazer(rbind(ar_coef_table_3, coef_table_3), align = TRUE, digits = 4, title = " Replication Model 3")
+#stargazer(rbind(ar_coef_table_4, coef_table_4), align = TRUE, out = "html", digits = 4, title = "Replication Model 4")
+ 
 ```
+\begin{table}[!htbp] \centering 
+  \caption{ Replication Model 3} 
+  \label{} 
+\begin{tabular}{@{\extracolsep{5pt}} D{.}{.}{-4} D{.}{.}{-4} D{.}{.}{-4} D{.}{.}{-4} D{.}{.}{-4} } 
+\\[-1.8ex]\hline 
+\hline \\[-1.8ex] 
+\multicolumn{1}{c}{} & \multicolumn{1}{c}{Estimate} & \multicolumn{1}{c}{Std. Error} & \multicolumn{1}{c}{t-value} & \multicolumn{1}{c}{Pr(\textgreater \textbar t\textbar )} \\ 
+\hline \\[-1.8ex] 
+\multicolumn{1}{c}{lambda} & 0.0458 & 0.0010 & 45.3304 & 0 \\ 
+\multicolumn{1}{c}{lag(ANY\_EVENT\_ACLED)} & 0.3373 & 0.0050 & 67.4562 & 0 \\ 
+\multicolumn{1}{c}{SPEI4pg} & -0.0017 & 0.0134 & -0.1264 & 0.8994 \\ 
+\multicolumn{1}{c}{L1\_SPEI4pg} & 0.0138 & 0.0139 & 0.9895 & 0.3224 \\ 
+\multicolumn{1}{c}{L2\_SPEI4pg} & -0.0160 & 0.0138 & -1.1537 & 0.2486 \\ 
+\multicolumn{1}{c}{GSmain\_ext\_SPEI4pg} & 0.0004 & 0.0141 & 0.0265 & 0.9789 \\ 
+\multicolumn{1}{c}{L1\_GSmain\_ext\_SPEI4pg} & -0.0469 & 0.0147 & -3.1841 & 0.0015 \\ 
+\multicolumn{1}{c}{L2\_GSmain\_ext\_SPEI4pg} & -0.0110 & 0.0148 & -0.7466 & 0.4553 \\ 
+\multicolumn{1}{c}{W\_GSmain\_ext\_SPEI4pg} & -0.0028 & 0.0024 & -1.1698 & 0.2421 \\ 
+\multicolumn{1}{c}{W\_L1\_GSmain\_ext\_SPEI4pg} & 0.0066 & 0.0025 & 2.6670 & 0.0077 \\ 
+\multicolumn{1}{c}{W\_L2\_GSmain\_ext\_SPEI4pg} & -0.0011 & 0.0025 & -0.4346 & 0.6639 \\ 
+\multicolumn{1}{c}{W\_SPEI4pg} & 0.0023 & 0.0021 & 1.1129 & 0.2658 \\ 
+\multicolumn{1}{c}{W\_L1\_SPEI4pg} & -0.0028 & 0.0021 & -1.3146 & 0.1886 \\ 
+\multicolumn{1}{c}{W\_L2\_SPEI4pg} & 0.0043 & 0.0021 & 2.0831 & 0.0372 \\ 
+\hline \\[-1.8ex] 
+\end{tabular} 
+\end{table} 
 
+
+\begin{table}[!htbp] \centering 
+  \caption{Replication Model 4} 
+  \label{} 
+\begin{tabular}{@{\extracolsep{5pt}} D{.}{.}{-4} D{.}{.}{-4} D{.}{.}{-4} D{.}{.}{-4} D{.}{.}{-4} } 
+\\[-1.8ex]\hline 
+\hline \\[-1.8ex] 
+\multicolumn{1}{c}{} & \multicolumn{1}{c}{Estimate} & \multicolumn{1}{c}{Std. Error} & \multicolumn{1}{c}{t-value} & \multicolumn{1}{c}{Pr(\textgreater \textbar t\textbar )} \\ 
+\hline \\[-1.8ex] 
+\multicolumn{1}{c}{lambda} & 0.0331 & 0.0011 & 29.7777 & 0 \\ 
+\multicolumn{1}{c}{lag(ANY\_EVENT\_ACLED)} & 0.3455 & 0.0051 & 67.3891 & 0 \\ 
+\multicolumn{1}{c}{SPEI4pg} & -0.0003 & 0.0135 & -0.0250 & 0.9800 \\ 
+\multicolumn{1}{c}{L1\_SPEI4pg} & 0.0182 & 0.0140 & 1.2950 & 0.1953 \\ 
+\multicolumn{1}{c}{L2\_SPEI4pg} & -0.0139 & 0.0139 & -0.9998 & 0.3174 \\ 
+\multicolumn{1}{c}{GSmain\_ext\_SPEI4pg} & 0.0005 & 0.0140 & 0.0389 & 0.9690 \\ 
+\multicolumn{1}{c}{L1\_GSmain\_ext\_SPEI4pg} & -0.0514 & 0.0146 & -3.5081 & 0.0005 \\ 
+\multicolumn{1}{c}{L2\_GSmain\_ext\_SPEI4pg} & -0.0050 & 0.0147 & -0.3376 & 0.7357 \\ 
+\multicolumn{1}{c}{W\_GSmain\_ext\_SPEI4pg} & -0.0035 & 0.0026 & -1.3493 & 0.1772 \\ 
+\multicolumn{1}{c}{W\_L1\_GSmain\_ext\_SPEI4pg} & 0.0071 & 0.0027 & 2.6270 & 0.0086 \\ 
+\multicolumn{1}{c}{W\_L2\_GSmain\_ext\_SPEI4pg} & -0.0017 & 0.0027 & -0.6202 & 0.5352 \\ 
+\multicolumn{1}{c}{W\_SPEI4pg} & 0.0012 & 0.0022 & 0.5311 & 0.5953 \\ 
+\multicolumn{1}{c}{W\_L1\_SPEI4pg} & -0.0018 & 0.0023 & -0.7959 & 0.4261 \\ 
+\multicolumn{1}{c}{W\_L2\_SPEI4pg} & 0.0050 & 0.0023 & 2.1728 & 0.0298 \\ 
+\hline \\[-1.8ex] 
+\end{tabular} 
+\end{table}
 Next, we create an adjacency matrix based on horizontal contiguity. To that end we write a function which takes the centroids and maximum distance for the contiguity cutoff as inputs and produces a neighboors list for each cells based on horizontal contiguity. We assign a neighboors status based on two conditions. First a cell needs to have the same latitude (or longitude in the case of vertical contiguity) and the centroid of the cell needs to be closer than a pre-specified distance cutoff. We check this condition for all cells. We then rerun specification 3 and 4 based on those contiguity matrices.  
 
 ```{r}
@@ -580,7 +936,7 @@ saveRDS(modelhorizontal4, "./models/modelhorizontal4.rds")
 ```
 
 
-```{r, echo = FALSE}
+```{r, echo = FALSE, eval = FALSE}
 modelvertical3 <- readRDS("./models/modvertical3.rds")
 
 modelhorizontal3 <- readRDS("./models/modelhorizontal3.rds")
@@ -651,9 +1007,109 @@ stargazer(
 ```
 
 
+\begin{table}[!htbp] \centering 
+  \caption{Model 3 Vertical} 
+  \label{} 
+\begin{tabular}{@{\extracolsep{5pt}} D{.}{.}{-4} D{.}{.}{-4} D{.}{.}{-4} D{.}{.}{-4} D{.}{.}{-4} } 
+\\[-1.8ex]\hline 
+\hline \\[-1.8ex] 
+\multicolumn{1}{c}{} & \multicolumn{1}{c}{Estimate} & \multicolumn{1}{c}{Std. Error} & \multicolumn{1}{c}{t-value} & \multicolumn{1}{c}{Pr(\textgreater \textbar t\textbar )} \\ 
+\hline \\[-1.8ex] 
+\multicolumn{1}{c}{lambda} & 0.0798 & 0.0026 & 30.6366 & 0 \\ 
+\multicolumn{1}{c}{lag(ANY\_EVENT\_ACLED)} & 0.3626 & 0.0051 & 71.2501 & 0 \\ 
+\multicolumn{1}{c}{SPEI4pg} & 0.0001 & 0.0136 & 0.0090 & 0.9928 \\ 
+\multicolumn{1}{c}{L1\_SPEI4pg} & 0.0161 & 0.0142 & 1.1361 & 0.2559 \\ 
+\multicolumn{1}{c}{L2\_SPEI4pg} & -0.0143 & 0.0141 & -1.0190 & 0.3082 \\ 
+\multicolumn{1}{c}{GSmain\_ext\_SPEI4pg} & -0.0026 & 0.0144 & -0.1787 & 0.8582 \\ 
+\multicolumn{1}{c}{L1\_GSmain\_ext\_SPEI4pg} & -0.0434 & 0.0150 & -2.8930 & 0.0038 \\ 
+\multicolumn{1}{c}{L2\_GSmain\_ext\_SPEI4pg} & -0.0088 & 0.0150 & -0.5852 & 0.5584 \\ 
+\multicolumn{1}{c}{W\_GSmain\_ext\_SPEI4pg} & -0.0036 & 0.0024 & -1.4839 & 0.1378 \\ 
+\multicolumn{1}{c}{W\_L1\_GSmain\_ext\_SPEI4pg} & 0.0054 & 0.0025 & 2.1523 & 0.0314 \\ 
+\multicolumn{1}{c}{W\_L2\_GSmain\_ext\_SPEI4pg} & -0.0024 & 0.0025 & -0.9317 & 0.3515 \\ 
+\multicolumn{1}{c}{W\_SPEI4pg} & 0.0029 & 0.0021 & 1.3755 & 0.1690 \\ 
+\multicolumn{1}{c}{W\_L1\_SPEI4pg} & -0.0029 & 0.0021 & -1.3469 & 0.1780 \\ 
+\multicolumn{1}{c}{W\_L2\_SPEI4pg} & 0.0047 & 0.0021 & 2.2169 & 0.0266 \\ 
+\hline \\[-1.8ex] 
+\end{tabular} 
+\end{table} 
 
+\begin{table}[!htbp] \centering 
+  \caption{Model 3 Horizontal} 
+  \label{} 
+\begin{tabular}{@{\extracolsep{5pt}} D{.}{.}{-4} D{.}{.}{-4} D{.}{.}{-4} D{.}{.}{-4} D{.}{.}{-4} } 
+\\[-1.8ex]\hline 
+\hline \\[-1.8ex] 
+\multicolumn{1}{c}{} & \multicolumn{1}{c}{Estimate} & \multicolumn{1}{c}{Std. Error} & \multicolumn{1}{c}{t-value} & \multicolumn{1}{c}{Pr(\textgreater \textbar t\textbar )} \\ 
+\hline \\[-1.8ex] 
+\multicolumn{1}{c}{lambda} & 0.0691 & 0.0026 & 26.3343 & 0 \\ 
+\multicolumn{1}{c}{lag(ANY\_EVENT\_ACLED)} & 0.3671 & 0.0051 & 71.7848 & 0 \\ 
+\multicolumn{1}{c}{SPEI4pg} & -0.0016 & 0.0137 & -0.1169 & 0.9069 \\ 
+\multicolumn{1}{c}{L1\_SPEI4pg} & 0.0140 & 0.0142 & 0.9831 & 0.3256 \\ 
+\multicolumn{1}{c}{L2\_SPEI4pg} & -0.0163 & 0.0141 & -1.1555 & 0.2479 \\ 
+\multicolumn{1}{c}{GSmain\_ext\_SPEI4pg} & -0.0018 & 0.0144 & -0.1273 & 0.8987 \\ 
+\multicolumn{1}{c}{L1\_GSmain\_ext\_SPEI4pg} & -0.0445 & 0.0151 & -2.9475 & 0.0032 \\ 
+\multicolumn{1}{c}{L2\_GSmain\_ext\_SPEI4pg} & -0.0100 & 0.0151 & -0.6604 & 0.5090 \\ 
+\multicolumn{1}{c}{W\_GSmain\_ext\_SPEI4pg} & -0.0040 & 0.0024 & -1.6469 & 0.0996 \\ 
+\multicolumn{1}{c}{W\_L1\_GSmain\_ext\_SPEI4pg} & 0.0055 & 0.0025 & 2.1464 & 0.0318 \\ 
+\multicolumn{1}{c}{W\_L2\_GSmain\_ext\_SPEI4pg} & -0.0025 & 0.0025 & -0.9798 & 0.3272 \\ 
+\multicolumn{1}{c}{W\_SPEI4pg} & 0.0033 & 0.0021 & 1.5491 & 0.1213 \\ 
+\multicolumn{1}{c}{W\_L1\_SPEI4pg} & -0.0026 & 0.0022 & -1.1871 & 0.2352 \\ 
+\multicolumn{1}{c}{W\_L2\_SPEI4pg} & 0.0051 & 0.0021 & 2.4010 & 0.0164 \\ 
+\hline \\[-1.8ex] 
+\end{tabular} 
+\end{table} 
 
+\begin{table}[!htbp] \centering 
+  \caption{Model 4 Vertical} 
+  \label{} 
+\begin{tabular}{@{\extracolsep{5pt}} D{.}{.}{-4} D{.}{.}{-4} D{.}{.}{-4} D{.}{.}{-4} D{.}{.}{-4} } 
+\\[-1.8ex]\hline 
+\hline \\[-1.8ex] 
+\multicolumn{1}{c}{} & \multicolumn{1}{c}{Estimate} & \multicolumn{1}{c}{Std. Error} & \multicolumn{1}{c}{t-value} & \multicolumn{1}{c}{Pr(\textgreater \textbar t\textbar )} \\ 
+\hline \\[-1.8ex] 
+\multicolumn{1}{c}{lambda} & 0.0556 & 0.0027 & 20.8863 & 0 \\ 
+\multicolumn{1}{c}{lag(ANY\_EVENT\_ACLED)} & 0.3600 & 0.0052 & 69.6567 & 0 \\ 
+\multicolumn{1}{c}{SPEI4pg} & 0.0007 & 0.0136 & 0.0483 & 0.9615 \\ 
+\multicolumn{1}{c}{L1\_SPEI4pg} & 0.0207 & 0.0142 & 1.4605 & 0.1442 \\ 
+\multicolumn{1}{c}{L2\_SPEI4pg} & -0.0124 & 0.0141 & -0.8858 & 0.3757 \\ 
+\multicolumn{1}{c}{GSmain\_ext\_SPEI4pg} & -0.0017 & 0.0141 & -0.1203 & 0.9043 \\ 
+\multicolumn{1}{c}{L1\_GSmain\_ext\_SPEI4pg} & -0.0491 & 0.0148 & -3.3294 & 0.0009 \\ 
+\multicolumn{1}{c}{L2\_GSmain\_ext\_SPEI4pg} & -0.0030 & 0.0148 & -0.2062 & 0.8367 \\ 
+\multicolumn{1}{c}{W\_GSmain\_ext\_SPEI4pg} & -0.0040 & 0.0026 & -1.5338 & 0.1251 \\ 
+\multicolumn{1}{c}{W\_L1\_GSmain\_ext\_SPEI4pg} & 0.0061 & 0.0027 & 2.2547 & 0.0242 \\ 
+\multicolumn{1}{c}{W\_L2\_GSmain\_ext\_SPEI4pg} & -0.0023 & 0.0027 & -0.8601 & 0.3897 \\ 
+\multicolumn{1}{c}{W\_SPEI4pg} & 0.0016 & 0.0022 & 0.7318 & 0.4643 \\ 
+\multicolumn{1}{c}{W\_L1\_SPEI4pg} & -0.0018 & 0.0023 & -0.7941 & 0.4272 \\ 
+\multicolumn{1}{c}{W\_L2\_SPEI4pg} & 0.0051 & 0.0023 & 2.2191 & 0.0265 \\ 
+\hline \\[-1.8ex] 
+\end{tabular} 
+\end{table} 
 
+\begin{table}[!htbp] \centering 
+  \caption{Model 4 Horizontal} 
+  \label{} 
+\begin{tabular}{@{\extracolsep{5pt}} D{.}{.}{-4} D{.}{.}{-4} D{.}{.}{-4} D{.}{.}{-4} D{.}{.}{-4} } 
+\\[-1.8ex]\hline 
+\hline \\[-1.8ex] 
+\multicolumn{1}{c}{} & \multicolumn{1}{c}{Estimate} & \multicolumn{1}{c}{Std. Error} & \multicolumn{1}{c}{t-value} & \multicolumn{1}{c}{Pr(\textgreater \textbar t\textbar )} \\ 
+\hline \\[-1.8ex] 
+\multicolumn{1}{c}{lambda} & 0.0447 & 0.0026 & 16.9036 & 0 \\ 
+\multicolumn{1}{c}{lag(ANY\_EVENT\_ACLED)} & 0.3637 & 0.0052 & 70.1381 & 0 \\ 
+\multicolumn{1}{c}{SPEI4pg} & -0.0003 & 0.0137 & -0.0245 & 0.9805 \\ 
+\multicolumn{1}{c}{L1\_SPEI4pg} & 0.0192 & 0.0142 & 1.3520 & 0.1764 \\ 
+\multicolumn{1}{c}{L2\_SPEI4pg} & -0.0138 & 0.0141 & -0.9777 & 0.3282 \\ 
+\multicolumn{1}{c}{GSmain\_ext\_SPEI4pg} & -0.0012 & 0.0142 & -0.0840 & 0.9330 \\ 
+\multicolumn{1}{c}{L1\_GSmain\_ext\_SPEI4pg} & -0.0500 & 0.0148 & -3.3747 & 0.0007 \\ 
+\multicolumn{1}{c}{L2\_GSmain\_ext\_SPEI4pg} & -0.0037 & 0.0148 & -0.2463 & 0.8055 \\ 
+\multicolumn{1}{c}{W\_GSmain\_ext\_SPEI4pg} & -0.0044 & 0.0026 & -1.6667 & 0.0956 \\ 
+\multicolumn{1}{c}{W\_L1\_GSmain\_ext\_SPEI4pg} & 0.0060 & 0.0027 & 2.2128 & 0.0269 \\ 
+\multicolumn{1}{c}{W\_L2\_GSmain\_ext\_SPEI4pg} & -0.0025 & 0.0027 & -0.9132 & 0.3612 \\ 
+\multicolumn{1}{c}{W\_SPEI4pg} & 0.0018 & 0.0022 & 0.8090 & 0.4185 \\ 
+\multicolumn{1}{c}{W\_L1\_SPEI4pg} & -0.0015 & 0.0023 & -0.6483 & 0.5168 \\ 
+\multicolumn{1}{c}{W\_L2\_SPEI4pg} & 0.0055 & 0.0023 & 2.3686 & 0.0179 \\ 
+\hline \\[-1.8ex] 
+\end{tabular} 
+\end{table} 
 
 ## Summarize and visualize the weights matrixes and briefly explain what they imply
 In both the horizontal and the vertical contiguity matrix the average degree is about 1.86 and 1.9. Thus most cells have (as expected) two neighbors but some cells , at the edge, have only one neighbors. This implies that the networks are sparser and less dense than the adjacency matrix used by the authors. This is also reflected in lower 'graph density' for the horizontal and vertical contiguity matrix as compared to the baseline adjacency matrix. Visualizing the spatial weight matrices further corroborates the sparser structure 
@@ -709,6 +1165,7 @@ summarize_graph <- function(g) {
 
 ```
 
+## Summarize and visualize the weights matrixes and briefly explain what they imply
 
 
 ```{r}
