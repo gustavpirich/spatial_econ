@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.21 (TeX Live 2020) (preloaded format=pdflatex 2020.10.12)  7 MAY 2024 22:21
+This is pdfTeX, Version 3.14159265-2.6-1.40.21 (TeX Live 2020) (preloaded format=pdflatex 2020.10.12)  7 MAY 2024 22:34
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1037,73 +1037,62 @@ LaTeX Font Info:    Font shape `TS1/lato-TLF/m/n' will be
 LaTeX Font Info:    Font shape `T1/lmtt/bx/n' in size <10> not available
 (Font)              Font shape `T1/lmtt/b/n' tried instead on input line 178.
 
-Overfull \hbox (120.05138pt too wide) in paragraph at lines 229--229
-[]\T1/lmtt/m/n/10 ## % Table created by stargazer v.5.2.3 by Marek Hlavac, Soci
-al Policy Institute. E-mail: marek.hlavac at gmail.com[] 
- []
+LaTeX Warning: Float too large for page by 2250.75949pt on input line 483.
 
 [2] [3] [4] [5] [6]
-
-LaTeX Warning: Float too large for page by 2250.75949pt on input line 748.
-
-[7] [8] [9] [10]
-<03_assignment_files/figure-latex/unnamed-chunk-13-1.pdf, id=83, 326.21875pt x 
+<03_assignment_files/figure-latex/unnamed-chunk-13-1.pdf, id=66, 326.21875pt x 
 303.1325pt>
 File: 03_assignment_files/figure-latex/unnamed-chunk-13-1.pdf Graphic file (typ
 e pdf)
 <use 03_assignment_files/figure-latex/unnamed-chunk-13-1.pdf>
 Package pdftex.def Info: 03_assignment_files/figure-latex/unnamed-chunk-13-1.pd
-f  used on input line 1088.
+f  used on input line 823.
 (pdftex.def)             Requested size: 326.22292pt x 303.13638pt.
 
-Overfull \hbox (39.69815pt too wide) in paragraph at lines 1087--1089
+Overfull \hbox (39.69815pt too wide) in paragraph at lines 822--824
 []\T1/lato-TLF/m/n/10 Below we vi-su-al-ize the spa-tial weights ma-trix: [] 
  []
 
-[11]
+[7 <./03_assignment_files/figure-latex/unnamed-chunk-13-1.pdf>]
 LaTeX Font Info:    Font shape `T1/lato-TLF/b/n' will be
-(Font)              scaled to size 12.0pt on input line 1252.
-[12 <./03_assignment_files/figure-latex/unnamed-chunk-13-1.pdf>] [13] [14] [15]
+(Font)              scaled to size 12.0pt on input line 987.
+[8] [9] [10]
 
 LaTeX Font Warning: Font shape `T1/lmtt/bx/it' in size <10> not available
-(Font)              Font shape `T1/lmtt/b/sl' tried instead on input line 1401.
+(Font)              Font shape `T1/lmtt/b/sl' tried instead on input line 1136.
 
 
 
-Underfull \vbox (badness 10000) detected at line 1489
+Underfull \vbox (badness 10000) detected at line 1224
  []
 
-[16] [17] [18]
-Overfull \vbox (1.03943pt too high) detected at line 1675
+[11] [12] [13]
+Overfull \vbox (1.03943pt too high) detected at line 1421
  []
 
-[19]
-Underfull \vbox (badness 10000) detected at line 1711
- []
-
-[20]
-<03_assignment_files/figure-latex/unnamed-chunk-29-1.pdf, id=146, 458.71375pt x
+[14]
+<03_assignment_files/figure-latex/unnamed-chunk-29-1.pdf, id=121, 458.71375pt x
  306.14375pt>
 File: 03_assignment_files/figure-latex/unnamed-chunk-29-1.pdf Graphic file (typ
 e pdf)
 <use 03_assignment_files/figure-latex/unnamed-chunk-29-1.pdf>
 Package pdftex.def Info: 03_assignment_files/figure-latex/unnamed-chunk-29-1.pd
-f  used on input line 1713.
+f  used on input line 1423.
 (pdftex.def)             Requested size: 458.73363pt x 306.157pt.
-[21 <./03_assignment_files/figure-latex/unnamed-chunk-29-1.pdf>]
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 1715.
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 1715.
+[15] [16 <./03_assignment_files/figure-latex/unnamed-chunk-29-1.pdf>]
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 1425.
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 1425.
 (./03_assignment.aux)
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 1715.
-Package atveryend Info: Empty hook `AtEndAfterFileList' on input line 1715.
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 1425.
+Package atveryend Info: Empty hook `AtEndAfterFileList' on input line 1425.
 
 LaTeX Warning: There were multiply-defined labels.
 
  ) 
 Here is how much of TeX's memory you used:
- 25796 strings out of 480608
- 451489 string characters out of 5903629
- 786186 words of memory out of 5000000
+ 25791 strings out of 480608
+ 451358 string characters out of 5903629
+ 786187 words of memory out of 5000000
  41098 multiletter control sequences out of 15000+600000
  783641 words of font info for 88 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
@@ -1112,8 +1101,8 @@ Here is how much of TeX's memory you used:
 texlive/2020/texmf-dist/fonts/enc/dvips/lm/lm-mathex.enc}{/usr/local/texlive/20
 20/texmf-dist/fonts/enc/dvips/lm/lm-mathit.enc}{/usr/local/texlive/2020/texmf-d
 ist/fonts/enc/dvips/lm/lm-rm.enc}{/usr/local/texlive/2020/texmf-dist/fonts/enc/
-dvips/lm/lm-mathsy.enc}{/usr/local/texlive/2020/texmf-dist/fonts/enc/dvips/lm/l
-m-ts1.enc}{/usr/local/texlive/2020/texmf-dist/fonts/enc/dvips/lato/a_rt66h3.enc
+dvips/lm/lm-ts1.enc}{/usr/local/texlive/2020/texmf-dist/fonts/enc/dvips/lm/lm-m
+athsy.enc}{/usr/local/texlive/2020/texmf-dist/fonts/enc/dvips/lato/a_rt66h3.enc
 }{/usr/local/texlive/2020/texmf-dist/fonts/enc/dvips/lato/a_cl4kdn.enc}</usr/lo
 cal/texlive/2020/texmf-dist/fonts/type1/typoland/lato/Lato-Bold.pfb></usr/local
 /texlive/2020/texmf-dist/fonts/type1/typoland/lato/Lato-Italic.pfb></usr/local/
@@ -1129,10 +1118,10 @@ cal/texlive/2020/texmf-dist/fonts/type1/public/lm/lmsy7.pfb></usr/local/texlive
 f-dist/fonts/type1/public/lm/lmtko10.pfb></usr/local/texlive/2020/texmf-dist/fo
 nts/type1/public/lm/lmtt10.pfb></usr/local/texlive/2020/texmf-dist/fonts/type1/
 public/lm/lmtti10.pfb>
-Output written on 03_assignment.pdf (21 pages, 811663 bytes).
+Output written on 03_assignment.pdf (16 pages, 807089 bytes).
 PDF statistics:
- 252 PDF objects out of 1000 (max. 8388607)
- 204 compressed objects within 3 object streams
- 45 named destinations out of 1000 (max. 500000)
+ 229 PDF objects out of 1000 (max. 8388607)
+ 187 compressed objects within 2 object streams
+ 40 named destinations out of 1000 (max. 500000)
  6223 words of extra memory for PDF output out of 10000 (max. 10000000)
 

@@ -84,7 +84,7 @@ data_big <- cigarette_2var %>%
             fastDummies::dummy_cols(select_columns = "state") %>%
             select(c(logc, logp,logy, starts_with("year_")|starts_with("state_")))
 OLS <- lm(logc ~ ., data_big)
-stargazer(OLS)
+
 ```
 \begin{table}[!htbp] \centering 
   \caption{} 
@@ -1165,9 +1165,9 @@ summarize_graph <- function(g) {
 
 ```
 
-## Summarize and visualize the weights matrixes and briefly explain what they imply
+## Visualization of Spillover Effects
 
-
+For this exercise we simulate the effect of a one-standard deviation SEPI growing season shock. We multiply the shock times -1 to obtain the negative impact and conversely the increase in conflict incidence. We exogenously shock a cell and calculate 'manually' based on the coefficients of model 4 the magnitude of the shock propagation. We take into account both the dynamic, and spatial autoregressive structure. We see that the shock reaches its peak size at t = 1, consistent with the main message of the paper. A negative one standard deviation growing season shock increases conflict incidence by about 2 percentage points. Overall the spillover effects both in absolute magnitude and visually as reflected in the figure are rather small. 
 ```{r}
 
 # COMPUTATION OF SHOCKS
@@ -1248,7 +1248,7 @@ df <- expand.grid(x = 1:5, y = 1:5)
 df$z <- as.vector(grid3)   # Replace with your own values
 ```
 
-```{r, figure.height = 3, figure.width = 2}
+```{r, figure.height = 3, figure.width = 2, echo = FALSE}
 # Combine all three grids into one list
 all_grids <- list(grid1, grid2, grid3)
 
