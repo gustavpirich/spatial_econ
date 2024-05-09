@@ -23,7 +23,7 @@ urlcolor: DarkOrchid!65!black
 ---
 
 
-```{r, setup, include = FALSE}
+```{r, setup, echo = FALSE, warning = FALSE, results = 'hide'}
 knitr::opts_knit$set(root.dir = rprojroot::find_rstudio_root_file())
 knitr::opts_chunk$set(tidy.opts = list(width.cutoff = 80), tidy = TRUE)
 knitr::opts_chunk$set(warning = FALSE, message = FALSE) 
@@ -46,7 +46,7 @@ pacman::p_load(spatialreg, bsreg, patchwork, gridExtra, fixest, splm, stringi, s
 
 
 # Exercise A
-```{r, inlcude=FALSE}
+```{r, echo = FALSE, results='hide'}
 cigar_states <- st_read(file.path("data","cigarettes","cigar_states.xls"))
 cigarette_2var <- readxl::read_excel(file.path("data","cigarettes","cigarette+2var.xls")) %>%
                         relocate(state, .before=year) 
@@ -60,6 +60,8 @@ W_vega <- as.matrix(readxl::read_excel(file.path("data","cigarettes","W_vega.xls
 W.adj <- as.matrix(readxl::read_excel(file.path("data","cigarettes","Spat-Sym-US.xls"), col_names=FALSE), dimnames=FALSE)
 # <- nb2listw(W.adj,style="W")
 
+usalw <- mat2listw(usaww, style="W")
+
 scale <- function(x){
   x/sum(x)
 }
@@ -70,14 +72,26 @@ lW <- mat2listw(W, style="W")
 
 ## Estimate the demand model, and test for spatial dependence using the procedures discussed in class, and the provided weights matrix. Suppress any theoretical considerations
  
+## Stage 1
 The demand model without spatial effects can by estimated by using the package plm:
 ```{r, results = "asis", echo = FALSE}
 model1 <- plm(logc~logp+logy, data=data, model="within", effect="twoways")
 stargazer(model1, type = "latex", header=FALSE, add.lines = list(c("State FE", "X"), c("Year FE", "X")), title = "")
+
+data_big <- cigarette_2var %>%
+            fastDummies::dummy_cols(select_columns = "year") %>%
+            fastDummies::dummy_cols(select_columns = "state") %>%
+            select(c(logc, logp,logy, starts_with("year_")|starts_with("state_")))
+OLS <- lm(logc ~ ., data_big)
+
 ```
 The demand for cigarettes depends negatively on the price of the cigarettes and positively on the real disposable income. 
 
-Alternatively, this could be also done by hand by including the dummies for both fixed effects.
+We now test for spatial autocorrelation. Global Moran's I is highly statistically significant, presenting evidence that there is indeed spatial autocorrelation in the residuals.    
+```{r, echo = FALSE}
+lm.morantest(OLS, mat2listw(W_, style = "W"))
+```
+
 ```{r, include = FALSE, eval = FALSE}
 data_big <- cigarette_2var %>%
             fastDummies::dummy_cols(select_columns = "year") %>%
@@ -103,10 +117,10 @@ coefficients_with_stars <- paste0(variable_names, ": ", round(coefficients, 6),
 # Print the coefficients with stars
 print(coefficients_with_stars)
 ```
-## which model would the classical specification search prefer?
+## STAGE 2
 
-We run all tests including individual and time fixed effects:
-```{r}
+We now run the testing procedures as we learnt in class; 
+```{r, echo = FALSE}
 fm1 <- logc ~ logp + logy
 ```
 
@@ -124,24 +138,18 @@ slmtest(fm1, data=data, listw=lW, test="rlml", model="within", effect="twoways")
 # Spatial error allowing for spatial lag?
 slmtest(fm1, data=data, listw=lW, test="rlme", model="within", effect="twoways")
 ```
-
-Allowing for spatial error, the spatial lag dependence is not significant. Thus this classical specification search suggests estimating the SEM model. 
+The first two tests present evidence for the presence of spatial error dependence and spatial lag dependence. However, once we run the robust versions of the test, we find that there is no evidence for a spatial lag dependence. Thus according to the classical specification search procedure, we should estimate a \textbf{SEM model}. 
 
 ## Estimate the model implied by the specification search and contrast the effect estimates with a SLX model specification:
 
-Using the spml function, we can estimate SEM model by setting the spatial lag of dependent variable to false (lag=FALSE):
+Let us proceed by using the spml function. We can estimate the SEM model by setting the spatial lag of dependent variable to false (lag=FALSE):
 ```{r, echo=FALSE}
 data <- data.frame(data)
 sem <- spml(fm1, data, listw=lW, lag=FALSE, spatial.error = "b", 
                     model="within", effect="twoways") 
 ```
 
-```{r, eval=F,include=F}
-# # `effects()` extracts the individual FE, which are not visible in the `summary()`  
-# eff <- effects(sem)
-```
-
-SLX model can be estimated by using OLS, i.e. by using plm() function from before where we include the spatially lagged values of explanatory variables:
+The SLX model can be estimated by using OLS, i.e. by using plm() function from before where we include the spatially lagged values of the explanatory variables:
 ```{r}
 
 slx_OLS <- function(W){
@@ -155,7 +163,7 @@ return((slx))
 
 ```
 
-Now, to compare both:
+Now, to compare both lets look at the regression outputs: 
 ```{r, echo = FALSE}
 summary(sem)
 ```
@@ -164,11 +172,11 @@ summary(sem)
 stargazer(slx_OLS(W), type = "latex", header = FALSE, title = "SLX Model")
 ```
 
-The coefficient estimates above correspond to those reported in table 2 of Vega and Elhorst 2015. Both the SEM and SLX suggest on average a decrease in domestic demand for cigarettes of around 1% following an increase in domestic prices by 1%, ceteris paribus. Similarly both models suggest an increase in demand for cigarettes given an increase in domestic income. SLX coefficient estimate for this is higher. Additionally SLX model provides effects of lagged independ variables of cigarette demand. The SEM model does not provide any additional meaningful parameters since its parameter for spatial autocorrelation of errors is a nuisance parameter.
+The coefficient estimates above correspond to those reported in table 2 of Vega and Elhorst (2015). Both the SEM and SLX suggest, on average, a decrease in domestic demand for cigarettes of around 1% following an increase in domestic prices by 1%, ceteris paribus. Similarly both models suggest an increase in demand for cigarettes given an increase in domestic income. The SLX coefficient estimate for this is higher. Additionally, the SLX model provides effects of lagged independent variables of cigarette demand. The SEM model does not provide any additional meaningful parameters since its parameter for spatial autocorrelation of errors is a \textit{nuisance parameter}.
 
 ## What could be the rationale to use the SLX model as opposed to other spatial specifications?
 
-The choice of the model should be based on theory. If we expect spillovers of exogenous variables and spillovers of endogenous variables or correlation of error terms is expected to be less pronounced or absent, it might be good idea to consider SLX. However, there are also reasons to consider SLX as a point of departure even if the theory is not clear about which model to choose. First, when using the SLX model, the estimation and interpretation of spillover effects is more straightforward. In contrast to endogenous models, SLX allows us to parametrize W and its parameters can be estimated. Strong limitation of SAR and SAC models is that the ratio between the spillover and direct effects of is same for every explanatory variable, which is unlikely to be true in many empirical studies. This is not the case for SLX model, where we get estimates of both by construction. Thus SLX can be considered more flexible in this perspective.
+The choice of the model should be based on theory. If we expect spillovers of exogenous variables and spillovers of endogenous variables or correlation of error terms is expected to be less pronounced or absent, it might be a good idea to consider the SLX model. However, there are also reasons to consider SLX as a point of departure even if the theory is not clear about which model to choose. First, when using the SLX model, the estimation and interpretation of spillover effects is more straightforward. In contrast to endogenous models, SLX allows us to parameterize W and its parameters can be estimated. An undesirable property of SAR and SAC models is that the ratio between the spillover and direct effects is the same for every explanatory variable. This is not the case for SLX model, where we get flexible estimates of both by construction. Thus SLX can be considered less imposing in this perspective.
 
 ## Which type(s) of spillover(s) would you expect in the model for cigarette demand?
 
