@@ -94,13 +94,11 @@ moran_result_dist <- lm.morantest(OLS, mat2listw(W_, style = "W"))
 
 # Create a data frame to hold the summarized results
 moran_summary <- data.frame(
-  Test = c("Distance Threshold", "Smooth Distance-Decay", "Contiguity-Based"),
-  Moran_I = c(moran_result_dist$estimate["Moran I statistic"]),
+  Moran_I = c(moran_result_dist$estimate["Observed Moran I"]),
   Expectation = c(moran_result_dist$estimate["Expectation"]),
   Variance = c(moran_result_dist$estimate["Variance"]),
   p_value = c(format(moran_result_dist$p.value, scientific = TRUE))
 )
-
 # Format and print the table
 kable(moran_summary, "latex", digits = 4, booktabs = TRUE, caption = "Summary of Moran's I Test Results for Productivity Growth") %>%
   kable_styling(latex_options = c("striped", "scale_down"), font_size = 7) %>%

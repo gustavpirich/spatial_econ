@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.21 (TeX Live 2020) (preloaded format=pdflatex 2020.10.12)  9 MAY 2024 21:21
+This is pdfTeX, Version 3.14159265-2.6-1.40.21 (TeX Live 2020) (preloaded format=pdflatex 2020.10.12)  9 MAY 2024 22:37
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1024,67 +1024,76 @@ LaTeX Font Info:    Font shape `T1/lato-TLF/m/it' will be
 {/usr/local/texlive/2020/texmf-var/fonts/map/pdftex/updmap/pdftex.map}]
 LaTeX Font Info:    Font shape `T1/lato-TLF/b/n' will be
 (Font)              scaled to size 12.0pt on input line 171.
+
+Underfull \hbox (badness 10000) in paragraph at lines 211--214
+
+ []
+
+LaTeX Font Info:    Font shape `T1/lato-TLF/m/n' will be
+(Font)              scaled to size 7.0pt on input line 229.
+LaTeX Font Info:    Font shape `T1/lato-TLF/b/n' will be
+(Font)              scaled to size 7.0pt on input line 229.
 LaTeX Font Info:    Font shape `T1/lmtt/bx/n' in size <10> not available
-(Font)              Font shape `T1/lmtt/b/n' tried instead on input line 220.
-[2]
+(Font)              Font shape `T1/lmtt/b/n' tried instead on input line 240.
+[2] [3]
 LaTeX Font Info:    Trying to load font information for TS1+lmtt on input line 
-334.
+356.
 (/usr/local/texlive/2020/texmf-dist/tex/latex/lm/ts1lmtt.fd
 File: ts1lmtt.fd 2009/10/30 v1.6 Font defs for Latin Modern
-) [3] [4] [5]
-<03_assignment_files/figure-latex/unnamed-chunk-14-1.pdf, id=93, 310.15875pt x 
+) [4] [5]
+<03_assignment_files/figure-latex/unnamed-chunk-14-1.pdf, id=97, 310.15875pt x 
 303.1325pt>
 File: 03_assignment_files/figure-latex/unnamed-chunk-14-1.pdf Graphic file (typ
 e pdf)
 <use 03_assignment_files/figure-latex/unnamed-chunk-14-1.pdf>
 Package pdftex.def Info: 03_assignment_files/figure-latex/unnamed-chunk-14-1.pd
-f  used on input line 544.
+f  used on input line 566.
 (pdftex.def)             Requested size: 310.15799pt x 303.13176pt.
 LaTeX Font Info:    Trying to load font information for TS1+lato-TLF on input l
-ine 553.
+ine 575.
 (/usr/local/texlive/2020/texmf-dist/tex/latex/lato/TS1lato-TLF.fd
 File: TS1lato-TLF.fd 2019/06/24 Font definitions for TS1/lato-TLF.
 )
 LaTeX Font Info:    Font shape `TS1/lato-TLF/m/n' will be
-(Font)              scaled to size 10.0pt on input line 553.
+(Font)              scaled to size 10.0pt on input line 575.
 [6 <./03_assignment_files/figure-latex/unnamed-chunk-14-1.pdf>] [7] [8] [9]
 
 LaTeX Font Warning: Font shape `T1/lmtt/bx/it' in size <10> not available
-(Font)              Font shape `T1/lmtt/b/sl' tried instead on input line 867.
+(Font)              Font shape `T1/lmtt/b/sl' tried instead on input line 889.
 
 
-Underfull \vbox (badness 10000) detected at line 955
+Underfull \vbox (badness 10000) detected at line 977
  []
 
 [10] [11] [12]
-Overfull \vbox (1.03943pt too high) detected at line 1152
+Overfull \vbox (1.03943pt too high) detected at line 1174
  []
 
 [13]
-<03_assignment_files/figure-latex/unnamed-chunk-31-1.pdf, id=152, 458.71375pt x
+<03_assignment_files/figure-latex/unnamed-chunk-31-1.pdf, id=156, 458.71375pt x
  306.14375pt>
 File: 03_assignment_files/figure-latex/unnamed-chunk-31-1.pdf Graphic file (typ
 e pdf)
 <use 03_assignment_files/figure-latex/unnamed-chunk-31-1.pdf>
 Package pdftex.def Info: 03_assignment_files/figure-latex/unnamed-chunk-31-1.pd
-f  used on input line 1154.
+f  used on input line 1176.
 (pdftex.def)             Requested size: 458.73363pt x 306.157pt.
 [14] [15 <./03_assignment_files/figure-latex/unnamed-chunk-31-1.pdf>]
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 1156.
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 1156.
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 1178.
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 1178.
 (./03_assignment.aux)
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 1156.
-Package atveryend Info: Empty hook `AtEndAfterFileList' on input line 1156.
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 1178.
+Package atveryend Info: Empty hook `AtEndAfterFileList' on input line 1178.
 
 LaTeX Warning: There were multiply-defined labels.
 
  ) 
 Here is how much of TeX's memory you used:
- 25821 strings out of 480608
- 453085 string characters out of 5903629
- 787835 words of memory out of 5000000
- 41112 multiletter control sequences out of 15000+600000
- 783334 words of font info for 87 fonts, out of 8000000 for 9000
+ 25834 strings out of 480608
+ 453189 string characters out of 5903629
+ 787841 words of memory out of 5000000
+ 41120 multiletter control sequences out of 15000+600000
+ 827836 words of font info for 91 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  59i,17n,75p,2837b,547s stack positions out of 5000i,500n,10000p,200000b,80000s
 {/usr/local/texlive/2020/texmf-dist/fonts/enc/dvips/lm/lm-ec.enc}{/usr/local/
@@ -1112,10 +1121,10 @@ c/lm/lmsy10.pfb></usr/local/texlive/2020/texmf-dist/fonts/type1/public/lm/lmsy7
 /local/texlive/2020/texmf-dist/fonts/type1/public/lm/lmtko10.pfb></usr/local/te
 xlive/2020/texmf-dist/fonts/type1/public/lm/lmtt10.pfb></usr/local/texlive/2020
 /texmf-dist/fonts/type1/public/lm/lmtti10.pfb>
-Output written on 03_assignment.pdf (15 pages, 838401 bytes).
+Output written on 03_assignment.pdf (15 pages, 839989 bytes).
 PDF statistics:
- 301 PDF objects out of 1000 (max. 8388607)
- 254 compressed objects within 3 object streams
- 57 named destinations out of 1000 (max. 500000)
- 6287 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 308 PDF objects out of 1000 (max. 8388607)
+ 261 compressed objects within 3 object streams
+ 60 named destinations out of 1000 (max. 500000)
+ 6295 words of extra memory for PDF output out of 10000 (max. 10000000)
 
