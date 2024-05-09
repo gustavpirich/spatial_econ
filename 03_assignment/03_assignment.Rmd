@@ -89,7 +89,7 @@ OLS <- lm(logc ~ ., data_big)
 summary_OLS <- summary(OLS)
 
 # Extract coefficients and p-values
-coefficients <- coef(OLS)
+coefficients <- summary_OLS$coefficients[, 1]
 p_values <- summary_OLS$coefficients[, 4]
 variable_names <- rownames(summary_OLS$coefficients)
 
