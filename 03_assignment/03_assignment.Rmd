@@ -85,7 +85,26 @@ data_big <- cigarette_2var %>%
             select(c(logc, logp,logy, starts_with("year_")|starts_with("state_")))
 OLS <- lm(logc ~ ., data_big)
 
+# Get the summary of the model
+summary_OLS <- summary(OLS)
+
+# Extract coefficients and p-values
+coefficients <- coef(OLS)
+p_values <- summary_OLS$coefficients[, 4]
+variable_names <- rownames(summary_OLS$coefficients)
+
+# Merge coefficients with stars denoting significance level and variable names
+coefficients_with_stars <- paste0(variable_names, ": ", round(coefficients, 6), 
+                                  ifelse(p_values < 0.001, "***", 
+                                  ifelse(p_values < 0.01, "**", 
+                                  ifelse(p_values < 0.05, "*", 
+                                  ifelse(p_values < 0.1, ".", "")))))
+
+# Print the coefficients with stars
+print(coefficients_with_stars)
 ```
+To save space, we merged coefficients with stars indicating p-values.
+
 \begin{table}[!htbp] \centering 
   \caption{} 
   \label{} 
