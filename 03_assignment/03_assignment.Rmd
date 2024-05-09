@@ -401,7 +401,7 @@ sem <- spml(fm1, data, listw=lW, lag=FALSE, spatial.error = "b",
                     model="within", effect="twoways") 
 ```
 
-```{r}
+```{r, eval=F,include=F}
 # # `effects()` extracts the individual FE, which are not visible in the `summary()`  
 # eff <- effects(sem)
 ```
