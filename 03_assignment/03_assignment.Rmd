@@ -103,10 +103,6 @@ coefficients_with_stars <- paste0(variable_names, ": ", round(coefficients, 6),
 # Print the coefficients with stars
 print(coefficients_with_stars)
 ```
-To save space, we merged coefficients with stars indicating p-values.
-
-Where the point estimates of logp and logy are numerically identical to that of plm(). Thus we can see that using plm with "within" model and "twoways" effect is the way to go.
-
 ## which model would the classical specification search prefer?
 
 We run all tests including individual and time fixed effects:
@@ -260,7 +256,7 @@ beta + theta*sum(Wd)/N
 Thus, the average partial effect of increasing income of is very close to the effect of increasing income in home only. This is because using the specification of distance decay above, the links between the agents are mostly weak.
 
 ## Bonus 
-```{r}
+```{r, eval = FALSE, include = FALSE}
 blm(logc ~ logy + logp + factor(state) + factor(year), data = data)
   
 ```
