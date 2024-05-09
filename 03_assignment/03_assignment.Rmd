@@ -1193,7 +1193,7 @@ For this exercise we simulate the effect of a one-standard deviation SEPI growin
 
 #first number denotes period second number denotes neighboor
 # shock in period 0 of standard deviation in growing season SEPI (without contemporanously affecting SEPI over the year)
-risk_cell_0_0 <- -1*mod4$coefficients["GSmain_ext_SPEI4pg"]*sd(geoconflict_main_weights$GSmain_ext_SPEI4pg)
+risk_cell_0_0 <- -1*mod4$coefficients["GSmain_ext_SPEI4pg"]*sd(geoconflict_main_weights$GSmain_ext_SPEI4pg) 
 
 risk_cell_0_1 <- -1*mod4$coefficients["W_GSmain_ext_SPEI4pg"]*sd(geoconflict_main_weights$GSmain_ext_SPEI4pg) + risk_cell_0_0*mod4$arcoef 
 
@@ -1287,21 +1287,21 @@ df3$Prob <- as.vector(grid3)
 # Create plots
 plot1 <- ggplot(df1, aes(x = x, y = y, fill = Prob)) +
   geom_tile() +
-  scale_fill_viridis_c(option = "magma", limits = overall_range) +
+  scale_fill_viridis_c(option = "plasma", limits = overall_range) +
   theme_void() +
   theme(legend.position = "none") +
   labs(title = "SEPI Growing Season Shock at t = 0")
 
 plot2 <- ggplot(df2, aes(x = x, y = y, fill = Prob)) +
   geom_tile() +
-  scale_fill_viridis_c(option = "magma", limits = overall_range) +
+  scale_fill_viridis_c(option = "plasma", limits = overall_range) +
   theme_void() +
   theme(legend.position = "none") +
   labs(title = "t = 1")
 
 plot3 <- ggplot(df3, aes(x = x, y = y, fill = Prob)) +
   geom_tile() +
-  scale_fill_viridis_c(option = "magma", limits = overall_range) +
+  scale_fill_viridis_c(option = "plasma", limits = overall_range) +
   theme_void() +
   labs(title = "t = 2", fill = "Pr(Conflict)")
 
