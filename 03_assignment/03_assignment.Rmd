@@ -71,9 +71,9 @@ lW <- mat2listw(W, style="W")
 - Estimate the demand model, and test for spatial dependence using the procedures discussed in class, and the provided weights matrix. Suppress any theoretical considerations
  
 The demand model without spatial effects can by estimated by using the package plm:
-```{r, results = "asis", header=FALSE}
+```{r, results = "asis", echo = FALSE}
 model1 <- plm(logc~logp+logy, data=data, model="within", effect="twoways")
-stargazer(model1, type = "latex")
+stargazer(model1, type = "latex", header=FALSE)
 ```
 The demand for cigarettes depends negatively on the price of the cigarettes and positively on the real disposable income. 
 
@@ -163,10 +163,10 @@ return((slx))
 ```
 
 Now, to compare both:
-```{r, results = "asis", header=FALSE}
+```{r, results = "asis"}
 summary(sem)
 print("SLX Model")
-stargazer(slx_OLS(W), type = "latex")
+stargazer(slx_OLS(W), type = "latex", header = FALSE)
 ```
 
 The coefficient estimates above correspond to those reported in table 2 of Vega and Elhorst 2015. Both the SEM and SLX suggest on average a decrease in domestic demand for cigarettes of around 1% following an increase in domestic prices by 1%, ceteris paribus. Similarly both models suggest an increase in demand for cigarettes given an increase in domestic income. SLX coefficient estimate for this is higher. Additionally SLX model provides effects of lagged independ variables of cigarette demand. The SEM model does not provide any additional meaningful parameters since its parameter for spatial autocorrelation of errors is a nuisance parameter.
@@ -201,8 +201,8 @@ colnames(Wd) <- rownames(Wd)
 ```
 
 Using gamma similar to the paper, we get coefficient estimates which are very close to those in the paper:
-```{r, results = "asis", header=FALSE}
-stargazer(slx_OLS(Wd), type = 'latex')
+```{r, results = "asis"}
+stargazer(slx_OLS(Wd), type = 'latex',header = FALSE)
 ```
 While the interpretation is non-lagged independent variables is similar as in regressions above, we might want to focus on spatiall lagged variables. The model suggests that increase in price of cigarettes in neighboring regions increases demand for cigarettes in home region, ceteris paribus. This is consistent with the bootlegging behavior discussed in the paper, which predicts that some people might buy cigarettes in/from other regions if the price there is lower. The coefficient estimate for income in neighboring regions suggest lower demand for cigarettes if the real income in neighboring regions  increases. This suggests that if people have higher income their opportunity cost of time is higher and they might prefer the convenience of buying cigarettes in their home region. 
 
@@ -216,7 +216,7 @@ distw
 In this network all agents are connected, only the weights differ - which are given by the distance decay formula above. This corresponds to average number of links being 45 i.e. all regions except the region itself. Thus the percentage of nonzero weights simply gives the share of diagonal elements of  a 46*46 matrix.
 
 Below we visualize the spatial weights matrix:
-```{r, echo=FALSE}
+```{r, echo=FALSE, figure.align = 'left'}
 lattice::levelplot((Wd), main="Distance Decay Spatial Weights Matrix",
 scales = list(x=list(cex=0.45,rot=90),y=list(cex=.45)))
 ```
