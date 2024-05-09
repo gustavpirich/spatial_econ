@@ -30,7 +30,7 @@ knitr::opts_chunk$set(warning = FALSE, message = FALSE)
 library(showtext)
 showtext_auto()
 
-pacman::p_load(spatialreg, patchwork, gridExtra, fixest, splm, stringi, stringr, stringdist, haven, sf, dplyr, fuzzyjoin, 
+pacman::p_load(spatialreg, bsreg, patchwork, gridExtra, fixest, splm, stringi, stringr, stringdist, haven, sf, dplyr, fuzzyjoin, 
                comparator, digest, zoomerjoin, ggplot2, tidyr, ggthemes, viridis, 
                fixest, conleyreg, plm, stargazer, magrittr, tidyverse, tmap, spdep, SDPDmod,
                igraph, generics, knitr, kableExtra, formatR,readxl, haven, flextable, broom, units)
@@ -46,7 +46,7 @@ pacman::p_load(spatialreg, patchwork, gridExtra, fixest, splm, stringi, stringr,
 
 
 # Exercise A
-```{r, echo=FALSE}
+```{r, inlcude=FALSE}
 cigar_states <- st_read(file.path("data","cigarettes","cigar_states.xls"))
 cigarette_2var <- readxl::read_excel(file.path("data","cigarettes","cigarette+2var.xls")) %>%
                         relocate(state, .before=year) 
@@ -73,12 +73,12 @@ lW <- mat2listw(W, style="W")
 The demand model without spatial effects can by estimated by using the package plm:
 ```{r, results = "asis", echo = FALSE}
 model1 <- plm(logc~logp+logy, data=data, model="within", effect="twoways")
-stargazer(model1, type = "latex", header=FALSE)
+stargazer(model1, type = "latex", header=FALSE, add.lines = list(c("State FE", "X"), c("Year FE", "X")), title = "")
 ```
 The demand for cigarettes depends negatively on the price of the cigarettes and positively on the real disposable income. 
 
-Alternatively, this could be also done by hand by including the dummies for both fixed effects and running OLS:
-```{r}
+Alternatively, this could be also done by hand by including the dummies for both fixed effects.
+```{r, include = FALSE, eval = FALSE}
 data_big <- cigarette_2var %>%
             fastDummies::dummy_cols(select_columns = "year") %>%
             fastDummies::dummy_cols(select_columns = "state") %>%
@@ -114,8 +114,7 @@ We run all tests including individual and time fixed effects:
 fm1 <- logc ~ logp + logy
 ```
 
-
-```{r, echo=FALSE}
+```{r}
 # Spatial lag structure?
 slmtest(fm1, data=data, listw=lW, test="lml", model="within", effect="twoways")
 
@@ -130,10 +129,9 @@ slmtest(fm1, data=data, listw=lW, test="rlml", model="within", effect="twoways")
 slmtest(fm1, data=data, listw=lW, test="rlme", model="within", effect="twoways")
 ```
 
-Allowing for spatial error, the spatial lag dependence is not significant. Thus this classical specification search suggests estimating SEM model. 
+Allowing for spatial error, the spatial lag dependence is not significant. Thus this classical specification search suggests estimating the SEM model. 
 
-- Estimate the model implied by the specification search and contrast the effect estimates
-with a SLX model specification:
+## Estimate the model implied by the specification search and contrast the effect estimates with a SLX model specification:
 
 Using the spml function, we can estimate SEM model by setting the spatial lag of dependent variable to false (lag=FALSE):
 ```{r, echo=FALSE}
@@ -162,10 +160,12 @@ return((slx))
 ```
 
 Now, to compare both:
-```{r, results = "asis"}
+```{r, echo = FALSE}
 summary(sem)
-print("SLX Model")
-stargazer(slx_OLS(W), type = "latex", header = FALSE)
+```
+
+```{r, results = "asis", echo = FALSE}
+stargazer(slx_OLS(W), type = "latex", header = FALSE, title = "SLX Model")
 ```
 
 The coefficient estimates above correspond to those reported in table 2 of Vega and Elhorst 2015. Both the SEM and SLX suggest on average a decrease in domestic demand for cigarettes of around 1% following an increase in domestic prices by 1%, ceteris paribus. Similarly both models suggest an increase in demand for cigarettes given an increase in domestic income. SLX coefficient estimate for this is higher. Additionally SLX model provides effects of lagged independ variables of cigarette demand. The SEM model does not provide any additional meaningful parameters since its parameter for spatial autocorrelation of errors is a nuisance parameter.
@@ -176,9 +176,9 @@ The choice of the model should be based on theory. If we expect spillovers of ex
 
 ## Which type(s) of spillover(s) would you expect in the model for cigarette demand?
 
-We would expect no endogenous spillover effects, since we dont believe that demand for cigarettes in a country should determine demand for cigarettes in neighboring country if there are no shortages. If however, the price of cigarettes in neighboring country is lower, people living near the border could be buying cigarettes in the neighboring country. This is called bootlegging effect. On other hand, if the income in our country increases, the opportunity costs of time of our citizens increase and they might then prefer to buy the more expensive cigarettes in home country instead. Thus we would expect spatially lagged exogenous variables to be relevant: An increase in price of cigarettes in neighboring country should have positive effect on the demand for cigarettes in home country. Increase in income of neighboring country should have negative effect on the demand for cigarettes in home. 
+We would expect no endogenous spillover effects, since we consider it unlikely that demand for cigarettes in a country should determine demand for cigarettes in neighboring country if there are no shortages. If however, the price of cigarettes in neighboring country is lower, people living near the border could be buying cigarettes in the neighboring country. This is called \textit{bootlegging effect}. On other hand, if the income in our country increases, the opportunity costs of time of our citizens increase and they might then prefer to buy the more expensive cigarettes in home country instead. Thus we would expect spatially lagged exogenous variables to be relevant: An increase in price of cigarettes in neighboring country should have positive effect on the demand for cigarettes in home country. Increase in income of neighboring country should have negative effect on the demand for cigarettes in home. 
 
-- Re-run the analysis using a SLX model with a distance decay specification (between centers) for the weights matrix, i.e. $w_{ij} = \frac{1}{\gamma_{ij}}$  following Halleck Vega and Elhorst (2015). Use a distance decay parameter of $\gamma$ = 3.
+## Re-run the analysis using a SLX model with a distance decay specification (between centers) for the weights matrix, i.e. $w_{ij} = \frac{1}{\gamma_{ij}}$  following Halleck Vega and Elhorst (2015). Use a distance decay parameter of $\gamma$ = 3
 
 For this we first create a neighbour list, where all regions are neighbors by setting the distance threshold to big enough value and then compute distances using nbdists. They are then transformed as suggested above and scaled by maximum eigenvalue as in the paper.
 
@@ -199,8 +199,8 @@ colnames(Wd) <- rownames(Wd)
 ```
 
 Using gamma similar to the paper, we get coefficient estimates which are very close to those in the paper:
-```{r, results = "asis"}
-stargazer(slx_OLS(Wd), type = 'latex',header = FALSE)
+```{r, results = "asis", echo = FALSE}
+stargazer(slx_OLS(Wd), type = 'latex',header = FALSE, title = "DIstance Decay SLX")
 ```
 While the interpretation is non-lagged independent variables is similar as in regressions above, we might want to focus on spatiall lagged variables. The model suggests that increase in price of cigarettes in neighboring regions increases demand for cigarettes in home region, ceteris paribus. This is consistent with the bootlegging behavior discussed in the paper, which predicts that some people might buy cigarettes in/from other regions if the price there is lower. The coefficient estimate for income in neighboring regions suggest lower demand for cigarettes if the real income in neighboring regions  increases. This suggests that if people have higher income their opportunity cost of time is higher and they might prefer the convenience of buying cigarettes in their home region. 
 
@@ -216,12 +216,12 @@ In this network all agents are connected, only the weights differ - which are gi
 Below we visualize the spatial weights matrix:
 ```{r, echo=FALSE, fig.align = "center"}
 lattice::levelplot((Wd), main="Distance Decay Spatial Weights Matrix",
-scales = list(x=list(cex=0.45,rot=90),y=list(cex=.45)))
+scales = list(x=list(cex=0.45,rot=90),y=list(cex=.3)))
 ```
  
 Reminding ourselves that all regions except the diagonal are neighbors, we can see that the definition of distance decay parameter used results in few strongly connected neighbors and many weaker connections. 
 
-– Who are the central agents and where do spillover effects occur?
+- Who are the central agents and where do spillover effects occur?
 
 We could define the most central agent as one, who has the strongest connection to other regions overall. This could correspond to maximizing the nonlinear transformation of distance which we are using. Thus an agent is most central,if the sum of its weights to other agents is highest, i.e. if the sum of its row is highest. 
 
@@ -247,7 +247,7 @@ knitr::kable(ec, caption = "Eigenvector Centrality")
 
 ```
 
-– What is the average partial effect of increasing income?
+## What is the average partial effect of increasing income?
 We compute APE as follows:
 $\beta_{logy} + \theta_{logy}\frac{1}{N}\sum_{j}^{J}\sum_{i}^{I}  w_{ij}$
 where I is number of rows of W and J number of columns. 
@@ -259,6 +259,11 @@ beta + theta*sum(Wd)/N
 ```
 Thus, the average partial effect of increasing income of is very close to the effect of increasing income in home only. This is because using the specification of distance decay above, the links between the agents are mostly weak.
 
+## Bonus 
+```{r}
+blm(logc ~ logy + logp + factor(state) + factor(year), data = data)
+  
+```
 
 # Exercise B
 ```{r, echo = FALSE}
