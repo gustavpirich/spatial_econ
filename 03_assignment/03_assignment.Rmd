@@ -23,7 +23,7 @@ urlcolor: DarkOrchid!65!black
 ---
 
 
-```{r, setup, echo = FALSE, warning = FALSE, results = 'hide'}
+```{r, setup, echo = FALSE, warning=FALSE, results = 'hide'}
 knitr::opts_knit$set(root.dir = rprojroot::find_rstudio_root_file())
 knitr::opts_chunk$set(tidy.opts = list(width.cutoff = 80), tidy = TRUE)
 knitr::opts_chunk$set(warning = FALSE, message = FALSE) 
@@ -91,19 +91,6 @@ The demand for cigarettes depends negatively on the price of the cigarettes and 
 We now test for spatial autocorrelation. Global Moran's I is highly statistically significant, presenting evidence that there is indeed spatial autocorrelation in the residuals.    
 ```{r, echo = FALSE}
 moran_result_dist <- lm.morantest(OLS, mat2listw(W_, style = "W"))
-
-# Create a data frame to hold the summarized results
-moran_summary <- data.frame(
-  Moran_I = c(moran_result_dist$estimate["Observed Moran I"]),
-  Expectation = c(moran_result_dist$estimate["Expectation"]),
-  Variance = c(moran_result_dist$estimate["Variance"]),
-  p_value = c(format(moran_result_dist$p.value, scientific = TRUE))
-)
-# Format and print the table
-kable(moran_summary, "latex", digits = 4, booktabs = TRUE, caption = "Summary of Moran's I Test Results for Productivity Growth") %>%
-  kable_styling(latex_options = c("striped", "scale_down"), font_size = 7) %>%
-  column_spec(1, bold = TRUE, border_right = TRUE) %>%
-  column_spec(5, color = ifelse(moran_summary$p_value < 0.05, "red", "black"))
 ```
 
 ```{r, include = FALSE, eval = FALSE}
@@ -131,7 +118,7 @@ coefficients_with_stars <- paste0(variable_names, ": ", round(coefficients, 6),
 # Print the coefficients with stars
 print(coefficients_with_stars)
 ```
-## STAGE 2
+## Stage 2
 
 We now run the testing procedures as we learnt in class; 
 ```{r, echo = FALSE}
@@ -222,7 +209,7 @@ stargazer(slx_OLS(Wd), type = 'latex',header = FALSE, title = "DIstance Decay SL
 ```
 While the interpretation is non-lagged independent variables is similar as in regressions above, we might want to focus on spatiall lagged variables. The model suggests that increase in price of cigarettes in neighboring regions increases demand for cigarettes in home region, ceteris paribus. This is consistent with the bootlegging behavior discussed in the paper, which predicts that some people might buy cigarettes in/from other regions if the price there is lower. The coefficient estimate for income in neighboring regions suggest lower demand for cigarettes if the real income in neighboring regions  increases. This suggests that if people have higher income their opportunity cost of time is higher and they might prefer the convenience of buying cigarettes in their home region. 
 
-– Describe the network recovered by Halleck Vega and Elhorst (2015):
+- Describe the network recovered by Halleck Vega and Elhorst (2015):
 ```{r}
 distw
 46*46-46
@@ -265,7 +252,8 @@ knitr::kable(ec, caption = "Eigenvector Centrality")
 
 ```
 
-## What is the average partial effect of increasing income?
+- What is the average partial effect of increasing income?
+
 We compute APE as follows:
 $\beta_{logy} + \theta_{logy}\frac{1}{N}\sum_{j}^{J}\sum_{i}^{I}  w_{ij}$
 where I is number of rows of W and J number of columns. 
@@ -790,7 +778,7 @@ stargazer(
 
 
 \begin{table}[!htbp] \centering 
-  \caption{Model 3 Vertical} 
+  \caption{Model 3 Vertical Contiguity Matrix} 
   \label{} 
 \begin{tabular}{@{\extracolsep{5pt}} D{.}{.}{-4} D{.}{.}{-4} D{.}{.}{-4} D{.}{.}{-4} D{.}{.}{-4} } 
 \\[-1.8ex]\hline 
@@ -816,7 +804,7 @@ stargazer(
 \end{table} 
 
 \begin{table}[!htbp] \centering 
-  \caption{Model 3 Horizontal} 
+  \caption{Model 3 Horizontal Contiguity Matrix} 
   \label{} 
 \begin{tabular}{@{\extracolsep{5pt}} D{.}{.}{-4} D{.}{.}{-4} D{.}{.}{-4} D{.}{.}{-4} D{.}{.}{-4} } 
 \\[-1.8ex]\hline 
@@ -842,7 +830,7 @@ stargazer(
 \end{table} 
 
 \begin{table}[!htbp] \centering 
-  \caption{Model 4 Vertical} 
+  \caption{Model 4 Vertical Contiguity Matrix} 
   \label{} 
 \begin{tabular}{@{\extracolsep{5pt}} D{.}{.}{-4} D{.}{.}{-4} D{.}{.}{-4} D{.}{.}{-4} D{.}{.}{-4} } 
 \\[-1.8ex]\hline 
@@ -868,7 +856,7 @@ stargazer(
 \end{table} 
 
 \begin{table}[!htbp] \centering 
-  \caption{Model 4 Horizontal} 
+  \caption{Model 4 Horizontal Contiguity Matrix} 
   \label{} 
 \begin{tabular}{@{\extracolsep{5pt}} D{.}{.}{-4} D{.}{.}{-4} D{.}{.}{-4} D{.}{.}{-4} D{.}{.}{-4} } 
 \\[-1.8ex]\hline 
@@ -894,11 +882,13 @@ stargazer(
 \end{table} 
 
 ## Summarize and visualize the weights matrixes and briefly explain what they imply
-In both the horizontal and the vertical contiguity matrix the average degree is about 1.86 and 1.9. Thus most cells have (as expected) two neighbors but some cells , at the edge, have only one neighbors. This implies that the networks are sparser and less dense than the adjacency matrix used by the authors. This is also reflected in lower 'graph density' for the horizontal and vertical contiguity matrix as compared to the baseline adjacency matrix. Visualizing the spatial weight matrices further corroborates the sparser structure 
+In both the horizontal and the vertical contiguity matrix the average degree is about 1.86 and 1.9. Thus most cells have (as expected) two neighbors but some cells , at the edge, have only one neighbors. This implies that the networks are sparser and less dense than the adjacency matrix used by the authors. This is also reflected in lower 'graph density' for the horizontal and vertical contiguity matrix as compared to the baseline adjacency matrix. Visualizing the spatial weight matrices further corroborates the sparser structure. 
 
-More generally, the horizontal/vertical contiguity matrix implies that only cells which share the same latitude/longitude and are directly adjacent are considered to be affecting each other directly. It is hard to make a coherent case for why this should be that way in the real world. There is no inherent reason to assume that effects only propagate in one 'direction'. 
+More generally, the horizontal/vertical contiguity matrix implies that only cells which share the same latitude/longitude and are directly adjacent are considered to be affecting each other directly. It is hard to make a coherent case for why this should be the case in the real world. There is no inherent reason to assume that effects only propagate in one 'direction'. 
 
 Still due to the nature of dynamic multipliers in the form of the spatial autoregressive terms, even if the network appears relatively sparse and two cells are not directly linked the cells are still connected. However, the restriction of horizontal and vertical contiguity significantly restricts the dynamic propagation of the effects in this context.
+
+It is insightful to look at the impact of horizontal and vertical restrictions on the results. We reproduced both specification 3, and 4 for both contiguity matrices. The bottom line is; the results are pretty robust to differing quite dramatically different specifications of the spatial weights matrix. This is reassuring the validity and robustness of the results. 
 
 ```{r, echo = FALSE, eval = FALSE}
 #graph_dist_horizontal <- graph_from_adjacency_matrix(adj_matrix_horizontal, mode = "undirected")
@@ -949,28 +939,28 @@ summarize_graph <- function(g) {
 
 ## Visualization of Spillover Effects
 
-For this exercise we simulate the effect of a one-standard deviation SEPI growing season shock. We multiply the shock times -1 to obtain the negative impact and conversely the increase in conflict incidence. We exogenously shock a cell and calculate 'manually' based on the coefficients of model 4 the magnitude of the shock propagation. We take into account both the dynamic, and spatial autoregressive structure. We see that the shock reaches its peak size at t = 1, consistent with the main message of the paper. A negative one standard deviation growing season shock increases conflict incidence by about 2 percentage points. Overall the spillover effects both in absolute magnitude and visually as reflected in the figure are rather small. 
+For this exercise we simulate the effect of a one-standard deviation SEPI growing season shock holding everything else constant. We multiply the shock times -1 to obtain the negative impact and thus the \textit{increase} in conflict incidence. We exogenously shock a cell and calculate 'manually', based on the coefficients of model 4, the magnitude of the shock propagation. We take into account both the dynamic, and spatial autoregressive structure of the model. We see that the shock reaches its peak effect size at t = 1, consistent with the main insight of the paper (the lagged effect of growing season shocks on conflict). A negative one standard deviation growing season shock increases conflict incidence by about 2.1 percentage points for the affected cell. Overall the spillover effects both in absolute magnitude and visually as reflected in the figure are rather small. 
 ```{r}
 
 # COMPUTATION OF SHOCKS
 
 #first number denotes period second number denotes neighboor
 # shock in period 0 of standard deviation in growing season SEPI (without contemporanously affecting SEPI over the year)
-risk_cell_0_0 <- -1*mod4$coefficients["GSmain_ext_SPEI4pg"]*sd(geoconflict_main_weights$GSmain_ext_SPEI4pg) 
+risk_cell_0_0 <- -1*mod4$coefficients["GSmain_ext_SPEI4pg"]*sd(geoconflict_main_weights$GSmain_ext_SPEI4pg) / (1-mod4$arcoef)
 
 risk_cell_0_1 <- -1*mod4$coefficients["W_GSmain_ext_SPEI4pg"]*sd(geoconflict_main_weights$GSmain_ext_SPEI4pg) + risk_cell_0_0*mod4$arcoef 
 
 risk_cell_0_2 <- -1*mod4$coefficients["W_GSmain_ext_SPEI4pg"]*mod4$coefficients["W_GSmain_ext_SPEI4pg"]*sd(geoconflict_main_weights$GSmain_ext_SPEI4pg) + mod4$arcoef*risk_cell_0_1 + mod4$arcoef*mod4$arcoef*risk_cell_0_0
 
 
-risk_cell_1_0 <- risk_cell_0_0*mod4$coefficients["lag(ANY_EVENT_ACLED)"] + -1*mod4$coefficients["L1_GSmain_ext_SPEI4pg"]*sd(geoconflict_main_weights$GSmain_ext_SPEI4pg) 
+risk_cell_1_0 <- (risk_cell_0_0*mod4$coefficients["lag(ANY_EVENT_ACLED)"] + -1*mod4$coefficients["L1_GSmain_ext_SPEI4pg"]*sd(geoconflict_main_weights$GSmain_ext_SPEI4pg)) / (1-mod4$arcoef)
 
 risk_cell_1_1 <- risk_cell_0_1*mod4$coefficients["lag(ANY_EVENT_ACLED)"] + -1*mod4$coefficients["W_L1_GSmain_ext_SPEI4pg"]*sd(geoconflict_main_weights$GSmain_ext_SPEI4pg) + risk_cell_1_0*mod4$arcoef 
 
 risk_cell_1_2 <- risk_cell_0_2*mod4$coefficients["lag(ANY_EVENT_ACLED)"] + -1*mod4$coefficients["W_L1_GSmain_ext_SPEI4pg"]*mod4$coefficients["W_L1_GSmain_ext_SPEI4pg"]*sd(geoconflict_main_weights$GSmain_ext_SPEI4pg) + mod4$arcoef*risk_cell_1_1 + mod4$arcoef*mod4$arcoef*risk_cell_1_0
 
 
-risk_cell_2_0 <- risk_cell_1_0*mod4$coefficients["lag(ANY_EVENT_ACLED)"] + risk_cell_0_0 * mod4$coefficients["lag(ANY_EVENT_ACLED)"] *mod4$coefficients["lag(ANY_EVENT_ACLED)"]  + -1*mod4$coefficients["L2_GSmain_ext_SPEI4pg"]*sd(geoconflict_main_weights$GSmain_ext_SPEI4pg)
+risk_cell_2_0 <- (risk_cell_1_0*mod4$coefficients["lag(ANY_EVENT_ACLED)"] + risk_cell_0_0 * mod4$coefficients["lag(ANY_EVENT_ACLED)"] *mod4$coefficients["lag(ANY_EVENT_ACLED)"]  + -1*mod4$coefficients["L2_GSmain_ext_SPEI4pg"]*sd(geoconflict_main_weights$GSmain_ext_SPEI4pg)) / (1-mod4$arcoef)
 
 risk_cell_2_1 <- risk_cell_1_1*mod4$coefficients["lag(ANY_EVENT_ACLED)"] + risk_cell_0_1 * mod4$coefficients["lag(ANY_EVENT_ACLED)"] *mod4$coefficients["lag(ANY_EVENT_ACLED)"]  + -1*mod4$coefficients["W_L2_GSmain_ext_SPEI4pg"]*sd(geoconflict_main_weights$GSmain_ext_SPEI4pg) + risk_cell_2_0*mod4$arcoef 
 
