@@ -268,9 +268,65 @@ Thus, the average partial effect of increasing income of is very close to the ef
 
 ## Bonus 
 ```{r, eval = FALSE, include = FALSE}
-blm(logc ~ logy + logp + factor(state) + factor(year), data = data)
+#blm(logc ~ logy + logp + factor(state) + factor(year), data = data)
   
 ```
+
+
+```{r}
+library("dplyr")
+library("readxl")
+# Prepare the data
+
+contig <- read_excel(file.path("data","cigarettes","Spat-Sym-US.xls"),
+  col_names = paste0(1:46)) %>% as.matrix()
+df <- read_excel(file.path("data","cigarettes","cigarette+2var.xls")) %>%
+  mutate(year = factor(year + 1963), state = factor(state))
+xy <- read_excel(file.path("data","cigarettes","cigar_states.xls"), col_names = TRUE)
+
+# Utah has a wrong longitude
+xy %>% filter(Name == "UTAH") # 11.9 is off the Irish coast
+xy <- xy %>% mutate(longitude = ifelse(Name == "UTAH", 111.7, longitude))
+
+# Connectivities ---
+n_time <- length(unique(df$year))
+# Contiguity matrix
+W_cont <- kronecker(diag(n_time), contig / rowSums(contig))
+# Inverse-distance decay function
+dist <- as.matrix(dist(xy))
+diag(dist) <- Inf # Diagonal elements will be 0
+Psi <- function(delta) {
+  W_dist <- dist ^ (-delta) # Build
+  W_dist <- W_dist / max(eigen(W_dist, symmetric = TRUE)$values) # Scale
+  kronecker(diag(n_time), W_dist)
+}
+W_dist <- Psi(3)
+
+# Prepare variables ---
+y <- cbind(logc = df$logc)
+X <- model.matrix(logc ~ logp + logy + year + state, data = df)
+X_lag <- X[, c("logp", "logy")]
+colnames(X_lag) <- c("wlogp", "wlogy")
+X_cont <- W_cont %*% X_lag
+
+
+
+```
+
+```{r}
+# Settings ---
+n_save <- 1000
+n_burn <- 1000
+
+out_slxdx <- bslx(y ~ X, W = Psi, X_SLX = X_lag,
+  n_save = n_save, n_burn = n_burn, options = set_options(
+    SLX = set_SLX(delta = 3, delta_scale = 0.05, delta_a = 2, delta_b = 2)))
+```
+
+```{r}
+out_slxdx
+```
+
 
 # Exercise B
 ```{r, echo = FALSE}
