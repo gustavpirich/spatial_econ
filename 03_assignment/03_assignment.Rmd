@@ -91,6 +91,7 @@ The demand for cigarettes depends negatively on the price of the cigarettes and 
 We now test for spatial autocorrelation. Global Moran's I is highly statistically significant, presenting evidence that there is indeed spatial autocorrelation in the residuals.    
 ```{r, echo = FALSE}
 moran_result_dist <- lm.morantest(OLS, mat2listw(W_, style = "W"))
+moran_result_dist
 ```
 
 ```{r, include = FALSE, eval = FALSE}
@@ -335,7 +336,7 @@ mod1 <- feols(fml1,
 
 fml2 = ANY_EVENT_ACLED ~ SPEI4pg + L1_SPEI4pg + L2_SPEI4pg + GSmain_ext_SPEI4pg + L1_GSmain_ext_SPEI4pg + L2_GSmain_ext_SPEI4pg + W_L2_GSmain_ext_SPEI4pg + W_L1_GSmain_ext_SPEI4pg + W_GSmain_ext_SPEI4pg + W_SPEI4pg + W_L1_SPEI4pg + W_L2_SPEI4pg + elevation_cell + 
   rough_cell + area_cell + as.factor(use_primary) + 
-  dis_river_cell + as.factor(shared) +  as.factor(border) + as.factor(any_mineral)+ ELF + W_elevation_cell + W_rough_cell + W_area_cell + W_ELF + as.factor(W_any_mineral) + as.factor(W_shared)  + 
+  dis_river_cell + as.factor(shared) +  as.factor(border) + as.factor(any_mineral)+ ELF + W_elevation_cell + W_rough_cell + W_area_cell + W_ELF + as.factor(W_any_mineral) + as.factor(W_border) + as.factor(W_shared)  + 
   W_dis_river_cell + as.factor(W_use_primary) + i(as.factor(country_largest_share), as.numeric(year), ref = "Zimbabwe") | as.factor(year)
 
 mod2 <- feols(fml2, 
@@ -355,25 +356,25 @@ etable(mod1, mod2, tex = TRUE,
    Model:                          & (1)             & (2)\\  
    \midrule
    \emph{Variables}\\
-   SPEI4pg                         & 0.0346$^{***}$  & 0.0101\\   
+   SPEI4pg                         & 0.0346$^{***}$  & 0.0103\\   
                                    & (0.0053)        & (0.0149)\\   
-   L1\_SPEI4pg                     & 0.0026          & 0.0127\\   
+   L1\_SPEI4pg                     & 0.0026          & 0.0131\\   
                                    & (0.0049)        & (0.0135)\\   
-   L2\_SPEI4pg                     & 0.0104$^{**}$   & -0.0096\\   
+   L2\_SPEI4pg                     & 0.0104$^{**}$   & -0.0097\\   
                                    & (0.0049)        & (0.0140)\\   
-   GSmain\_ext\_SPEI4pg            & -0.0338$^{***}$ & -0.0052\\   
+   GSmain\_ext\_SPEI4pg            & -0.0338$^{***}$ & -0.0058\\   
                                    & (0.0088)        & (0.0158)\\   
-   L1\_GSmain\_ext\_SPEI4pg        & -0.0321$^{***}$ & -0.0429$^{***}$\\   
+   L1\_GSmain\_ext\_SPEI4pg        & -0.0321$^{***}$ & -0.0433$^{***}$\\   
                                    & (0.0081)        & (0.0158)\\   
-   L2\_GSmain\_ext\_SPEI4pg        & -0.0348$^{***}$ & -0.0239\\   
+   L2\_GSmain\_ext\_SPEI4pg        & -0.0348$^{***}$ & -0.0240\\   
                                    & (0.0085)        & (0.0156)\\   
-   W\_L2\_GSmain\_ext\_SPEI4pg     &                 & -0.0027\\   
+   W\_L2\_GSmain\_ext\_SPEI4pg     &                 & -0.0026\\   
                                    &                 & (0.0026)\\   
-   W\_L1\_GSmain\_ext\_SPEI4pg     &                 & 0.0020\\   
+   W\_L1\_GSmain\_ext\_SPEI4pg     &                 & 0.0021\\   
                                    &                 & (0.0026)\\   
-   W\_GSmain\_ext\_SPEI4pg         &                 & -0.0058$^{**}$\\   
+   W\_GSmain\_ext\_SPEI4pg         &                 & -0.0056$^{**}$\\   
                                    &                 & (0.0027)\\   
-   W\_SPEI4pg                      &                 & 0.0044$^{*}$\\   
+   W\_SPEI4pg                      &                 & 0.0043$^{*}$\\   
                                    &                 & (0.0023)\\   
    W\_L1\_SPEI4pg                  &                 & -0.0017\\   
                                    &                 & (0.0021)\\   
@@ -385,8 +386,8 @@ etable(mod1, mod2, tex = TRUE,
    \midrule
    \emph{Fit statistics}\\
    Observations                    & 35,042          & 35,042\\  
-   R$^2$                           & 0.18918         & 0.19568\\  
-   Within R$^2$                    & 0.18655         & 0.19307\\  
+   R$^2$                           & 0.18918         & 0.19614\\  
+   Within R$^2$                    & 0.18655         & 0.19353\\  
    \midrule \midrule
    \multicolumn{3}{l}{\emph{Clustered (cell) standard-errors in parentheses}}\\
    \multicolumn{3}{l}{\emph{Signif. Codes: ***: 0.01, **: 0.05, *: 0.1}}\\
@@ -413,7 +414,7 @@ listwmat <- nb2listw(neighboors, style ="B", zero.policy = TRUE)
 
 # specification 3 - we might be missing the country specific linear time trends of the neighbors 
 mod3 <- spml(ANY_EVENT_ACLED ~ lag(ANY_EVENT_ACLED) + SPEI4pg + L1_SPEI4pg + L2_SPEI4pg + GSmain_ext_SPEI4pg + L1_GSmain_ext_SPEI4pg + L2_GSmain_ext_SPEI4pg + W_GSmain_ext_SPEI4pg +
-                               W_L1_GSmain_ext_SPEI4pg + W_L2_GSmain_ext_SPEI4pg + W_SPEI4pg + W_L1_SPEI4pg + W_L2_SPEI4pg + elevation_cell + 
+                               W_L1_GSmain_ext_SPEI4pg + W_L2_GSmain_ext_SPEI4pg + W_SPEI4pg + W_L1_SPEI4pg + W_L2_SPEI4pg + elevation_cell + as.factor(W_border) +
                                rough_cell + area_cell + as.factor(use_primary) + dis_river_cell + as.factor(shared) +  as.factor(border) + as.factor(any_mineral) +
                                ELF + W_elevation_cell + W_rough_cell + W_area_cell + W_ELF + as.factor(W_any_mineral) + as.factor(W_shared)  + 
                                W_dis_river_cell + as.factor(W_use_primary) + as.factor(country_largest_share):as.numeric(year), # country specific linear time trends
@@ -440,7 +441,7 @@ saveRDS(mod3, "./models/mod3.rds")
 geoconflict_main_fe <- geoconflict_main_if %>% 
   mutate(country_year_fe = paste0(country_largest_share, year))
 
-mod4 <- spml(ANY_EVENT_ACLED ~ lag(ANY_EVENT_ACLED) + SPEI4pg + L1_SPEI4pg + L2_SPEI4pg + GSmain_ext_SPEI4pg + L1_GSmain_ext_SPEI4pg + L2_GSmain_ext_SPEI4pg + W_GSmain_ext_SPEI4pg + W_L1_GSmain_ext_SPEI4pg + W_L2_GSmain_ext_SPEI4pg + W_SPEI4pg + W_L1_SPEI4pg + W_L2_SPEI4pg + elevation_cell + rough_cell + area_cell + as.factor(use_primary) + dis_river_cell + as.factor(shared) +  as.factor(border) + as.factor(any_mineral) +
+mod4 <- spml(ANY_EVENT_ACLED ~ lag(ANY_EVENT_ACLED) + SPEI4pg + L1_SPEI4pg + L2_SPEI4pg + GSmain_ext_SPEI4pg + L1_GSmain_ext_SPEI4pg + L2_GSmain_ext_SPEI4pg + W_GSmain_ext_SPEI4pg + W_L1_GSmain_ext_SPEI4pg + W_L2_GSmain_ext_SPEI4pg + W_SPEI4pg + W_L1_SPEI4pg + W_L2_SPEI4pg + elevation_cell + rough_cell + area_cell + as.factor(use_primary) + dis_river_cell + as.factor(shared) +  as.factor(border) + as.factor(W_border) + as.factor(any_mineral) +
                               ELF + W_elevation_cell + W_rough_cell + W_area_cell + W_ELF + as.factor(W_any_mineral) + as.factor(W_shared)  + 
                               W_dis_river_cell + as.factor(W_use_primary) + as.factor(country_year_fe), # country x year FE
                              data = as.data.frame(geoconflict_main_fe), 
@@ -460,7 +461,7 @@ saveRDS(mod4, "./models/mod4.rds")
 
 ```
 
-```{r, echo = FALSE}
+```{r, echo = FALSE, results='asis'}
 # reading in the model 
 
 mod3 <- readRDS("./models/mod3.rds")
@@ -490,62 +491,10 @@ coef_table_4 <- summary_mod4$CoefTable[selected_coefficients, ]
 ar_coef_table_4 <- summary_mod4$ARCoefTable
 
 # Print formatted regression table
-#stargazer(rbind(ar_coef_table_3, coef_table_3), align = TRUE, digits = 4, title = " Replication Model 3")
-#stargazer(rbind(ar_coef_table_4, coef_table_4), align = TRUE, out = "html", digits = 4, title = "Replication Model 4")
- 
+stargazer(rbind(ar_coef_table_3, coef_table_3), align = TRUE, digits = 4, title = " Replication Model 3")
+stargazer(rbind(ar_coef_table_4, coef_table_4), align = TRUE, out = "html", digits = 4, title = "Replication Model 4")
+
 ```
-\begin{table}[!htbp] \centering 
-  \caption{ Replication Model 3} 
-  \label{} 
-\begin{tabular}{@{\extracolsep{5pt}} D{.}{.}{-4} D{.}{.}{-4} D{.}{.}{-4} D{.}{.}{-4} D{.}{.}{-4} } 
-\\[-1.8ex]\hline 
-\hline \\[-1.8ex] 
-\multicolumn{1}{c}{} & \multicolumn{1}{c}{Estimate} & \multicolumn{1}{c}{Std. Error} & \multicolumn{1}{c}{t-value} & \multicolumn{1}{c}{Pr(\textgreater \textbar t\textbar )} \\ 
-\hline \\[-1.8ex] 
-\multicolumn{1}{c}{lambda} & 0.0458 & 0.0010 & 45.3304 & 0 \\ 
-\multicolumn{1}{c}{lag(ANY\_EVENT\_ACLED)} & 0.3373 & 0.0050 & 67.4562 & 0 \\ 
-\multicolumn{1}{c}{SPEI4pg} & -0.0017 & 0.0134 & -0.1264 & 0.8994 \\ 
-\multicolumn{1}{c}{L1\_SPEI4pg} & 0.0138 & 0.0139 & 0.9895 & 0.3224 \\ 
-\multicolumn{1}{c}{L2\_SPEI4pg} & -0.0160 & 0.0138 & -1.1537 & 0.2486 \\ 
-\multicolumn{1}{c}{GSmain\_ext\_SPEI4pg} & 0.0004 & 0.0141 & 0.0265 & 0.9789 \\ 
-\multicolumn{1}{c}{L1\_GSmain\_ext\_SPEI4pg} & -0.0469 & 0.0147 & -3.1841 & 0.0015 \\ 
-\multicolumn{1}{c}{L2\_GSmain\_ext\_SPEI4pg} & -0.0110 & 0.0148 & -0.7466 & 0.4553 \\ 
-\multicolumn{1}{c}{W\_GSmain\_ext\_SPEI4pg} & -0.0028 & 0.0024 & -1.1698 & 0.2421 \\ 
-\multicolumn{1}{c}{W\_L1\_GSmain\_ext\_SPEI4pg} & 0.0066 & 0.0025 & 2.6670 & 0.0077 \\ 
-\multicolumn{1}{c}{W\_L2\_GSmain\_ext\_SPEI4pg} & -0.0011 & 0.0025 & -0.4346 & 0.6639 \\ 
-\multicolumn{1}{c}{W\_SPEI4pg} & 0.0023 & 0.0021 & 1.1129 & 0.2658 \\ 
-\multicolumn{1}{c}{W\_L1\_SPEI4pg} & -0.0028 & 0.0021 & -1.3146 & 0.1886 \\ 
-\multicolumn{1}{c}{W\_L2\_SPEI4pg} & 0.0043 & 0.0021 & 2.0831 & 0.0372 \\ 
-\hline \\[-1.8ex] 
-\end{tabular} 
-\end{table} 
-
-
-\begin{table}[!htbp] \centering 
-  \caption{Replication Model 4} 
-  \label{} 
-\begin{tabular}{@{\extracolsep{5pt}} D{.}{.}{-4} D{.}{.}{-4} D{.}{.}{-4} D{.}{.}{-4} D{.}{.}{-4} } 
-\\[-1.8ex]\hline 
-\hline \\[-1.8ex] 
-\multicolumn{1}{c}{} & \multicolumn{1}{c}{Estimate} & \multicolumn{1}{c}{Std. Error} & \multicolumn{1}{c}{t-value} & \multicolumn{1}{c}{Pr(\textgreater \textbar t\textbar )} \\ 
-\hline \\[-1.8ex] 
-\multicolumn{1}{c}{lambda} & 0.0331 & 0.0011 & 29.7777 & 0 \\ 
-\multicolumn{1}{c}{lag(ANY\_EVENT\_ACLED)} & 0.3455 & 0.0051 & 67.3891 & 0 \\ 
-\multicolumn{1}{c}{SPEI4pg} & -0.0003 & 0.0135 & -0.0250 & 0.9800 \\ 
-\multicolumn{1}{c}{L1\_SPEI4pg} & 0.0182 & 0.0140 & 1.2950 & 0.1953 \\ 
-\multicolumn{1}{c}{L2\_SPEI4pg} & -0.0139 & 0.0139 & -0.9998 & 0.3174 \\ 
-\multicolumn{1}{c}{GSmain\_ext\_SPEI4pg} & 0.0005 & 0.0140 & 0.0389 & 0.9690 \\ 
-\multicolumn{1}{c}{L1\_GSmain\_ext\_SPEI4pg} & -0.0514 & 0.0146 & -3.5081 & 0.0005 \\ 
-\multicolumn{1}{c}{L2\_GSmain\_ext\_SPEI4pg} & -0.0050 & 0.0147 & -0.3376 & 0.7357 \\ 
-\multicolumn{1}{c}{W\_GSmain\_ext\_SPEI4pg} & -0.0035 & 0.0026 & -1.3493 & 0.1772 \\ 
-\multicolumn{1}{c}{W\_L1\_GSmain\_ext\_SPEI4pg} & 0.0071 & 0.0027 & 2.6270 & 0.0086 \\ 
-\multicolumn{1}{c}{W\_L2\_GSmain\_ext\_SPEI4pg} & -0.0017 & 0.0027 & -0.6202 & 0.5352 \\ 
-\multicolumn{1}{c}{W\_SPEI4pg} & 0.0012 & 0.0022 & 0.5311 & 0.5953 \\ 
-\multicolumn{1}{c}{W\_L1\_SPEI4pg} & -0.0018 & 0.0023 & -0.7959 & 0.4261 \\ 
-\multicolumn{1}{c}{W\_L2\_SPEI4pg} & 0.0050 & 0.0023 & 2.1728 & 0.0298 \\ 
-\hline \\[-1.8ex] 
-\end{tabular} 
-\end{table}
 Next, we create an adjacency matrix based on horizontal contiguity. To that end we write a function which takes the centroids and maximum distance for the contiguity cutoff as inputs and produces a neighboors list for each cells based on horizontal contiguity. We assign a neighboors status based on two conditions. First a cell needs to have the same latitude (or longitude in the case of vertical contiguity) and the centroid of the cell needs to be closer than a pre-specified distance cutoff. We check this condition for all cells. We then rerun specification 3 and 4 based on those contiguity matrices.  
 
 ```{r}
@@ -640,7 +589,7 @@ Simple feature collection with 3 features and 166 fields
 Geometry type: POINT
 We can now rerun our analysis
 ```{r, include = FALSE, eval = FALSE}
-modvertical3 <- spml(ANY_EVENT_ACLED ~ lag(ANY_EVENT_ACLED) + SPEI4pg + L1_SPEI4pg + L2_SPEI4pg + GSmain_ext_SPEI4pg + L1_GSmain_ext_SPEI4pg + L2_GSmain_ext_SPEI4pg + W_GSmain_ext_SPEI4pg + W_L1_GSmain_ext_SPEI4pg + W_L2_GSmain_ext_SPEI4pg + W_SPEI4pg + W_L1_SPEI4pg + W_L2_SPEI4pg + elevation_cell + rough_cell + area_cell + as.factor(use_primary) + dis_river_cell + as.factor(shared) +  as.factor(border) + as.factor(any_mineral) + ELF + W_elevation_cell + W_rough_cell + W_area_cell + W_ELF + as.factor(W_any_mineral) + as.factor(W_shared)  + W_dis_river_cell + as.factor(W_use_primary) + as.factor(country_largest_share):as.numeric(year), # country specific linear time trends
+modvertical3 <- spml(ANY_EVENT_ACLED ~ lag(ANY_EVENT_ACLED) + SPEI4pg + L1_SPEI4pg + L2_SPEI4pg + GSmain_ext_SPEI4pg + L1_GSmain_ext_SPEI4pg + L2_GSmain_ext_SPEI4pg + W_GSmain_ext_SPEI4pg + W_L1_GSmain_ext_SPEI4pg + W_L2_GSmain_ext_SPEI4pg + W_SPEI4pg + W_L1_SPEI4pg + W_L2_SPEI4pg + elevation_cell + rough_cell + area_cell + as.factor(use_primary) + dis_river_cell + as.factor(shared) +  as.factor(border) + as.factor(any_mineral) + ELF + W_elevation_cell + W_rough_cell + W_area_cell + as.factor(W_border) + W_ELF + as.factor(W_any_mineral) + as.factor(W_shared)  + W_dis_river_cell + as.factor(W_use_primary) + as.factor(country_largest_share):as.numeric(year), # country specific linear time trends
                              data = as.data.frame(geoconflict_main_if), 
                              index=c("cell","year"),
                              listw = vertical_listw,
@@ -654,7 +603,7 @@ modvertical3 <- spml(ANY_EVENT_ACLED ~ lag(ANY_EVENT_ACLED) + SPEI4pg + L1_SPEI4
 
 saveRDS(modvertical3, "./models/modvertical3.rds")
 
-modelhorizontal3 <- spml(ANY_EVENT_ACLED ~ lag(ANY_EVENT_ACLED) + SPEI4pg + L1_SPEI4pg + L2_SPEI4pg + GSmain_ext_SPEI4pg + L1_GSmain_ext_SPEI4pg + L2_GSmain_ext_SPEI4pg + W_GSmain_ext_SPEI4pg + W_L1_GSmain_ext_SPEI4pg + W_L2_GSmain_ext_SPEI4pg + W_SPEI4pg + W_L1_SPEI4pg + W_L2_SPEI4pg + elevation_cell + rough_cell + area_cell + as.factor(use_primary) + dis_river_cell + as.factor(shared) +  as.factor(border) + as.factor(any_mineral) + ELF + W_elevation_cell + W_rough_cell + W_area_cell + W_ELF + as.factor(W_any_mineral) + as.factor(W_shared)  + W_dis_river_cell + as.factor(W_use_primary) + as.factor(country_largest_share):as.numeric(year), # country specific linear time trends
+modelhorizontal3 <- spml(ANY_EVENT_ACLED ~ lag(ANY_EVENT_ACLED) + SPEI4pg + L1_SPEI4pg + L2_SPEI4pg + GSmain_ext_SPEI4pg + L1_GSmain_ext_SPEI4pg + L2_GSmain_ext_SPEI4pg + W_GSmain_ext_SPEI4pg + W_L1_GSmain_ext_SPEI4pg + W_L2_GSmain_ext_SPEI4pg + W_SPEI4pg + W_L1_SPEI4pg + W_L2_SPEI4pg + elevation_cell + rough_cell + area_cell + as.factor(use_primary) + dis_river_cell + as.factor(shared) +  as.factor(border) + as.factor(any_mineral) + ELF + W_elevation_cell + W_rough_cell + W_area_cell + + as.factor(W_border) + W_ELF + as.factor(W_any_mineral) + as.factor(W_shared)  + W_dis_river_cell + as.factor(W_use_primary) + as.factor(country_largest_share):as.numeric(year), # country specific linear time trends
                              data = as.data.frame(geoconflict_main_if), 
                              index=c("cell","year"),
                              listw = horizontal_listw,
@@ -668,7 +617,7 @@ modelhorizontal3 <- spml(ANY_EVENT_ACLED ~ lag(ANY_EVENT_ACLED) + SPEI4pg + L1_S
 
 saveRDS(modelhorizontal3, "./models/modelhorizontal3.rds")
 
-modelvertical4 <- spml(ANY_EVENT_ACLED ~ lag(ANY_EVENT_ACLED) + SPEI4pg + L1_SPEI4pg + L2_SPEI4pg + GSmain_ext_SPEI4pg + L1_GSmain_ext_SPEI4pg + L2_GSmain_ext_SPEI4pg + W_GSmain_ext_SPEI4pg + W_L1_GSmain_ext_SPEI4pg + W_L2_GSmain_ext_SPEI4pg + W_SPEI4pg + W_L1_SPEI4pg + W_L2_SPEI4pg + elevation_cell + rough_cell + area_cell + as.factor(use_primary) + dis_river_cell + as.factor(shared) +  as.factor(border) + as.factor(any_mineral) +
+modelvertical4 <- spml(ANY_EVENT_ACLED ~ lag(ANY_EVENT_ACLED) + SPEI4pg + L1_SPEI4pg + L2_SPEI4pg + GSmain_ext_SPEI4pg + L1_GSmain_ext_SPEI4pg + L2_GSmain_ext_SPEI4pg + W_GSmain_ext_SPEI4pg + W_L1_GSmain_ext_SPEI4pg + W_L2_GSmain_ext_SPEI4pg + W_SPEI4pg + W_L1_SPEI4pg + W_L2_SPEI4pg + elevation_cell + rough_cell + area_cell + as.factor(use_primary) + dis_river_cell + as.factor(shared) + as.factor(W_border)+ as.factor(border) + as.factor(any_mineral) +
                               ELF + W_elevation_cell + W_rough_cell + W_area_cell + W_ELF + as.factor(W_any_mineral) + as.factor(W_shared)  + 
                               W_dis_river_cell + as.factor(W_use_primary) + as.factor(country_year_fe), # country x year FE
                              data = as.data.frame(geoconflict_main_fe), 
@@ -686,7 +635,7 @@ modelvertical4 <- spml(ANY_EVENT_ACLED ~ lag(ANY_EVENT_ACLED) + SPEI4pg + L1_SPE
 saveRDS(modelvertical4, "./models/modelvertical4.rds")
 
 
-modelhorizontal4 <- spml(ANY_EVENT_ACLED ~ lag(ANY_EVENT_ACLED) + SPEI4pg + L1_SPEI4pg + L2_SPEI4pg + GSmain_ext_SPEI4pg + L1_GSmain_ext_SPEI4pg + L2_GSmain_ext_SPEI4pg + W_GSmain_ext_SPEI4pg + W_L1_GSmain_ext_SPEI4pg + W_L2_GSmain_ext_SPEI4pg + W_SPEI4pg + W_L1_SPEI4pg + W_L2_SPEI4pg + elevation_cell + rough_cell + area_cell + as.factor(use_primary) + dis_river_cell + as.factor(shared) +  as.factor(border) + as.factor(any_mineral) +
+modelhorizontal4 <- spml(ANY_EVENT_ACLED ~ lag(ANY_EVENT_ACLED) + SPEI4pg + L1_SPEI4pg + L2_SPEI4pg + GSmain_ext_SPEI4pg + L1_GSmain_ext_SPEI4pg + L2_GSmain_ext_SPEI4pg + W_GSmain_ext_SPEI4pg + W_L1_GSmain_ext_SPEI4pg + W_L2_GSmain_ext_SPEI4pg + W_SPEI4pg + W_L1_SPEI4pg + W_L2_SPEI4pg + elevation_cell + rough_cell + area_cell + as.factor(use_primary) + dis_river_cell + as.factor(shared) + as.factor(W_border) + as.factor(border) + as.factor(any_mineral) +
                               ELF + W_elevation_cell + W_rough_cell + W_area_cell + W_ELF + as.factor(W_any_mineral) + as.factor(W_shared)  + 
                               W_dis_river_cell + as.factor(W_use_primary) + as.factor(country_year_fe), # country x year FE
                              data = as.data.frame(geoconflict_main_fe), 
@@ -939,7 +888,8 @@ summarize_graph <- function(g) {
 
 ## Visualization of Spillover Effects
 
-For this exercise we simulate the effect of a one-standard deviation SEPI growing season shock holding everything else constant. We multiply the shock times -1 to obtain the negative impact and thus the \textit{increase} in conflict incidence. We exogenously shock a cell and calculate 'manually', based on the coefficients of model 4, the magnitude of the shock propagation. We take into account both the dynamic, and spatial autoregressive structure of the model. We see that the shock reaches its peak effect size at t = 1, consistent with the main insight of the paper (the lagged effect of growing season shocks on conflict). A negative one standard deviation growing season shock increases conflict incidence by about 2.1 percentage points for the affected cell. Overall the spillover effects both in absolute magnitude and visually as reflected in the figure are rather small. 
+For this exercise we simulate the effect of a one-standard deviation SEPI growing season shock holding everything else constant. We multiply the shock times -1 to obtain the negative impact and thus the \textit{increase} in conflict incidence. We exogenously shock a cell and calculate 'manually', based on the coefficients of model 4, the magnitude of the shock propagation. We take into account both the dynamic, and spatial autoregressive structure of the model. We see that the shock reaches its peak effect size at t = 1, consistent with the main insight of the paper (the lagged effect of growing season shocks on conflict). A negative one standard deviation growing season shock increases conflict incidence by about 2.1 percentage points for the affected cell. Overall the spillover effects both in absolute magnitude and visually as reflected in the figure are rather small. The maximum conflict increase in a neighbooring cell only amounts to about 0.5 percentage points. 
+
 ```{r}
 
 # COMPUTATION OF SHOCKS
@@ -1040,21 +990,21 @@ df3$Prob <- as.vector(grid3)
 # Create plots
 plot1 <- ggplot(df1, aes(x = x, y = y, fill = Prob)) +
   geom_tile() +
-  scale_fill_viridis_c(option = "plasma", limits = overall_range) +
+  scale_fill_viridis_c(option = "magma", limits = overall_range) +
   theme_void() +
   theme(legend.position = "none") +
   labs(title = "SEPI Growing Season Shock at t = 0")
 
 plot2 <- ggplot(df2, aes(x = x, y = y, fill = Prob)) +
   geom_tile() +
-  scale_fill_viridis_c(option = "plasma", limits = overall_range) +
+  scale_fill_viridis_c(option = "magma", limits = overall_range) +
   theme_void() +
   theme(legend.position = "none") +
   labs(title = "t = 1")
 
 plot3 <- ggplot(df3, aes(x = x, y = y, fill = Prob)) +
   geom_tile() +
-  scale_fill_viridis_c(option = "plasma", limits = overall_range) +
+  scale_fill_viridis_c(option = "magma", limits = overall_range) +
   theme_void() +
   labs(title = "t = 2", fill = "Pr(Conflict)")
 
