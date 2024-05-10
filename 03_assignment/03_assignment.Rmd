@@ -417,7 +417,7 @@ mod3 <- spml(ANY_EVENT_ACLED ~ lag(ANY_EVENT_ACLED) + SPEI4pg + L1_SPEI4pg + L2_
                                W_L1_GSmain_ext_SPEI4pg + W_L2_GSmain_ext_SPEI4pg + W_SPEI4pg + W_L1_SPEI4pg + W_L2_SPEI4pg + elevation_cell + as.factor(W_border) +
                                rough_cell + area_cell + as.factor(use_primary) + dis_river_cell + as.factor(shared) +  as.factor(border) + as.factor(any_mineral) +
                                ELF + W_elevation_cell + W_rough_cell + W_area_cell + W_ELF + as.factor(W_any_mineral) + as.factor(W_shared)  + 
-                               W_dis_river_cell + as.factor(W_use_primary) + as.factor(country_largest_share):as.numeric(year), # country specific linear time trends
+                               W_dis_river_cell + as.factor(W_use_primary) +  as.factor(country_largest_share):as.numeric(year), # country specific linear time trends
                              data = as.data.frame(geoconflict_main_if), 
                              index=c("cell","year"),
                              listw = listwmat,
@@ -491,19 +491,19 @@ coef_table_4 <- summary_mod4$CoefTable[selected_coefficients, ]
 ar_coef_table_4 <- summary_mod4$ARCoefTable
 
 # Print formatted regression table
-stargazer(rbind(ar_coef_table_3, coef_table_3), align = TRUE, digits = 4, title = " Replication Model 3")
-stargazer(rbind(ar_coef_table_4, coef_table_4), align = TRUE, out = "html", digits = 4, title = "Replication Model 4")
+stargazer(rbind(ar_coef_table_3, coef_table_3), header = FALSE, align = TRUE, digits = 4, title = " Replication Model 3")
+stargazer(rbind(ar_coef_table_4, coef_table_4), header = FALSE, align = TRUE, out = "html", digits = 4, title = "Replication Model 4")
 
 ```
 Next, we create an adjacency matrix based on horizontal contiguity. To that end we write a function which takes the centroids and maximum distance for the contiguity cutoff as inputs and produces a neighboors list for each cells based on horizontal contiguity. We assign a neighboors status based on two conditions. First a cell needs to have the same latitude (or longitude in the case of vertical contiguity) and the centroid of the cell needs to be closer than a pre-specified distance cutoff. We check this condition for all cells. We then rerun specification 3 and 4 based on those contiguity matrices.  
 
-```{r}
+```{r, echo = FALSE}
 ### Lets first create teh bianry contiguity matrix based on horizontal contiguity 
 # Extract centroids of the polygons if not already point data
 
 # Calculate distances and filter horizontally contiguous points
 # Define a function to find neighbors based on conditions
-find_neighbors_horizontal <- function(centroids, max_distance = 150000, lat_tolerance = 0.01) {
+find_neighbors_horizontal <- function(centroids, max_distance = 180000, lat_tolerance = 0.01) {
   # Create a matrix to store distances
   distances <- st_distance(centroids)
   latitudes <- st_coordinates(centroids)[,2] # Extract latitudes
@@ -529,7 +529,7 @@ find_neighbors_horizontal <- function(centroids, max_distance = 150000, lat_tole
   return(neighbors_list)
 }
 
-find_neighbors_vertical <- function(centroids, max_distance = 150000, lon_tolerance = 0.01) {
+find_neighbors_vertical <- function(centroids, max_distance = 180000, lon_tolerance = 0.01) {
   # Create a matrix to store distances
   distances <- st_distance(centroids)
   longitudes <- st_coordinates(centroids)[,1] # Extract longitudes
@@ -584,10 +584,8 @@ for (i in seq_len(n)) {
 vertical_listw <- mat2listw(adj_matrix_vertical, style = "B", zero.policy=TRUE)
 horizontal_listw <-mat2listw(adj_matrix_horizontal, style = "B", zero.policy=TRUE)
 ```
-[[677]]
-Simple feature collection with 3 features and 166 fields
-Geometry type: POINT
-We can now rerun our analysis
+
+We can now rerun our analysis: 
 ```{r, include = FALSE, eval = FALSE}
 modvertical3 <- spml(ANY_EVENT_ACLED ~ lag(ANY_EVENT_ACLED) + SPEI4pg + L1_SPEI4pg + L2_SPEI4pg + GSmain_ext_SPEI4pg + L1_GSmain_ext_SPEI4pg + L2_GSmain_ext_SPEI4pg + W_GSmain_ext_SPEI4pg + W_L1_GSmain_ext_SPEI4pg + W_L2_GSmain_ext_SPEI4pg + W_SPEI4pg + W_L1_SPEI4pg + W_L2_SPEI4pg + elevation_cell + rough_cell + area_cell + as.factor(use_primary) + dis_river_cell + as.factor(shared) +  as.factor(border) + as.factor(any_mineral) + ELF + W_elevation_cell + W_rough_cell + W_area_cell + as.factor(W_border) + W_ELF + as.factor(W_any_mineral) + as.factor(W_shared)  + W_dis_river_cell + as.factor(W_use_primary) + as.factor(country_largest_share):as.numeric(year), # country specific linear time trends
                              data = as.data.frame(geoconflict_main_if), 
@@ -655,7 +653,7 @@ saveRDS(modelhorizontal4, "./models/modelhorizontal4.rds")
 ```
 
 
-```{r, echo = FALSE, eval = FALSE}
+```{r, echo = FALSE, results = "asis"}
 modelvertical3 <- readRDS("./models/modvertical3.rds")
 
 modelhorizontal3 <- readRDS("./models/modelhorizontal3.rds")
@@ -700,6 +698,7 @@ stargazer(
   rbind(ar_coef_table_3_vertical, coef_table_3_vertical), 
   align = TRUE, 
   digits = 4, 
+  header = FALSE,
   title = "Model 3 Vertical"
 )
 
@@ -707,6 +706,7 @@ stargazer(
   rbind(ar_coef_table_3_horizontal, coef_table_3_horizontal), 
   align = TRUE, 
   digits = 4, 
+  header = FALSE,
   title = "Model 3 Horizontal"
 )
 
@@ -714,6 +714,7 @@ stargazer(
   rbind(ar_coef_table_4_vertical, coef_table_4_vertical), 
   align = TRUE, 
   digits = 4, 
+  header = FALSE,
   title = "Model 4 Vertical"
 )
 
@@ -721,123 +722,21 @@ stargazer(
   rbind(ar_coef_table_4_horizontal, coef_table_4_horizontal), 
   align = TRUE, 
   digits = 4, 
+  header = FALSE, 
   title = "Model 4 Horizontal"
 )
 ```
+We reproduced both specification 3, and 4 for both contiguity matrices. Now that we have produced a lot of tables, what do we make of that? 
 
-
-\begin{table}[!htbp] \centering 
-  \caption{Model 3 Vertical Contiguity Matrix} 
-  \label{} 
-\begin{tabular}{@{\extracolsep{5pt}} D{.}{.}{-4} D{.}{.}{-4} D{.}{.}{-4} D{.}{.}{-4} D{.}{.}{-4} } 
-\\[-1.8ex]\hline 
-\hline \\[-1.8ex] 
-\multicolumn{1}{c}{} & \multicolumn{1}{c}{Estimate} & \multicolumn{1}{c}{Std. Error} & \multicolumn{1}{c}{t-value} & \multicolumn{1}{c}{Pr(\textgreater \textbar t\textbar )} \\ 
-\hline \\[-1.8ex] 
-\multicolumn{1}{c}{lambda} & 0.0798 & 0.0026 & 30.6366 & 0 \\ 
-\multicolumn{1}{c}{lag(ANY\_EVENT\_ACLED)} & 0.3626 & 0.0051 & 71.2501 & 0 \\ 
-\multicolumn{1}{c}{SPEI4pg} & 0.0001 & 0.0136 & 0.0090 & 0.9928 \\ 
-\multicolumn{1}{c}{L1\_SPEI4pg} & 0.0161 & 0.0142 & 1.1361 & 0.2559 \\ 
-\multicolumn{1}{c}{L2\_SPEI4pg} & -0.0143 & 0.0141 & -1.0190 & 0.3082 \\ 
-\multicolumn{1}{c}{GSmain\_ext\_SPEI4pg} & -0.0026 & 0.0144 & -0.1787 & 0.8582 \\ 
-\multicolumn{1}{c}{L1\_GSmain\_ext\_SPEI4pg} & -0.0434 & 0.0150 & -2.8930 & 0.0038 \\ 
-\multicolumn{1}{c}{L2\_GSmain\_ext\_SPEI4pg} & -0.0088 & 0.0150 & -0.5852 & 0.5584 \\ 
-\multicolumn{1}{c}{W\_GSmain\_ext\_SPEI4pg} & -0.0036 & 0.0024 & -1.4839 & 0.1378 \\ 
-\multicolumn{1}{c}{W\_L1\_GSmain\_ext\_SPEI4pg} & 0.0054 & 0.0025 & 2.1523 & 0.0314 \\ 
-\multicolumn{1}{c}{W\_L2\_GSmain\_ext\_SPEI4pg} & -0.0024 & 0.0025 & -0.9317 & 0.3515 \\ 
-\multicolumn{1}{c}{W\_SPEI4pg} & 0.0029 & 0.0021 & 1.3755 & 0.1690 \\ 
-\multicolumn{1}{c}{W\_L1\_SPEI4pg} & -0.0029 & 0.0021 & -1.3469 & 0.1780 \\ 
-\multicolumn{1}{c}{W\_L2\_SPEI4pg} & 0.0047 & 0.0021 & 2.2169 & 0.0266 \\ 
-\hline \\[-1.8ex] 
-\end{tabular} 
-\end{table} 
-
-\begin{table}[!htbp] \centering 
-  \caption{Model 3 Horizontal Contiguity Matrix} 
-  \label{} 
-\begin{tabular}{@{\extracolsep{5pt}} D{.}{.}{-4} D{.}{.}{-4} D{.}{.}{-4} D{.}{.}{-4} D{.}{.}{-4} } 
-\\[-1.8ex]\hline 
-\hline \\[-1.8ex] 
-\multicolumn{1}{c}{} & \multicolumn{1}{c}{Estimate} & \multicolumn{1}{c}{Std. Error} & \multicolumn{1}{c}{t-value} & \multicolumn{1}{c}{Pr(\textgreater \textbar t\textbar )} \\ 
-\hline \\[-1.8ex] 
-\multicolumn{1}{c}{lambda} & 0.0691 & 0.0026 & 26.3343 & 0 \\ 
-\multicolumn{1}{c}{lag(ANY\_EVENT\_ACLED)} & 0.3671 & 0.0051 & 71.7848 & 0 \\ 
-\multicolumn{1}{c}{SPEI4pg} & -0.0016 & 0.0137 & -0.1169 & 0.9069 \\ 
-\multicolumn{1}{c}{L1\_SPEI4pg} & 0.0140 & 0.0142 & 0.9831 & 0.3256 \\ 
-\multicolumn{1}{c}{L2\_SPEI4pg} & -0.0163 & 0.0141 & -1.1555 & 0.2479 \\ 
-\multicolumn{1}{c}{GSmain\_ext\_SPEI4pg} & -0.0018 & 0.0144 & -0.1273 & 0.8987 \\ 
-\multicolumn{1}{c}{L1\_GSmain\_ext\_SPEI4pg} & -0.0445 & 0.0151 & -2.9475 & 0.0032 \\ 
-\multicolumn{1}{c}{L2\_GSmain\_ext\_SPEI4pg} & -0.0100 & 0.0151 & -0.6604 & 0.5090 \\ 
-\multicolumn{1}{c}{W\_GSmain\_ext\_SPEI4pg} & -0.0040 & 0.0024 & -1.6469 & 0.0996 \\ 
-\multicolumn{1}{c}{W\_L1\_GSmain\_ext\_SPEI4pg} & 0.0055 & 0.0025 & 2.1464 & 0.0318 \\ 
-\multicolumn{1}{c}{W\_L2\_GSmain\_ext\_SPEI4pg} & -0.0025 & 0.0025 & -0.9798 & 0.3272 \\ 
-\multicolumn{1}{c}{W\_SPEI4pg} & 0.0033 & 0.0021 & 1.5491 & 0.1213 \\ 
-\multicolumn{1}{c}{W\_L1\_SPEI4pg} & -0.0026 & 0.0022 & -1.1871 & 0.2352 \\ 
-\multicolumn{1}{c}{W\_L2\_SPEI4pg} & 0.0051 & 0.0021 & 2.4010 & 0.0164 \\ 
-\hline \\[-1.8ex] 
-\end{tabular} 
-\end{table} 
-
-\begin{table}[!htbp] \centering 
-  \caption{Model 4 Vertical Contiguity Matrix} 
-  \label{} 
-\begin{tabular}{@{\extracolsep{5pt}} D{.}{.}{-4} D{.}{.}{-4} D{.}{.}{-4} D{.}{.}{-4} D{.}{.}{-4} } 
-\\[-1.8ex]\hline 
-\hline \\[-1.8ex] 
-\multicolumn{1}{c}{} & \multicolumn{1}{c}{Estimate} & \multicolumn{1}{c}{Std. Error} & \multicolumn{1}{c}{t-value} & \multicolumn{1}{c}{Pr(\textgreater \textbar t\textbar )} \\ 
-\hline \\[-1.8ex] 
-\multicolumn{1}{c}{lambda} & 0.0556 & 0.0027 & 20.8863 & 0 \\ 
-\multicolumn{1}{c}{lag(ANY\_EVENT\_ACLED)} & 0.3600 & 0.0052 & 69.6567 & 0 \\ 
-\multicolumn{1}{c}{SPEI4pg} & 0.0007 & 0.0136 & 0.0483 & 0.9615 \\ 
-\multicolumn{1}{c}{L1\_SPEI4pg} & 0.0207 & 0.0142 & 1.4605 & 0.1442 \\ 
-\multicolumn{1}{c}{L2\_SPEI4pg} & -0.0124 & 0.0141 & -0.8858 & 0.3757 \\ 
-\multicolumn{1}{c}{GSmain\_ext\_SPEI4pg} & -0.0017 & 0.0141 & -0.1203 & 0.9043 \\ 
-\multicolumn{1}{c}{L1\_GSmain\_ext\_SPEI4pg} & -0.0491 & 0.0148 & -3.3294 & 0.0009 \\ 
-\multicolumn{1}{c}{L2\_GSmain\_ext\_SPEI4pg} & -0.0030 & 0.0148 & -0.2062 & 0.8367 \\ 
-\multicolumn{1}{c}{W\_GSmain\_ext\_SPEI4pg} & -0.0040 & 0.0026 & -1.5338 & 0.1251 \\ 
-\multicolumn{1}{c}{W\_L1\_GSmain\_ext\_SPEI4pg} & 0.0061 & 0.0027 & 2.2547 & 0.0242 \\ 
-\multicolumn{1}{c}{W\_L2\_GSmain\_ext\_SPEI4pg} & -0.0023 & 0.0027 & -0.8601 & 0.3897 \\ 
-\multicolumn{1}{c}{W\_SPEI4pg} & 0.0016 & 0.0022 & 0.7318 & 0.4643 \\ 
-\multicolumn{1}{c}{W\_L1\_SPEI4pg} & -0.0018 & 0.0023 & -0.7941 & 0.4272 \\ 
-\multicolumn{1}{c}{W\_L2\_SPEI4pg} & 0.0051 & 0.0023 & 2.2191 & 0.0265 \\ 
-\hline \\[-1.8ex] 
-\end{tabular} 
-\end{table} 
-
-\begin{table}[!htbp] \centering 
-  \caption{Model 4 Horizontal Contiguity Matrix} 
-  \label{} 
-\begin{tabular}{@{\extracolsep{5pt}} D{.}{.}{-4} D{.}{.}{-4} D{.}{.}{-4} D{.}{.}{-4} D{.}{.}{-4} } 
-\\[-1.8ex]\hline 
-\hline \\[-1.8ex] 
-\multicolumn{1}{c}{} & \multicolumn{1}{c}{Estimate} & \multicolumn{1}{c}{Std. Error} & \multicolumn{1}{c}{t-value} & \multicolumn{1}{c}{Pr(\textgreater \textbar t\textbar )} \\ 
-\hline \\[-1.8ex] 
-\multicolumn{1}{c}{lambda} & 0.0447 & 0.0026 & 16.9036 & 0 \\ 
-\multicolumn{1}{c}{lag(ANY\_EVENT\_ACLED)} & 0.3637 & 0.0052 & 70.1381 & 0 \\ 
-\multicolumn{1}{c}{SPEI4pg} & -0.0003 & 0.0137 & -0.0245 & 0.9805 \\ 
-\multicolumn{1}{c}{L1\_SPEI4pg} & 0.0192 & 0.0142 & 1.3520 & 0.1764 \\ 
-\multicolumn{1}{c}{L2\_SPEI4pg} & -0.0138 & 0.0141 & -0.9777 & 0.3282 \\ 
-\multicolumn{1}{c}{GSmain\_ext\_SPEI4pg} & -0.0012 & 0.0142 & -0.0840 & 0.9330 \\ 
-\multicolumn{1}{c}{L1\_GSmain\_ext\_SPEI4pg} & -0.0500 & 0.0148 & -3.3747 & 0.0007 \\ 
-\multicolumn{1}{c}{L2\_GSmain\_ext\_SPEI4pg} & -0.0037 & 0.0148 & -0.2463 & 0.8055 \\ 
-\multicolumn{1}{c}{W\_GSmain\_ext\_SPEI4pg} & -0.0044 & 0.0026 & -1.6667 & 0.0956 \\ 
-\multicolumn{1}{c}{W\_L1\_GSmain\_ext\_SPEI4pg} & 0.0060 & 0.0027 & 2.2128 & 0.0269 \\ 
-\multicolumn{1}{c}{W\_L2\_GSmain\_ext\_SPEI4pg} & -0.0025 & 0.0027 & -0.9132 & 0.3612 \\ 
-\multicolumn{1}{c}{W\_SPEI4pg} & 0.0018 & 0.0022 & 0.8090 & 0.4185 \\ 
-\multicolumn{1}{c}{W\_L1\_SPEI4pg} & -0.0015 & 0.0023 & -0.6483 & 0.5168 \\ 
-\multicolumn{1}{c}{W\_L2\_SPEI4pg} & 0.0055 & 0.0023 & 2.3686 & 0.0179 \\ 
-\hline \\[-1.8ex] 
-\end{tabular} 
-\end{table} 
+The bottom line is that the results are pretty robust to different specifications of the spatial weights matrix. The main coefficient of interest (the lag of SEPI Growing Season) is statistically significant and of similar magnitude for all regressions. This is reassuring for the validity and robustness of the results. 
+The coefficient for the (spatial) autoregressive parameter $\lambda$ varies somewhat depending on the specification and spatial weights matrix being used. For Model 4 $\lambda$ amounts to 0.0331, while for model 3 with the vertical spatial weights matrix $\lambda$ amounts to about 0.08. Due to the amplification of those effects this implies rather large differences in the amplification of conflict events. Nonetheless overall the results are all remarkably similar.    
 
 ## Summarize and visualize the weights matrixes and briefly explain what they imply
-In both the horizontal and the vertical contiguity matrix the average degree is about 1.86 and 1.9. Thus most cells have (as expected) two neighbors but some cells , at the edge, have only one neighbors. This implies that the networks are sparser and less dense than the adjacency matrix used by the authors. This is also reflected in lower 'graph density' for the horizontal and vertical contiguity matrix as compared to the baseline adjacency matrix. Visualizing the spatial weight matrices further corroborates the sparser structure. 
+In both the horizontal and the vertical contiguity matrix the average degree is about 1.86 and 2.09. Thus most cells have (as expected) two neighbors but some cells , at the edge, have only one neighbors. Moreover, some cells even have more than two neighbors. This is because the condition that any cells is being assigned neighborhood status who's centroid is less than 180 kilometers away can include more than one neighbor. This implies that the networks are sparser and less dense than the adjacency matrix used by the authors. This is also reflected in lower 'graph density' for the horizontal and vertical contiguity matrix as compared to the baseline adjacency matrix. Visualizing the spatial weight matrices further corroborates the sparser structure. 
 
 More generally, the horizontal/vertical contiguity matrix implies that only cells which share the same latitude/longitude and are directly adjacent are considered to be affecting each other directly. It is hard to make a coherent case for why this should be the case in the real world. There is no inherent reason to assume that effects only propagate in one 'direction'. 
 
 Still due to the nature of dynamic multipliers in the form of the spatial autoregressive terms, even if the network appears relatively sparse and two cells are not directly linked the cells are still connected. However, the restriction of horizontal and vertical contiguity significantly restricts the dynamic propagation of the effects in this context.
-
-It is insightful to look at the impact of horizontal and vertical restrictions on the results. We reproduced both specification 3, and 4 for both contiguity matrices. The bottom line is; the results are pretty robust to differing quite dramatically different specifications of the spatial weights matrix. This is reassuring the validity and robustness of the results. 
 
 ```{r, echo = FALSE, eval = FALSE}
 #graph_dist_horizontal <- graph_from_adjacency_matrix(adj_matrix_horizontal, mode = "undirected")
@@ -1013,5 +912,95 @@ combined_plots <- plot1 + plot2 + plot3 + plot_layout(ncol = 1, width = 0.5, gui
 
 # Display the combined plots
 combined_plots
+```
+
+## Appendix
+Functions to create horizontal and vertical contiguity neighboors list
+```{r}
+### Lets first create teh bianry contiguity matrix based on horizontal contiguity 
+# Extract centroids of the polygons if not already point data
+
+# Calculate distances and filter horizontally contiguous points
+# Define a function to find neighbors based on conditions
+find_neighbors_horizontal <- function(centroids, max_distance = 150000, lat_tolerance = 0.01) {
+  # Create a matrix to store distances
+  distances <- st_distance(centroids)
+  latitudes <- st_coordinates(centroids)[,2] # Extract latitudes
+  
+  # Initialize neighbors list
+  neighbors_list <- vector("list", nrow(centroids))
+  
+  for (i in seq_len(nrow(centroids))) {
+    # Find points within the same latitude band and within distance
+    lat_condition <- abs(latitudes - latitudes[i]) < lat_tolerance
+    dist_condition <- distances[i,] < set_units(max_distance, "meters")
+    
+    # Combine conditions
+    neighbor_ids <- which(lat_condition & dist_condition)
+    
+    # Exclude the point itself from its list of neighbors
+    neighbor_ids <- neighbor_ids[neighbor_ids != i]
+    
+    # Store neighbor ids
+    neighbors_list[[i]] <- as.integer(neighbor_ids)
+  }
+  
+  return(neighbors_list)
+}
+
+find_neighbors_vertical <- function(centroids, max_distance = 150000, lon_tolerance = 0.01) {
+  # Create a matrix to store distances
+  distances <- st_distance(centroids)
+  longitudes <- st_coordinates(centroids)[,1] # Extract longitudes
+  
+  # Initialize neighbors list
+  neighbors_list <- vector("list", nrow(centroids))
+  
+  for (i in seq_len(nrow(centroids))) {
+    # Find points within the same longitude band and within distance
+    lon_condition <- abs(longitudes - longitudes[i]) < lon_tolerance
+    dist_condition <- distances[i,] < set_units(max_distance, "meters")
+    
+    # Combine conditions
+    neighbor_ids <- which(lon_condition & dist_condition)
+    
+    # Exclude the point itself from its list of neighbors
+    neighbor_ids <- neighbor_ids[neighbor_ids != i]
+    
+    # Store neighbor ids
+    neighbors_list[[i]] <- as.integer(neighbor_ids)
+  }
+  
+  return(neighbors_list)
+}
+
+# Apply the function
+neighbors_vertical <- find_neighbors_vertical(geoconflict_main_weights)
+
+neighbors_horizontal <- find_neighbors_horizontal(geoconflict_main_weights)
+
+
+
+# Number of elements
+n <- length(neighbors_vertical)
+
+# Initialize an adjacency matrix with 0s
+adj_matrix_vertical <- matrix(0, nrow = n, ncol = n)
+adj_matrix_horizontal <- matrix(0, nrow = n, ncol = n)
+
+# Populate the adjacency matrix
+for (i in seq_len(n)) {
+  # Ensure indices are within the valid range
+  valid_indices_vertical <- neighbors_vertical[[i]][neighbors_vertical[[i]] <= n]
+  valid_indices_horizontal <- neighbors_horizontal[[i]][neighbors_horizontal[[i]] <= n]
+
+  # Set matrix elements to 1
+  adj_matrix_vertical[i, valid_indices_vertical] <- 1
+  adj_matrix_horizontal[i, valid_indices_horizontal] <- 1
+}
+
+# Turn the matrices into listw objects
+vertical_listw <- mat2listw(adj_matrix_vertical, style = "B", zero.policy=TRUE)
+horizontal_listw <-mat2listw(adj_matrix_horizontal, style = "B", zero.policy=TRUE)
 ```
 

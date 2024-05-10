@@ -1,18 +1,18 @@
 
 <table style="text-align:center"><caption><strong>Replication Model 4</strong></caption>
 <tr><td colspan="5" style="border-bottom: 1px solid black"></td></tr><tr><td></td><td>Estimate</td><td>Std. Error</td><td>t-value</td><td>Pr(> | t| )</td></tr>
-<tr><td colspan="5" style="border-bottom: 1px solid black"></td></tr><tr><td>lambda</td><td>0.0331</td><td>0.0011</td><td>29.7777</td><td>0</td></tr>
-<tr><td>lag(ANY_EVENT_ACLED)</td><td>0.3455</td><td>0.0051</td><td>67.3891</td><td>0</td></tr>
-<tr><td>SPEI4pg</td><td>-0.0003</td><td>0.0135</td><td>-0.0250</td><td>0.9800</td></tr>
-<tr><td>L1_SPEI4pg</td><td>0.0182</td><td>0.0140</td><td>1.2950</td><td>0.1953</td></tr>
-<tr><td>L2_SPEI4pg</td><td>-0.0139</td><td>0.0139</td><td>-0.9998</td><td>0.3174</td></tr>
-<tr><td>GSmain_ext_SPEI4pg</td><td>0.0005</td><td>0.0140</td><td>0.0389</td><td>0.9690</td></tr>
-<tr><td>L1_GSmain_ext_SPEI4pg</td><td>-0.0514</td><td>0.0146</td><td>-3.5081</td><td>0.0005</td></tr>
-<tr><td>L2_GSmain_ext_SPEI4pg</td><td>-0.0050</td><td>0.0147</td><td>-0.3376</td><td>0.7357</td></tr>
-<tr><td>W_GSmain_ext_SPEI4pg</td><td>-0.0035</td><td>0.0026</td><td>-1.3493</td><td>0.1772</td></tr>
-<tr><td>W_L1_GSmain_ext_SPEI4pg</td><td>0.0071</td><td>0.0027</td><td>2.6270</td><td>0.0086</td></tr>
-<tr><td>W_L2_GSmain_ext_SPEI4pg</td><td>-0.0017</td><td>0.0027</td><td>-0.6202</td><td>0.5352</td></tr>
-<tr><td>W_SPEI4pg</td><td>0.0012</td><td>0.0022</td><td>0.5311</td><td>0.5953</td></tr>
-<tr><td>W_L1_SPEI4pg</td><td>-0.0018</td><td>0.0023</td><td>-0.7959</td><td>0.4261</td></tr>
-<tr><td>W_L2_SPEI4pg</td><td>0.0050</td><td>0.0023</td><td>2.1728</td><td>0.0298</td></tr>
+<tr><td colspan="5" style="border-bottom: 1px solid black"></td></tr><tr><td>lambda</td><td>0.0331</td><td>0.0011</td><td>29.8567</td><td>0</td></tr>
+<tr><td>lag(ANY_EVENT_ACLED)</td><td>0.3453</td><td>0.0051</td><td>67.3353</td><td>0</td></tr>
+<tr><td>SPEI4pg</td><td>-0.0003</td><td>0.0135</td><td>-0.0210</td><td>0.9832</td></tr>
+<tr><td>L1_SPEI4pg</td><td>0.0184</td><td>0.0140</td><td>1.3074</td><td>0.1911</td></tr>
+<tr><td>L2_SPEI4pg</td><td>-0.0139</td><td>0.0139</td><td>-0.9961</td><td>0.3192</td></tr>
+<tr><td>GSmain_ext_SPEI4pg</td><td>0.0004</td><td>0.0140</td><td>0.0264</td><td>0.9789</td></tr>
+<tr><td>L1_GSmain_ext_SPEI4pg</td><td>-0.0516</td><td>0.0146</td><td>-3.5242</td><td>0.0004</td></tr>
+<tr><td>L2_GSmain_ext_SPEI4pg</td><td>-0.0050</td><td>0.0147</td><td>-0.3429</td><td>0.7317</td></tr>
+<tr><td>W_GSmain_ext_SPEI4pg</td><td>-0.0035</td><td>0.0026</td><td>-1.3479</td><td>0.1777</td></tr>
+<tr><td>W_L1_GSmain_ext_SPEI4pg</td><td>0.0071</td><td>0.0027</td><td>2.6243</td><td>0.0087</td></tr>
+<tr><td>W_L2_GSmain_ext_SPEI4pg</td><td>-0.0017</td><td>0.0027</td><td>-0.6222</td><td>0.5338</td></tr>
+<tr><td>W_SPEI4pg</td><td>0.0012</td><td>0.0022</td><td>0.5354</td><td>0.5924</td></tr>
+<tr><td>W_L1_SPEI4pg</td><td>-0.0018</td><td>0.0023</td><td>-0.7936</td><td>0.4274</td></tr>
+<tr><td>W_L2_SPEI4pg</td><td>0.0050</td><td>0.0023</td><td>2.1730</td><td>0.0298</td></tr>
 <tr><td colspan="5" style="border-bottom: 1px solid black"></td></tr></table>
