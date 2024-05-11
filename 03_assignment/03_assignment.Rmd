@@ -27,13 +27,8 @@ urlcolor: DarkOrchid!65!black
 knitr::opts_knit$set(root.dir = rprojroot::find_rstudio_root_file())
 knitr::opts_chunk$set(tidy.opts = list(width.cutoff = 80), tidy = TRUE)
 knitr::opts_chunk$set(warning = FALSE, message = FALSE) 
-library(showtext)
-showtext_auto()
 
-pacman::p_load(spatialreg, bsreg, patchwork, gridExtra, fixest, splm, stringi, stringr, stringdist, haven, sf, dplyr, fuzzyjoin, 
-               comparator, digest, zoomerjoin, ggplot2, tidyr, ggthemes, viridis, 
-               fixest, conleyreg, plm, stargazer, magrittr, tidyverse, tmap, spdep, SDPDmod,
-               igraph, generics, knitr, kableExtra, formatR,readxl, haven, flextable, broom, units)
+pacman::p_load(spatialreg, showtext, magritr, bsreg, spdep, patchwork, gridExtra, fixest, splm, stringi, stringr, stringdist, haven, sf, dplyr, fuzzyjoin, comparator, digest, zoomerjoin, ggplot2, tidyr, ggthemes, viridis, fixest, conleyreg, plm, stargazer, bsreg, igraph, generics, knitr, kableExtra, formatR,readxl, haven, flextable, broom, units, sysfonts, showtextdb)
 ```
 
 \vspace{2em}
@@ -140,7 +135,7 @@ slmtest(fm1, data=data, listw=lW, test="rlml", model="within", effect="twoways")
 # Spatial error allowing for spatial lag?
 slmtest(fm1, data=data, listw=lW, test="rlme", model="within", effect="twoways")
 ```
-The first two tests present evidence for the presence of spatial error dependence and spatial lag dependence. However, once we run the robust versions of the test, we find that there is no evidence for a spatial lag dependence. Thus according to the classical specification search procedure, we should estimate a \textbf{SEM model}. 
+The first two tests present evidence for the presence of spatial error dependence and spatial lag dependence. However, once we run the 'locally robust' versions of the test, we find that (allowing for spatial error dependence) there is actually no evidence for a spatial lag dependence. Thus according to the classical specification search procedure, we should estimate a \textbf{SEM model}. 
 
 ## Estimate the model implied by the specification search and contrast the effect estimates with a SLX model specification:
 
@@ -151,7 +146,7 @@ sem <- spml(fm1, data, listw=lW, lag=FALSE, spatial.error = "b",
                     model="within", effect="twoways") 
 ```
 
-The SLX model can be estimated by using OLS, i.e. by using plm() function from before where we include the spatially lagged values of the explanatory variables:
+The SLX model can be estimated using OLS, for example by using the plm() function from before where we include the spatially lagged values of the explanatory variables:
 ```{r}
 
 slx_OLS <- function(W){
@@ -174,7 +169,7 @@ summary(sem)
 stargazer(slx_OLS(W), type = "latex", header = FALSE, title = "SLX Model")
 ```
 
-The coefficient estimates above correspond to those reported in table 2 of Vega and Elhorst (2015). Both the SEM and SLX suggest, on average, a decrease in domestic demand for cigarettes of around 1% following an increase in domestic prices by 1%, ceteris paribus. Similarly both models suggest an increase in demand for cigarettes given an increase in domestic income. The SLX coefficient estimate for this is higher. Additionally, the SLX model provides effects of lagged independent variables of cigarette demand. The SEM model does not provide any additional meaningful parameters since its parameter for spatial autocorrelation of errors is a \textit{nuisance parameter}.
+The coefficient estimates above correspond to those reported in table 2 of @HalleckVega2015. Both the SEM and SLX suggest, on average, a decrease in domestic demand for cigarettes of around 1% following an increase in domestic prices by 1%, ceteris paribus. Similarly both models suggest an increase in demand for cigarettes given an increase in domestic income. The SLX coefficient estimate for this is higher. Additionally, the SLX model provides effects of lagged independent variables of cigarette demand. The SEM model does not provide any additional meaningful parameters since its parameter for spatial autocorrelation of errors is a \textit{nuisance parameter}.
 
 ## What could be the rationale to use the SLX model as opposed to other spatial specifications?
 
@@ -217,7 +212,7 @@ distw
 (46*46-46)/46*46
 ```
 
-In this network all agents are connected, only the weights differ - which are given by the distance decay formula above. This corresponds to average number of links being 45 i.e. all regions except the region itself. Thus the percentage of nonzero weights simply gives the share of diagonal elements of  a 46*46 matrix.
+In this network all agents are connected, only the weights differ - which are given by the distance decay formula above. This corresponds to average number of links being 45 i.e. all regions except the region itself. Thus the percentage of nonzero weights simply gives the share of diagonal elements of a 46*46 matrix.
 
 Below we visualize the spatial weights matrix:
 ```{r, echo=FALSE, fig.align = "center"}
@@ -266,18 +261,18 @@ beta + theta*sum(Wd)/N
 ```
 Thus, the average partial effect of increasing income of is very close to the effect of increasing income in home only. This is because using the specification of distance decay above, the links between the agents are mostly weak.
 
+\newpage
+
 ## Bonus 
-```{r, eval = FALSE, include = FALSE}
-#blm(logc ~ logy + logp + factor(state) + factor(year), data = data)
-  
-```
 
+We will now use the bsreg package to estimate the distance decay parameter. We follow the procedure layed out in @Kuschnig2022 and the accompanying GitHub repository. Using the function bslx from bsreg we estimate $\gamma$ from  @HalleckVega2015 in the code below. Since we use exactly the same data and model as in the paper corresponding to the bsreg (Kuschnig 2022), we reuse the specification for the prior parameter. 
 
-```{r}
+The estimate of gamma (delta_SLX) using Bayesian methods is similar to that of @HalleckVega2015. 
+
+```{r, echo = FALSE, results = FALSE}
 library("dplyr")
 library("readxl")
 # Prepare the data
-
 contig <- read_excel(file.path("data","cigarettes","Spat-Sym-US.xls"),
   col_names = paste0(1:46)) %>% as.matrix()
 df <- read_excel(file.path("data","cigarettes","cigarette+2var.xls")) %>%
@@ -308,23 +303,40 @@ X <- model.matrix(logc ~ logp + logy + year + state, data = df)
 X_lag <- X[, c("logp", "logy")]
 colnames(X_lag) <- c("wlogp", "wlogy")
 X_cont <- W_cont %*% X_lag
-
-
-
 ```
 
-```{r}
-# Settings ---
-n_save <- 1000
-n_burn <- 1000
+```{r, eval = FALSE}
+# Settings for MCMC
+n_save <- 50000L
+n_burn <- 10000L
 
+# Estimate SLX model with uncertainty around delta. 
 out_slxdx <- bslx(y ~ X, W = Psi, X_SLX = X_lag,
   n_save = n_save, n_burn = n_burn, options = set_options(
     SLX = set_SLX(delta = 3, delta_scale = 0.05, delta_a = 2, delta_b = 2)))
-```
 
-```{r}
-out_slxdx
+saveRDS(out_slxdx, "./models/out_slxdx.rds")
+```
+We use an inverse gamma prior with shape and scale parameter 2. The support is (0, $\infty$). We then plot the posterior density of the connectivity parameter. We find that the posterior mean is close to 3, which is in line with @HalleckVega2015. The figure nicely visualizes the uncertainty around the connectivity parameter. The highest posterior density is from [2.7, 3.4].     
+
+```{r, echo = FALSE, echo = FALSE, fig.align ='center'}
+out_slxdx <- readRDS("./models/out_slxdx.rds")
+
+kable(mean(out_slxdx$draws[,"delta_SLX"]), col.names = "Posterior Mean")
+
+plot(density(out_slxdx$draws[,"delta_SLX"]) ,main = "Posterior Density")
+# Calculate quantiles; for example, 25th, 50th, and 75th percentiles
+quantiles <- quantile(out_slxdx$draws[,"delta_SLX"], probs = c(0.05, 0.5, 0.95))
+
+# Add vertical lines for quantiles
+abline(v = quantiles, col = c("red", "blue", "red"), lwd = 2)
+
+# Adding legends manually, just for clarity (optional)
+legend("topright", legend = paste0(c("5%", "50% Median", "95%")), 
+       col = c("red", "blue", "red"), lwd = 2)
+
+kable(rbind(quantile(out_slxdx$draws[,"delta_SLX"], p = c(0.05, 0.5, 0.95))),
+      caption = "Quantile for Posterior Gamma")
 ```
 
 
@@ -345,7 +357,7 @@ raster_Africa <- read_sf("~/Desktop/GITHUB/spatial_econ/data/03_assignment/datas
 
 area <- st_area(raster_Africa)
 
-raster_Africa %<>%
+raster_Africa <- raster_Africa %>%
   mutate(area = st_area(geometry))
 
 data <- data.frame(Cells = c("Min", "Mean", "Median", "Max"), Stats = c(min(area), mean(area), median(area), max(area)))
@@ -353,12 +365,11 @@ data <- data.frame(Cells = c("Min", "Mean", "Median", "Max"), Stats = c(min(area
 kable(data)
 ```
 The unit of observation are cells in a raster representing a 1×1 degree latitude longitude grid cover. At the equator this corresponds to a side length of 110 km. The areal extension of the cells varies with latitude. Further away from the equator, the area of a cell decreases. 
-The table shows the area of the cells. The smallest cell has an area of about 9.785 $km^{2}$, the largest 12.364 $km^{2}$. On average the size of the cells is 11.900 $km^{2}$.  Thus the gap between the smallest and largest cell amounts to about 20%.
+The table shows the area of the cells. The smallest cell has an area of about 9.785 $km^{2}$, the largest 12.364 $km^{2}$. On average the size of the cells is 11.900 $km^{2}$. Thus the gap between the smallest and largest cell amounts to about 20%.
 They differ because of the distortions induced by the projection of the surface of the earth, onto a 2 dimensional raster grid. 
 
 ## Interpretation of Coefficients
-The binary contiguity matrix is \textit{not} row normalized. This implies that the coefficients for the spatially lagged dependent and independent variables need to be interpreted as the direct impact of marginal changes in only \textit{one} of the neighboring cells. 
-
+The binary contiguity matrix is \textit{not} row normalized. This implies that the coefficients for the spatially lagged dependent and independent variables need to be interpreted as the direct impact of marginal changes in only \textit{one} of the neighboring cells. To obtain summary statistics of hte average partial effect and direct and indirect impacts, the spatial weight matrix has to to be considered (through row and columnwise summation).
 
 ## Replication
 
@@ -412,25 +423,25 @@ etable(mod1, mod2, tex = TRUE,
    Model:                          & (1)             & (2)\\  
    \midrule
    \emph{Variables}\\
-   SPEI4pg                         & 0.0346$^{***}$  & 0.0103\\   
+   SPEI4pg                         & 0.0346$^{***}$  & 0.0101\\   
                                    & (0.0053)        & (0.0149)\\   
-   L1\_SPEI4pg                     & 0.0026          & 0.0131\\   
+   L1\_SPEI4pg                     & 0.0026          & 0.0127\\   
                                    & (0.0049)        & (0.0135)\\   
-   L2\_SPEI4pg                     & 0.0104$^{**}$   & -0.0097\\   
+   L2\_SPEI4pg                     & 0.0104$^{**}$   & -0.0096\\   
                                    & (0.0049)        & (0.0140)\\   
-   GSmain\_ext\_SPEI4pg            & -0.0338$^{***}$ & -0.0058\\   
+   GSmain\_ext\_SPEI4pg            & -0.0338$^{***}$ & -0.0052\\   
                                    & (0.0088)        & (0.0158)\\   
-   L1\_GSmain\_ext\_SPEI4pg        & -0.0321$^{***}$ & -0.0433$^{***}$\\   
+   L1\_GSmain\_ext\_SPEI4pg        & -0.0321$^{***}$ & -0.0429$^{***}$\\   
                                    & (0.0081)        & (0.0158)\\   
-   L2\_GSmain\_ext\_SPEI4pg        & -0.0348$^{***}$ & -0.0240\\   
+   L2\_GSmain\_ext\_SPEI4pg        & -0.0348$^{***}$ & -0.0239\\   
                                    & (0.0085)        & (0.0156)\\   
-   W\_L2\_GSmain\_ext\_SPEI4pg     &                 & -0.0026\\   
+   W\_L2\_GSmain\_ext\_SPEI4pg     &                 & -0.0027\\   
                                    &                 & (0.0026)\\   
-   W\_L1\_GSmain\_ext\_SPEI4pg     &                 & 0.0021\\   
+   W\_L1\_GSmain\_ext\_SPEI4pg     &                 & 0.0020\\   
                                    &                 & (0.0026)\\   
-   W\_GSmain\_ext\_SPEI4pg         &                 & -0.0056$^{**}$\\   
+   W\_GSmain\_ext\_SPEI4pg         &                 & -0.0058$^{**}$\\   
                                    &                 & (0.0027)\\   
-   W\_SPEI4pg                      &                 & 0.0043$^{*}$\\   
+   W\_SPEI4pg                      &                 & 0.0044$^{*}$\\   
                                    &                 & (0.0023)\\   
    W\_L1\_SPEI4pg                  &                 & -0.0017\\   
                                    &                 & (0.0021)\\   
@@ -442,8 +453,8 @@ etable(mod1, mod2, tex = TRUE,
    \midrule
    \emph{Fit statistics}\\
    Observations                    & 35,042          & 35,042\\  
-   R$^2$                           & 0.18918         & 0.19614\\  
-   Within R$^2$                    & 0.18655         & 0.19353\\  
+   R$^2$                           & 0.18918         & 0.19568\\  
+   Within R$^2$                    & 0.18655         & 0.19307\\  
    \midrule \midrule
    \multicolumn{3}{l}{\emph{Clustered (cell) standard-errors in parentheses}}\\
    \multicolumn{3}{l}{\emph{Signif. Codes: ***: 0.01, **: 0.05, *: 0.1}}\\
@@ -788,7 +799,9 @@ The bottom line is that the results are pretty robust to different specification
 The coefficient for the (spatial) autoregressive parameter $\lambda$ varies somewhat depending on the specification and spatial weights matrix being used. For Model 4 $\lambda$ amounts to 0.0331, while for model 3 with the vertical spatial weights matrix $\lambda$ amounts to about 0.08. Due to the amplification of those effects this implies rather large differences in the amplification of conflict events. Nonetheless overall the results are all remarkably similar.    
 
 ## Summarize and visualize the weights matrixes and briefly explain what they imply
-In both the horizontal and the vertical contiguity matrix the average degree is about 1.86 and 2.09. Thus most cells have (as expected) two neighbors but some cells , at the edge, have only one neighbors. Moreover, some cells even have more than two neighbors. This is because the condition that any cells is being assigned neighborhood status who's centroid is less than 180 kilometers away can include more than one neighbor. This implies that the networks are sparser and less dense than the adjacency matrix used by the authors. This is also reflected in lower 'graph density' for the horizontal and vertical contiguity matrix as compared to the baseline adjacency matrix. Visualizing the spatial weight matrices further corroborates the sparser structure. 
+In both the horizontal and the vertical contiguity matrix the average degree is about 1.86 and 2.09. Thus most cells have two neighbors but some cells, when the gird is 'spherically disturbed', can have more than two neighbors.  This is because the condition that any cells is being assigned neighborhood status when the centroid is less than 180 kilometers away can include more than two cells in one direction. 
+
+The networks implied by the vertical and horizontal contiguity matrices are sparser and less dense than the adjacency matrix used by the authors. This is also reflected in lower 'graph density' for the horizontal and vertical contiguity matrix as compared to the baseline adjacency matrix. Visualizing the spatial weight matrices further corroborates the sparser structure. 
 
 More generally, the horizontal/vertical contiguity matrix implies that only cells which share the same latitude/longitude and are directly adjacent are considered to be affecting each other directly. It is hard to make a coherent case for why this should be the case in the real world. There is no inherent reason to assume that effects only propagate in one 'direction'. 
 
@@ -843,15 +856,12 @@ summarize_graph <- function(g) {
 
 ## Visualization of Spillover Effects
 
-For this exercise we simulate the effect of a one-standard deviation SEPI growing season shock holding everything else constant. We multiply the shock times -1 to obtain the negative impact and thus the \textit{increase} in conflict incidence. We exogenously shock a cell and calculate 'manually', based on the coefficients of model 4, the magnitude of the shock propagation. We take into account both the dynamic, and spatial autoregressive structure of the model. We see that the shock reaches its peak effect size at t = 1, consistent with the main insight of the paper (the lagged effect of growing season shocks on conflict). A negative one standard deviation growing season shock increases conflict incidence by about 2.1 percentage points for the affected cell. Overall the spillover effects both in absolute magnitude and visually as reflected in the figure are rather small. The maximum conflict increase in a neighbooring cell only amounts to about 0.5 percentage points. 
+In a similar spirit to @Harari2018 we simulate the effect of a \textit{one-time} and \textit{one-standard deviation SEPI growing season shock} setting all other covariates to zero (and holding everything else constant). We multiply the shock times -1 to obtain the negative impact and thus the \textit{increase} in conflict incidence. We exogenously shock a cell and calculate 'manually', based on the coefficients of model 4 (instead of model 3 as in the paper), the magnitude of the shock propagation for t = 0, 1, and 2 for all neighbors and 'neighbors neighbors'. We take into account both the dynamic, and spatial autoregressive structure of the model. We see that the shock reaches its peak effect size at t = 1, consistent with the main insight of the paper (the lagged effect of growing season shocks on conflict). A negative one standard deviation growing season shock increases conflict incidence by about 2.1 percentage points for the affected cell. Overall the spillover effects both in absolute magnitude and visually as reflected in the figure are rather small. The maximum conflict increase in a neighboring cell only amounts to about 0.5 percentage points. 
 
-```{r}
-
-# COMPUTATION OF SHOCKS
-
+```{r, echo = FALSE}
 #first number denotes period second number denotes neighboor
 # shock in period 0 of standard deviation in growing season SEPI (without contemporanously affecting SEPI over the year)
-risk_cell_0_0 <- -1*mod4$coefficients["GSmain_ext_SPEI4pg"]*sd(geoconflict_main_weights$GSmain_ext_SPEI4pg) / (1-mod4$arcoef)
+risk_cell_0_0 <- -1*mod4$coefficients["GSmain_ext_SPEI4pg"]*sd(geoconflict_main_weights$GSmain_ext_SPEI4pg) / (1 - sum(listw2mat(listwmat))*mod4$arcoef)
 
 risk_cell_0_1 <- -1*mod4$coefficients["W_GSmain_ext_SPEI4pg"]*sd(geoconflict_main_weights$GSmain_ext_SPEI4pg) + risk_cell_0_0*mod4$arcoef 
 
@@ -871,6 +881,14 @@ risk_cell_2_1 <- risk_cell_1_1*mod4$coefficients["lag(ANY_EVENT_ACLED)"] + risk_
 
 risk_cell_2_2 <- -1*mod4$coefficients["W_L2_GSmain_ext_SPEI4pg"]*mod4$coefficients["W_L2_GSmain_ext_SPEI4pg"]*sd(geoconflict_main_weights$GSmain_ext_SPEI4pg) + mod4$arcoef*risk_cell_2_1 +  mod4$arcoef*mod4$arcoef*risk_cell_2_0 + risk_cell_2_1*mod4$arcoef +risk_cell_2_0*mod4$arcoef*mod4$arcoef
 
+
+# we do not use those effects
+
+risk_cell_3_0 <- risk_cell_2_0*mod4$coefficients["lag(ANY_EVENT_ACLED)"] + risk_cell_1_0*mod4$coefficients["lag(ANY_EVENT_ACLED)"]*mod4$coefficients["lag(ANY_EVENT_ACLED)"]  +   risk_cell_0_0*mod4$coefficients["lag(ANY_EVENT_ACLED)"] *mod4$coefficients["lag(ANY_EVENT_ACLED)"]*mod4$coefficients["lag(ANY_EVENT_ACLED)"]
+
+risk_cell_3_1 <- risk_cell_1_1*mod4$coefficients["lag(ANY_EVENT_ACLED)"] + risk_cell_0_1 * mod4$coefficients["lag(ANY_EVENT_ACLED)"] *mod4$coefficients["lag(ANY_EVENT_ACLED)"] + mod4$coefficients["lag(ANY_EVENT_ACLED)"] *mod4$coefficients["lag(ANY_EVENT_ACLED)"] *risk_cell_2_1 + risk_cell_3_0*mod4$arcoef  
+
+risk_cell_3_2 <- mod4$arcoef*risk_cell_3_1 + risk_cell_2_2*mod4$coefficients["lag(ANY_EVENT_ACLED)"] + risk_cell_1_2 * mod4$coefficients["lag(ANY_EVENT_ACLED)"] *mod4$coefficients["lag(ANY_EVENT_ACLED)"] + risk_cell_0_2*mod4$coefficients["lag(ANY_EVENT_ACLED)"] *mod4$coefficients["lag(ANY_EVENT_ACLED)"]*mod4$coefficients["lag(ANY_EVENT_ACLED)"] + mod4$arcoef*mod4$arcoef*risk_cell_3_1 + risk_cell_3_0*mod4$arcoef*mod4$arcoef
 ```
 
 ```{r, echo = FALSE}
@@ -1060,3 +1078,6 @@ vertical_listw <- mat2listw(adj_matrix_vertical, style = "B", zero.policy=TRUE)
 horizontal_listw <-mat2listw(adj_matrix_horizontal, style = "B", zero.policy=TRUE)
 ```
 
+\newpage
+
+\textbf{Bibliography}
